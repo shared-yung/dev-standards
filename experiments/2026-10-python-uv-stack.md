@@ -26,6 +26,7 @@ review-by: 2027-01-31
 - 2026-10-11: import-linter の `forbidden` は禁止リストで、`scipy` のように依存で入るライブラリを取りこぼす
 - 2026-10-11: 日本語の文言・テスト名に ruff の RUF001-003 と N802 が反応する。設定で外した
 - 2026-10-11: `cv2.imread` が Windows の日本語パスを読めない。`np.fromfile` ＋ `cv2.imdecode` で回避
+- 2026-10-11: git hook と commitlint は、Python だけのリポジトリでも bun で入れると決めた（Python 向けの pre-commit などに分けない）。同期スクリプト（dev-standards #3）で全リポジトリに同じ一式を配るため。動作は clip-studio-tools #8 で確かめる
 
 ## 振り返り
 

@@ -15,7 +15,7 @@ WF・GR・REPO の一部を、git と GitHub の仕組みで実装する。言�
 
 ## ツール
 
-- git hook: lefthook ＋ commitlint（どちらも Node 製。bun で入れる）
+- git hook: lefthook ＋ commitlint（どちらも Node 製）。**言語のスタックにかかわらず bun で入れる**。Node を使わないスタック（Python など）でも、リポジトリのルートにツール用の `package.json` を置く。代替（Python なら pre-commit など）に分けず、全リポジトリで同じ仕組み・同じ設定ファイルにするため
 - CI: GitHub Actions（`conventions.yml` と `pr-merged.yml`）
 - ブランチ保護: ruleset（`scripts/setup-branch-protection.sh` ＋ `branch-protection-ruleset.json`）
 - エージェントのガードレール: `.claude/settings.json` の permissions ＋ PreToolUse フック `guard-remote.mjs`
