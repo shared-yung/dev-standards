@@ -1,0 +1,43 @@
+name: 機能追加・変更
+description: 新しい機能や既存機能の変更を提案する
+labels: [feature]
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 目的
+      description: 何のために必要かを書いてください
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec
+    attributes:
+      label: 仕様
+      description: 期待する振る舞い。詳細は docs/spec/ に置いてリンクしても構いません
+    validations:
+      required: true
+
+  - type: input
+    id: feature-scope
+    attributes:
+      label: 対象 feature
+      description: features/ 配下のフォルダ名（コミットの scope に使います）。新規なら想定名
+    validations:
+      required: true
+
+  - type: textarea
+    id: test-list
+    attributes:
+      label: テストリスト
+      description: 外から観察できる振る舞いを箇条書きで。分かる範囲でよく、実装中の増減は PR の「計画との差異」に書く（docs/workflow/tdd.md）
+      value: |
+        - [ ]
+
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了条件
+      description: 何が満たされたら close できるか
+    validations:
+      required: true

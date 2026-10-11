@@ -11,6 +11,7 @@
 | `rationale/`         | 長い根拠・比較検討                                             | しない                                                       |
 | `radar/`             | 手法ごとの段階（Adopt / Trial / Assess / Hold）                | しない                                                       |
 | `experiments/`       | Trial の記録（仮説・基準・観察・振り返り）                     | しない                                                       |
+| `skills/<名前>/`     | スキル（`project-bootstrap`・`work-checkpoint`）とテンプレート | する。`~/.claude/skills/<名前>/` に丸ごと置き換えでコピー    |
 
 スタック: `typescript-vue`（Adopt）、`python`（Trial）、`github-workflow`（言語に依存しない git / GitHub の実装）
 
@@ -23,6 +24,7 @@ bun run install-rules
 
 - Claude Code: `~/.claude/rules/dev-standards/` に丸ごと置き換えでコピーする
 - Copilot: `~/.copilot/instructions/dev-standards-*.instructions.md` を生成する（`paths` → `applyTo`）
+- スキル: `skills/<名前>/` を `~/.claude/skills/<名前>/` に丸ごと置き換えでコピーする。dev-standards に無い名前のスキルには触らない
 - `bun run install-rules --check` で、配布先が最新かを確かめる
 - コピーにしている理由: Windows のシンボリックリンクは開発者モードか管理者権限が要り、Cowork ではリポジトリの外を指すリンクのルールが読み込まれない
 

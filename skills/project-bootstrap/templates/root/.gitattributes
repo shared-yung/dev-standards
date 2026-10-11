@@ -1,0 +1,91 @@
+# 改行コードは「リポジトリ内も作業ツリーも LF」で統一する。
+#
+# .gitattributes は各開発者の core.autocrlf / core.eol 設定より優先されるため、
+# 誰がどの OS でクローンしても同じ改行コードになる。設定を各自に依存させない。
+* text=auto eol=lf
+
+# ---------------------------------------------------------------------------
+# CRLF が必要なもの（Windows 固有）
+# ---------------------------------------------------------------------------
+# cmd.exe はバッチファイルの解釈で CRLF を前提にしている箇所がある
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# regedit は CRLF でないと .reg のインポートに失敗する
+*.reg text eol=crlf
+# PowerShell 自体は LF でも動くが、Windows 固有ファイルとして揃える
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+# Visual Studio が CRLF で書き戻すため、揃えないと毎回差分が出る
+*.sln text eol=crlf
+
+# ---------------------------------------------------------------------------
+# LF が必須のもの（CRLF だと実行時に壊れる）
+# ---------------------------------------------------------------------------
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+Makefile text eol=lf
+*.mk text eol=lf
+
+# ---------------------------------------------------------------------------
+# 生成物 / ロックファイル
+# GitHub の差分で折りたたまれ、言語統計からも除外される
+# ---------------------------------------------------------------------------
+bun.lock linguist-generated=true
+packages/api-client/src/generated/** linguist-generated=true
+
+# ---------------------------------------------------------------------------
+# 差分の見やすさ（git 組み込みの diff ドライバ。ハンク見出しに文脈が出る）
+# ---------------------------------------------------------------------------
+*.ts diff=typescript
+*.tsx diff=typescript
+*.js diff=javascript
+*.jsx diff=javascript
+*.md diff=markdown
+*.css diff=css
+*.scss diff=css
+*.html diff=html
+*.json diff=json
+
+# ---------------------------------------------------------------------------
+# バイナリ（改行変換も差分表示もしない）
+# 注: .svg はテキストなのでここには入れない
+# ---------------------------------------------------------------------------
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.tiff binary
+*.ico binary
+*.webp binary
+*.avif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.mp3 binary
+*.mp4 binary
+*.wav binary
+*.webm binary
+*.ogg binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
+*.rar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.pdb binary
+*.wasm binary
+*.node binary
+*.xlsx binary
+*.docx binary
+*.pptx binary
+*.pfx binary
+*.p12 binary

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.quasar/
+coverage/
+bun.lock
+packages/api-client/src/generated/

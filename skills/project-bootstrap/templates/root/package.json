@@ -1,0 +1,29 @@
+{
+  "name": "__REPO__",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "__PROJECT__"
+  ],
+  "scripts": {
+    "prepare": "lefthook install",
+    "lint": "eslint . && bun run --filter '*' lint",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test",
+    "check:branch": "bash scripts/check-branch-name.sh",
+    "prune:branches": "sh scripts/prune-merged-branches.sh"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@__REPO__/eslint-config": "workspace:*",
+    "eslint": "^9.0.0",
+    "lefthook": "^1.10.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  }
+}
