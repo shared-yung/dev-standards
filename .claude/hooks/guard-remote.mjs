@@ -30,7 +30,7 @@ process.stdin.on('end', () => {
       /(^|[;&|(\s])gh\s+api\b[\s\S]*?(--input|--field|--raw-field|\s-f\s|\s-F\s)/,
       'gh api のフィールド指定（既定で POST になる）',
     ],
-    [/setup-branch-protection\.sh/, 'ブランチ保護の設定'],
+    [/setup-branch-protection\.(sh|ts)/, 'ブランチ保護の設定'],
   ];
 
   const hit = rules.find(([re]) => re.test(cmd));

@@ -59,6 +59,6 @@ fork からの PR では `pull_request` の closed イベントのトークン�
 
 `scripts/commit-msg.sh` が `git rev-parse -q --verify HEAD` で親コミットの有無を判定し、root commit なら commitlint を実行しない。
 
-CI 側は PR の base..head 範囲しか検証しないため、root commit がチェック対象に入ることはない。初回コミットは main に直接置き、その後 `scripts/setup-branch-protection.sh` を実行してブランチ保護を有効化する。
+CI 側は PR の base..head 範囲しか検証しないため、root commit がチェック対象に入ることはない。初回コミットは main に直接置き、その後 `bun scripts/setup-branch-protection.ts` を実行してリポジトリを保護する（[リポジトリの保護](branch-protection.md)）。
 
 関連: [コミット・ブランチ規約](commit-and-branch.md) / [ブランチ保護の設定](branch-protection.md)

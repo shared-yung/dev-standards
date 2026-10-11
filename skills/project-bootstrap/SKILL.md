@@ -47,16 +47,19 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 2. `bun install`（`prepare` で lefthook の hook が登録される）
 3. 初回コミットを `main` に置く。**root commit のみ issue 参照が免除される**
 4. `gh repo create` して push
-5. `sh scripts/setup-branch-protection.sh` でブランチ保護を有効化（マージ時のリモートブランチ削除 `delete_branch_on_merge` もここで有効になる）
+5. `bun scripts/setup-branch-protection.ts` でリポジトリを保護する（`docs/workflow/branch-protection.md`）
+   - リポジトリ設定（マージ後のブランチ削除・squash のみ）はどのプランでも設定される
+   - ruleset は無料プランの private リポジトリでは使えない（403）。その場合は警告を出して続け、**最後の層なし**で運用する（main への push は pre-push で止め、CI の結果はマージする人が確かめる）
 
-> 順序が重要。先にブランチ保護を掛けると初回コミットを `main` に置けない。
+> 順序が重要。先に ruleset を掛けると初回コミットを `main` に置けない。
 
 ### 検証ゲート
 
 - `Refs: #N` 無しのコミットが `commit-msg` で**落ちる**
 - 規約外のブランチ名が `pre-push` で**落ちる**
+- `main` への push が `pre-push` で**落ちる**（`git push --dry-run origin HEAD:main` で確かめる）
 - `git ls-files --eol` が全て `i/lf w/lf`
-- `gh api repos/<owner>/<repo> --jq .delete_branch_on_merge` が `true`
+- `bun scripts/setup-branch-protection.ts --check` が通る（ruleset が使えない場合は警告だけ出て通る）
 - 最初の PR をマージして `git pull` すると、`post-merge` がそのローカルブランチを消す（`docs/workflow/commit-and-branch.md` の「マージ後のブランチ」）
 
 ## フェーズ 2: リモート操作のガードレール

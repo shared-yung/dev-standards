@@ -14,7 +14,7 @@ fix/57-answer-validation
 chore/61-bump-quasar
 ```
 
-検証しているのは `scripts/check-branch-name.sh`。`main` は対象外。
+検証しているのは `scripts/check-branch-name.sh`。`main` は対象外（`main` への push そのものは pre-push の `scripts/check-push-target.ts` が拒否する）。
 
 ## コミットメッセージ
 

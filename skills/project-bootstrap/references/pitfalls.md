@@ -217,7 +217,7 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 
 squash merge は別のコミットを作るため、git はブランチを未マージと判定する。内容は取り込まれているので `-D` で削除する。
 
-**手で `-D` を打たない。** `git pull` の後に `post-merge` が `scripts/prune-merged-branches.sh` を呼び、追跡先が `[gone]` でローカルの先端を head とするマージ済み PR があるものだけを `-D` で消す。前提はリポジトリ設定の `delete_branch_on_merge`（`setup-branch-protection.sh` が有効にする）。無いと追跡先が `[gone]` にならず、何も消えない。
+**手で `-D` を打たない。** `git pull` の後に `post-merge` が `scripts/prune-merged-branches.sh` を呼び、追跡先が `[gone]` でローカルの先端を head とするマージ済み PR があるものだけを `-D` で消す。前提はリポジトリ設定の `delete_branch_on_merge`（`setup-branch-protection.ts` が有効にする）。無いと追跡先が `[gone]` にならず、何も消えない。
 
 ### pull_request の closed イベントはどのワークフローで動くか
 
