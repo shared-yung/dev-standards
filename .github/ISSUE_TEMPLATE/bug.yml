@@ -1,0 +1,42 @@
+name: バグ報告
+description: 想定と異なる挙動を報告する
+labels: [bug]
+body:
+  - type: textarea
+    id: current
+    attributes:
+      label: 現象
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する挙動
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-test
+    attributes:
+      label: 再現テスト
+      description: どの層のどのテストで再現するか。修正の前にこのテストが落ちることを確認する（docs/workflow/tdd.md）。分かる範囲でよい
+
+  - type: input
+    id: feature-scope
+    attributes:
+      label: 対象 feature
+      description: features/ 配下のフォルダ名。不明なら「不明」
+    validations:
+      required: true

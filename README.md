@@ -1,0 +1,43 @@
+# dev-standards
+
+個人開発の共通ルール。**言語・フレームワークに依存しない原則**と、**スタック別の具体化**に分けて管理し、Claude Code と GitHub Copilot に配る。
+
+## 構成
+
+| フォルダ             | 内容                                                           | 配布                                                         |
+| -------------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
+| `principles/`        | 原則（何を・なぜ）。ID・階層（必須／標準）・目的・適合性の注意 | する。常に読み込まれる                                       |
+| `stacks/<スタック>/` | 具体化（どうやって）。`00-index.md` に全原則との対応表         | する。`paths` に一致するファイルを触ったときだけ読み込まれる |
+| `rationale/`         | 長い根拠・比較検討                                             | しない                                                       |
+| `radar/`             | 手法ごとの段階（Adopt / Trial / Assess / Hold）                | しない                                                       |
+| `experiments/`       | Trial の記録（仮説・基準・観察・振り返り）                     | しない                                                       |
+
+スタック: `typescript-vue`（Adopt）、`python`（Trial）、`github-workflow`（言語に依存しない git / GitHub の実装）
+
+## 導入・更新
+
+```bash
+bun install
+bun run install-rules
+```
+
+- Claude Code: `~/.claude/rules/dev-standards/` に丸ごと置き換えでコピーする
+- Copilot: `~/.copilot/instructions/dev-standards-*.instructions.md` を生成する（`paths` → `applyTo`）
+- `bun run install-rules --check` で、配布先が最新かを確かめる
+- コピーにしている理由: Windows のシンボリックリンクは開発者モードか管理者権限が要り、Cowork ではリポジトリの外を指すリンクのルールが読み込まれない
+
+## 変更の流れ
+
+1. issue を起こす（WF-01）
+2. 原則を変えるときは、全スタックの対応表を見直す（`bun run check` が覆われていない原則を報告する）
+3. 新しいスタックを足すときは `principles/00-index.md` の「適合性の確認」で原則ごとに判断し、`stacks/<名前>/00-index.md` の対応表を埋める。新しいスタックは Trial として `radar/` に登録する
+4. PR（「計画との差異」節は必須）→ マージ（人間）→ `git pull` → `bun run install-rules`
+
+## 検査
+
+```bash
+bun run check        # 対応表の網羅・階層・フロントマター・radar・常時読み込みのサイズ
+bun run test         # scripts/ の単体テスト（Vitest）
+bun run typecheck
+bun run format:check
+```
