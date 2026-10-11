@@ -16,7 +16,7 @@ paths:
 - テスト: pytest（`--import-mode=importlib`）
 - 依存の向き: import-linter
 - レイアウト: src レイアウト（テストがインストール済みのパッケージを対象にするため）
-- git hook と CI は `stacks/github-workflow/`。lefthook / commitlint は Node 製なので、Python だけのリポジトリでも bun で入れる（**未検証**）
+- git hook と CI は `stacks/github-workflow/`。**Python だけのリポジトリでも lefthook / commitlint は bun で入れる**（リポジトリのルートにツール用の `package.json` を置く）。スタックが違っても仕組みを揃えるための決定（2026-10-11）。Python だけのリポジトリでの動作は**未検証**（clip-studio-tools #8 で確かめる）
 
 ## 原則との対応
 
