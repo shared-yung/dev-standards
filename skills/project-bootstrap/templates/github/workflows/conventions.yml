@@ -1,0 +1,70 @@
+name: Conventions
+
+# issue-driven 開発の強制。ローカルの git hook は --no-verify で迂回できるため、
+# 実効的な必須チェックはこのワークフロー + ブランチ保護で担保する。
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+  # private リポジトリでは、issue を読めないトークンだと closingIssuesReferences が 0 件になる
+  issues: read
+
+jobs:
+  conventions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: ブランチ名を検証
+        run: sh scripts/check-branch-name.sh "${{ github.head_ref }}"
+
+      - name: コミットメッセージを検証
+        run: |
+          bun x commitlint \
+            --from "${{ github.event.pull_request.base.sha }}" \
+            --to "${{ github.event.pull_request.head.sha }}" \
+            --verbose
+
+      - name: PR タイトルを検証
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s' "$PR_TITLE" | bun x commitlint --config commitlint.title.config.js --verbose
+
+      - name: 計画との差異が書かれているか検証
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s' "$PR_BODY" | node scripts/check-pr-divergence.mjs
+
+      - name: PR に issue がリンクされているか検証
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PR: ${{ github.event.number }}
+        run: |
+          count=$(gh api graphql \
+            -f query='query($owner:String!, $repo:String!, $pr:Int!) {
+              repository(owner:$owner, name:$repo) {
+                pullRequest(number:$pr) {
+                  closingIssuesReferences(first: 1) { totalCount }
+                }
+              }
+            }' \
+            -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" \
+            --jq '.data.repository.pullRequest.closingIssuesReferences.totalCount')
+          if [ "$count" -eq 0 ]; then
+            echo "::error::PR に issue がリンクされていません。本文に 'Closes #<issue番号>' を追加してください。"
+            exit 1
+          fi
+          echo "リンクされた issue: $count 件"

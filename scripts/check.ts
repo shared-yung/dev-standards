@@ -6,6 +6,7 @@ import {
   checkByteBudget,
   checkPrincipleFile,
   checkRadarEntry,
+  checkSkillFile,
   checkStackFile,
   checkStackMapping,
   extractPrinciples,
@@ -56,6 +57,16 @@ for (const stack of readdirSync(join(root, 'stacks'))) {
 // radar
 for (const path of markdownFiles('radar').filter((p) => !p.endsWith('/README.md'))) {
   errors.push(...checkRadarEntry(path, read(path), (p) => existsSync(join(root, p)), read));
+}
+
+// skills
+for (const skill of readdirSync(join(root, 'skills'))) {
+  const path = `skills/${skill}/SKILL.md`;
+  if (!existsSync(join(root, path))) {
+    errors.push(`${path} がありません`);
+    continue;
+  }
+  errors.push(...checkSkillFile(path, read(path)));
 }
 
 // サイズ

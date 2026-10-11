@@ -1,0 +1,68 @@
+name: PR Merged
+
+# マージされた PR の「計画との差異」節を、リンク先の issue にコメントとして残す。
+#
+# issue は着手前の計画で書かれるため、実装中に方針が変わっても issue 側には
+# 反映されない。クローズされた issue 単体を読んだときに事実と食い違わないよう、
+# マージ時点の実態をここで追記する。
+#
+# 制約: fork からの PR では closed イベントのトークンが読み取り専用になり
+# 投稿できない。所有者のみが push する前提で運用する。
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  annotate-issues:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 計画との差異をリンク先 issue に追記
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PR: ${{ github.event.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          MERGED_AT: ${{ github.event.pull_request.merged_at }}
+        run: |
+          section=$(printf '%s' "$PR_BODY" | node scripts/check-pr-divergence.mjs --extract)
+          if [ -z "$section" ]; then
+            echo "::warning::「計画との差異」節が空のためコメントを投稿しません（PR #$PR）"
+            exit 0
+          fi
+
+          issues=$(gh api graphql \
+            -f query='query($owner:String!, $repo:String!, $pr:Int!) {
+              repository(owner:$owner, name:$repo) {
+                pullRequest(number:$pr) {
+                  closingIssuesReferences(first: 20) { nodes { number } }
+                }
+              }
+            }' \
+            -F owner="$OWNER" -F repo="$REPO" -F pr="$PR" \
+            --jq '.data.repository.pullRequest.closingIssuesReferences.nodes[].number')
+
+          if [ -z "$issues" ]; then
+            echo "::warning::リンクされた issue がありません（PR #$PR）"
+            exit 0
+          fi
+
+          for n in $issues; do
+            {
+              printf '## 計画との差異（自動追記）\n\n'
+              printf 'この issue は PR #%s のマージで close されました（%s）。\n' "$PR" "$MERGED_AT"
+              printf '上の本文は着手前の計画です。実装との差異は次のとおり。\n\n'
+              printf '%s\n' "$section"
+            } > comment.md
+            gh issue comment "$n" --body-file comment.md
+            echo "issue #$n にコメントしました"
+          done

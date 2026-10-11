@@ -140,6 +140,22 @@ export function checkRadarEntry(
   return [];
 }
 
+/** `skills/<名前>/SKILL.md` を検査する。name はフォルダ名と一致させ、description（呼ばれる条件）を必須にする。 */
+export function checkSkillFile(path: string, markdown: string): string[] {
+  const data = splitFrontmatter(markdown).data ?? {};
+  const folder = path.split('/').at(-2) ?? '';
+  const name = typeof data['name'] === 'string' ? data['name'] : '';
+  const description = typeof data['description'] === 'string' ? data['description'] : '';
+  const errors: string[] = [];
+  if (name !== folder) {
+    errors.push(`${path}: name（${name}）がフォルダ名（${folder}）と違います`);
+  }
+  if (description === '') {
+    errors.push(`${path}: description がありません（スキルが呼ばれる条件になる）`);
+  }
+  return errors;
+}
+
 export function checkByteBudget(files: SizedFile[], limit: number): string[] {
   const total = files.reduce((sum, file) => sum + file.bytes, 0);
   return total > limit

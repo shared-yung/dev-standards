@@ -1,64 +1,82 @@
-// principles/ と stacks/ を、Claude Code と Copilot のユーザー単位の指示フォルダへ配る。
+// principles/ と stacks/ をルールとして、skills/ をスキルとして、ユーザー単位のフォルダへ配る。
 //   bun run install-rules            配る（配布先の dev-standards の分は丸ごと置き換える）
 //   bun run install-rules --check    配布先が最新かだけを確かめる（差分があれば終了コード 1）
 //
 // シンボリックリンクではなくコピーにしている。Windows ではリンクの作成に開発者モードか管理者権限が要り、
 // Cowork のセッションではリポジトリの外を指すリンクのルールが読み込まれないため。
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { toCopilotInstruction } from './lib/copilot';
+import { diffTrees } from './lib/tree';
 
 const root = join(import.meta.dirname, '..');
-const claudeDir = join(homedir(), '.claude', 'rules', 'dev-standards');
+const claudeRulesDir = join(homedir(), '.claude', 'rules', 'dev-standards');
+const claudeSkillsDir = join(homedir(), '.claude', 'skills');
 const copilotDir = join(homedir(), '.copilot', 'instructions');
 const copilotPrefix = 'dev-standards-';
 const checkOnly = process.argv.includes('--check');
 
-/** 配布先の相対パス → 内容 */
-function plan(): { claude: Map<string, string>; copilot: Map<string, string> } {
-  const claude = new Map<string, string>();
-  const copilot = new Map<string, string>();
-  for (const dir of ['principles', 'stacks']) {
-    const files = readdirSync(join(root, dir), { recursive: true, encoding: 'utf8' })
-      .filter((name) => name.endsWith('.md'))
-      .map((name) => `${dir}/${name.replaceAll('\\', '/')}`);
-    for (const path of files) {
-      const content = readFileSync(join(root, path), 'utf8');
-      claude.set(path, content);
-      const flat = path.replace(/\.md$/, '').replaceAll('/', '-');
-      copilot.set(`${copilotPrefix}${flat}.instructions.md`, toCopilotInstruction(content));
-    }
-  }
-  return { claude, copilot };
-}
-
-function installed(dir: string, filter: (name: string) => boolean): Map<string, string> {
+/** dir 以下のファイル（相対パス → 内容）。filter で対象を絞る。 */
+function readTree(
+  dir: string,
+  filter: (path: string) => boolean = () => true,
+): Map<string, string> {
   const result = new Map<string, string>();
   if (!existsSync(dir)) return result;
   for (const name of readdirSync(dir, { recursive: true, encoding: 'utf8' })) {
-    const normalized = name.replaceAll('\\', '/');
-    if (!normalized.endsWith('.md') || !filter(normalized)) continue;
-    result.set(normalized, readFileSync(join(dir, normalized), 'utf8'));
+    const path = name.replaceAll('\\', '/');
+    if (!filter(path) || !statSync(join(dir, path)).isFile()) continue;
+    result.set(path, readFileSync(join(dir, path), 'utf8'));
   }
   return result;
 }
 
-function diff(expected: Map<string, string>, actual: Map<string, string>): string[] {
-  const keys = new Set([...expected.keys(), ...actual.keys()]);
-  return [...keys].filter((key) => expected.get(key) !== actual.get(key)).sort();
+function writeTree(dir: string, files: Map<string, string>): void {
+  rmSync(dir, { recursive: true, force: true });
+  for (const [path, content] of files) {
+    const target = join(dir, path);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, content);
+  }
 }
 
-const expected = plan();
+// ルール（Claude Code）と、その Copilot 版
+const rules = new Map<string, string>();
+const copilot = new Map<string, string>();
+for (const dir of ['principles', 'stacks']) {
+  for (const [path, content] of readTree(join(root, dir), (p) => p.endsWith('.md'))) {
+    rules.set(`${dir}/${path}`, content);
+    const flat = `${dir}/${path}`.replace(/\.md$/, '').replaceAll('/', '-');
+    copilot.set(`${copilotPrefix}${flat}.instructions.md`, toCopilotInstruction(content));
+  }
+}
+
+// スキル（skills/<名前>/ → ~/.claude/skills/<名前>/）。dev-standards に無い名前のスキルには触らない
+const skills = readdirSync(join(root, 'skills')).map((name) => ({
+  name,
+  files: readTree(join(root, 'skills', name)),
+}));
+
 const drift = [
-  ...diff(
-    expected.claude,
-    installed(claudeDir, () => true),
-  ).map((p) => join(claudeDir, p)),
-  ...diff(
-    expected.copilot,
-    installed(copilotDir, (n) => n.startsWith(copilotPrefix)),
+  ...diffTrees(rules, readTree(claudeRulesDir)).map((p) => join(claudeRulesDir, p)),
+  ...diffTrees(
+    copilot,
+    readTree(copilotDir, (p) => p.startsWith(copilotPrefix)),
   ).map((p) => join(copilotDir, p)),
+  ...skills.flatMap(({ name, files }) =>
+    diffTrees(files, readTree(join(claudeSkillsDir, name))).map((p) =>
+      join(claudeSkillsDir, name, p),
+    ),
+  ),
 ];
 
 if (checkOnly) {
@@ -71,20 +89,22 @@ if (checkOnly) {
   process.exit(0);
 }
 
-rmSync(claudeDir, { recursive: true, force: true });
-for (const [path, content] of expected.claude) {
-  const target = join(claudeDir, path);
-  mkdirSync(dirname(target), { recursive: true });
-  writeFileSync(target, content);
-}
+writeTree(claudeRulesDir, rules);
 
 mkdirSync(copilotDir, { recursive: true });
 for (const name of readdirSync(copilotDir).filter((n) => n.startsWith(copilotPrefix))) {
   rmSync(join(copilotDir, name));
 }
-for (const [name, content] of expected.copilot) {
+for (const [name, content] of copilot) {
   writeFileSync(join(copilotDir, name), content);
 }
 
-console.log(`✓ Claude Code: ${expected.claude.size} ファイル → ${claudeDir}`);
-console.log(`✓ Copilot: ${expected.copilot.size} ファイル → ${copilotDir}`);
+for (const { name, files } of skills) {
+  writeTree(join(claudeSkillsDir, name), files);
+}
+
+console.log(`✓ Claude Code のルール: ${rules.size} ファイル → ${claudeRulesDir}`);
+console.log(`✓ Copilot: ${copilot.size} ファイル → ${copilotDir}`);
+for (const { name, files } of skills) {
+  console.log(`✓ スキル ${name}: ${files.size} ファイル → ${join(claudeSkillsDir, name)}`);
+}

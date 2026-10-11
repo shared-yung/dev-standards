@@ -1,0 +1,36 @@
+# ESLint の flat config はサブディレクトリへカスケードしないため、
+# ルートと各プロジェクトで別々に eslint を起動する必要がある。
+# lefthook の `root:` を使うとその作業ディレクトリで {staged_files} が解決される。
+pre-commit:
+  parallel: true
+  commands:
+    lint-root:
+      glob: '*.{js,mjs,cjs,ts,vue}'
+      exclude:
+        - '__PROJECT__/**'
+      run: bun x eslint --fix {staged_files} && git add {staged_files}
+    lint-__PROJECT__:
+      root: '__PROJECT__/'
+      glob: '*.{js,ts,vue}'
+      # GIT_WORK_TREE を明示して git add する。直接 git add するとルート直下に二重にステージされる
+      # （scripts/lint-project.sh）。プロジェクトを足したら、このコマンドを root だけ変えて複製する
+      run: sh ../scripts/lint-project.sh {staged_files}
+    format:
+      glob: '*.{js,mjs,cjs,ts,vue,json,md,yml,yaml,scss,html}'
+      run: bun x prettier --write {staged_files} && git add {staged_files}
+
+commit-msg:
+  commands:
+    commitlint:
+      run: sh scripts/commit-msg.sh {1}
+
+# git pull の後に、マージ済みのローカルブランチを消す（scripts/prune-merged-branches.sh）
+post-merge:
+  commands:
+    prune-merged-branches:
+      run: sh scripts/prune-merged-branches.sh
+
+pre-push:
+  commands:
+    branch-name:
+      run: sh scripts/check-branch-name.sh
