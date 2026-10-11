@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { checkSkillFile } from '../scripts/lib/rules';
+import { checkPlaceholders, checkSkillFile } from '../scripts/lib/rules';
 import { diffTrees } from '../scripts/lib/tree';
+
+describe('checkPlaceholders', () => {
+  it('プレースホルダがそのまま残っていれば通る', () => {
+    expect(checkPlaceholders('t/CLAUDE.md', '# __REPO__\n`__PROJECT__/` と __OWNER__\n')).toEqual(
+      [],
+    );
+  });
+
+  it('Markdown の太字に書き換えられたプレースホルダを見つける（Prettier が __X__ を **X** にする）', () => {
+    expect(checkPlaceholders('t/CLAUDE.md', '# **REPO**\n')).toEqual([
+      't/CLAUDE.md:1: プレースホルダが崩れています: **REPO**（__REPO__ に戻す）',
+    ]);
+  });
+});
 
 describe('checkSkillFile', () => {
   it('name がフォルダ名と一致し、description があれば通る', () => {

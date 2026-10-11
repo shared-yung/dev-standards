@@ -156,6 +156,24 @@ export function checkSkillFile(path: string, markdown: string): string[] {
   return errors;
 }
 
+const PLACEHOLDER_NAMES = ['REPO', 'PROJECT', 'OWNER'] as const;
+const mangledPlaceholder = new RegExp(`\\*\\*(${PLACEHOLDER_NAMES.join('|')})\\*\\*`, 'g');
+
+/**
+ * テンプレートのプレースホルダ（`__REPO__` など）が崩れていないかを検査する。
+ * Markdown の整形（Prettier）は `__X__` を太字とみなして `**X**` に書き換えるため。
+ */
+export function checkPlaceholders(path: string, text: string): string[] {
+  return text
+    .split('\n')
+    .flatMap((line, index) =>
+      [...line.matchAll(mangledPlaceholder)].map(
+        (match) =>
+          `${path}:${index + 1}: プレースホルダが崩れています: ${match[0]}（__${match[1] ?? ''}__ に戻す）`,
+      ),
+    );
+}
+
 export function checkByteBudget(files: SizedFile[], limit: number): string[] {
   const total = files.reduce((sum, file) => sum + file.bytes, 0);
   return total > limit

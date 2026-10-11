@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import {
   checkByteBudget,
+  checkPlaceholders,
   checkPrincipleFile,
   checkRadarEntry,
   checkSkillFile,
@@ -68,6 +69,14 @@ for (const skill of readdirSync(join(root, 'skills'))) {
     continue;
   }
   errors.push(...checkSkillFile(path, read(path)));
+}
+
+// テンプレートのプレースホルダが整形で崩れていないか
+for (const dir of ['skills', 'bundles']) {
+  for (const name of readdirSync(join(root, dir), { recursive: true, encoding: 'utf8' })) {
+    const path = join(dir, name).replaceAll('\\', '/');
+    if (statSync(join(root, path)).isFile()) errors.push(...checkPlaceholders(path, read(path)));
+  }
 }
 
 // bundles（sync-repo が配る内容）: スタックごとにバンドルを読み、参照しているファイルが揃っていて、
