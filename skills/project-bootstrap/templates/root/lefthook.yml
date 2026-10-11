@@ -34,3 +34,7 @@ pre-push:
   commands:
     branch-name:
       run: sh scripts/check-branch-name.sh
+    # main への push と削除を拒否する（ブランチ保護が使えない無料プランの private でも効くように手元で止める）
+    push-target:
+      run: bun scripts/check-push-target.ts
+      use_stdin: true
