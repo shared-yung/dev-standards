@@ -1,0 +1,22 @@
+# dev-standards が配る共通の git hook（sync-repo が管理する。直接編集しない）。
+# lefthook.yml から extends で読み込む。プロジェクト固有の hook は lefthook.yml に書く。
+
+commit-msg:
+  commands:
+    commitlint:
+      run: sh scripts/commit-msg.sh {1}
+
+# git pull の後に、マージ済みのローカルブランチを消す（WF-06）
+post-merge:
+  commands:
+    prune-merged-branches:
+      run: sh scripts/prune-merged-branches.sh
+
+pre-push:
+  commands:
+    branch-name:
+      run: sh scripts/check-branch-name.sh
+    # main への push と削除を拒否する（無料プランの private ではブランチ保護が使えないため、手元で止める）
+    push-target:
+      run: bun scripts/check-push-target.ts
+      use_stdin: true
