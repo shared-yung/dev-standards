@@ -1,0 +1,7 @@
+{
+  "$comment": "sync-repo の配布先。path は dev-standards のルートからの相対パス（兄弟のクローンを前提にする）",
+  "consumers": [
+    { "name": "dev-standards", "path": ".", "stack": "typescript-vue" },
+    { "name": "clip-studio-tools", "path": "../clip-studio-tools", "stack": "python" }
+  ]
+}
