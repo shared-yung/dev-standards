@@ -9,6 +9,8 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  # private リポジトリでは、issue を読めないトークンだと closingIssuesReferences が 0 件になる
+  issues: read
 
 jobs:
   conventions:
