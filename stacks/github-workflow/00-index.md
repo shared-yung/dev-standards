@@ -52,6 +52,7 @@ WF・GR・REPO の一部を、git と GitHub の仕組みで実装する。言�
 - **lefthook の `root:` 付きコマンドで素の `git add` をしない。** git worktree 上の `git commit` から起動されたフックには `GIT_WORK_TREE` が渡らず、ルート直下に prefix 無しで二重にコミットされる。`scripts/lint-project.sh` のように `GIT_WORK_TREE` を明示する。確認は `lefthook run` ではなく、worktree 上の実際の `git commit` で
 - **順序**: 初回コミットを `main` に置いてからブランチ保護を掛ける（先に掛けると置けない）
 - **無料プランの private リポジトリにはブランチ保護（ruleset）を掛けられない**（`Upgrade to GitHub Pro or make this repository public` で 403）。この場合 WF-07 / GR-03 の最後の層が無い。public にするか GitHub Pro にするか、無いことを前提に CI の結果をマージ前に人間が確かめる（2026-10-11 に確認）
+- **linked issue の検査には `issues: read` が要る**: `conventions.yml` の `permissions` に無いと、private リポジトリでは `closingIssuesReferences` が 0 件になり、本文に `Closes #N` があっても CI が落ちる（public では誰でも issue を読めるので表に出ない。2026-10-11 に dev-standards #2 で発覚）
 - **permission は前方一致**: `cd x && gh issue create` や `gh api -f a=b`（フラグで暗黙に POST）を取りこぼす。フックで補う
 - **設定後にセッションの再起動が必要**: `.claude/` がセッション開始時に無かった場合、フックが発火しない
 - その他の罠は `project-bootstrap` スキルの `references/pitfalls.md`
