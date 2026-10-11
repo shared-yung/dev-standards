@@ -51,6 +51,7 @@ WF・GR・REPO の一部を、git と GitHub の仕組みで実装する。言�
 - **ブランチの削除（WF-06）**: squash merge なので `-d` は効かない。消してよい条件（追跡先が `[gone]`、ローカルの先端を head とするマージ済み PR がある、worktree でチェックアウト中でない）をスクリプトで判定して `-D` する。手で `-D` を打たない
 - **lefthook の `root:` 付きコマンドで素の `git add` をしない。** git worktree 上の `git commit` から起動されたフックには `GIT_WORK_TREE` が渡らず、ルート直下に prefix 無しで二重にコミットされる。`scripts/lint-project.sh` のように `GIT_WORK_TREE` を明示する。確認は `lefthook run` ではなく、worktree 上の実際の `git commit` で
 - **順序**: 初回コミットを `main` に置いてからブランチ保護を掛ける（先に掛けると置けない）
+- **無料プランの private リポジトリにはブランチ保護（ruleset）を掛けられない**（`Upgrade to GitHub Pro or make this repository public` で 403）。この場合 WF-07 / GR-03 の最後の層が無い。public にするか GitHub Pro にするか、無いことを前提に CI の結果をマージ前に人間が確かめる（2026-10-11 に確認）
 - **permission は前方一致**: `cd x && gh issue create` や `gh api -f a=b`（フラグで暗黙に POST）を取りこぼす。フックで補う
 - **設定後にセッションの再起動が必要**: `.claude/` がセッション開始時に無かった場合、フックが発火しない
 - その他の罠は `project-bootstrap` スキルの `references/pitfalls.md`
