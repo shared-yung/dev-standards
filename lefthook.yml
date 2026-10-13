@@ -1,25 +1,10 @@
+# 共通の hook（commit-msg・post-merge・pre-push）は lefthook-dev-standards.yml にある（sync-repo が管理）。
+# このファイルはプロジェクトのもの。スタック固有の hook をここに足す。
+extends:
+  - lefthook-dev-standards.yml
+
 pre-commit:
   commands:
     format:
       glob: '*.{ts,js,mjs,json,md,yml,yaml}'
       run: bun x prettier --write {staged_files} && git add {staged_files}
-
-commit-msg:
-  commands:
-    commitlint:
-      run: sh scripts/commit-msg.sh {1}
-
-# git pull の後に、マージ済みのローカルブランチを消す（WF-06）
-post-merge:
-  commands:
-    prune-merged-branches:
-      run: sh scripts/prune-merged-branches.sh
-
-pre-push:
-  commands:
-    branch-name:
-      run: sh scripts/check-branch-name.sh
-    # main への push と削除を拒否する（無料プランの private ではブランチ保護が使えないため、手元で止める）
-    push-target:
-      run: bun scripts/check-push-target.ts
-      use_stdin: true

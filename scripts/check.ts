@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import {
   checkByteBudget,
+  checkPlaceholders,
   checkPrincipleFile,
   checkRadarEntry,
   checkSkillFile,
@@ -12,6 +13,7 @@ import {
   extractPrinciples,
   parseMappingTable,
 } from './lib/rules';
+import { bundlesForStack, loadDesired } from './lib/sync/bundle';
 
 /** 常時読み込む principles/ の合計の上限。移行前の ~/.claude/CLAUDE.md（20,597 バイト）より小さく保つ。 */
 const ALWAYS_LOADED_BYTE_LIMIT = 20_000;
@@ -67,6 +69,27 @@ for (const skill of readdirSync(join(root, 'skills'))) {
     continue;
   }
   errors.push(...checkSkillFile(path, read(path)));
+}
+
+// テンプレートのプレースホルダが整形で崩れていないか
+for (const dir of ['skills', 'bundles']) {
+  for (const name of readdirSync(join(root, dir), { recursive: true, encoding: 'utf8' })) {
+    const path = join(dir, name).replaceAll('\\', '/');
+    if (statSync(join(root, path)).isFile()) errors.push(...checkPlaceholders(path, read(path)));
+  }
+}
+
+// bundles（sync-repo が配る内容）: スタックごとにバンドルを読み、参照しているファイルが揃っていて、
+// 同じターゲットを二重に扱っていないことを確かめる
+const stackNames = Object.keys(
+  JSON.parse(read('bundles/stacks.json')) as Record<string, unknown>,
+).filter((name) => !name.startsWith('$'));
+for (const stack of stackNames) {
+  try {
+    loadDesired(root, bundlesForStack(root, stack));
+  } catch (error) {
+    errors.push(`bundles（${stack}）: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 // サイズ

@@ -1,5 +1,8 @@
+# >>> dev-standards
 node_modules/
 *.log
 .env
 .env.*
+!.env.example
 .claude/settings.local.json
+# <<< dev-standards

@@ -40,12 +40,12 @@ bun scripts/setup-branch-protection.ts --check
 
 ruleset の API が 403 になる。スクリプトは止めずに警告を出し、リポジトリ設定だけを反映する。この状態では GitHub 側で次を止められないので、手元の仕組みと人の確認で補う。
 
-| GitHub 側で止められないこと | 補う手段 |
-| --- | --- |
-| main への直 push・削除 | pre-push の `scripts/check-push-target.ts`（`--no-verify` で迂回できる） |
-| squash 以外のマージ | リポジトリ設定（ruleset が無くても効く） |
-| CI が落ちたままのマージ | マージする人が PR の CI を確かめる（PR テンプレートの「マージ前の確認」） |
-| force push | エージェントは設定で deny。人の操作は止められない |
+| GitHub 側で止められないこと | 補う手段                                                                  |
+| --------------------------- | ------------------------------------------------------------------------- |
+| main への直 push・削除      | pre-push の `scripts/check-push-target.ts`（`--no-verify` で迂回できる）  |
+| squash 以外のマージ         | リポジトリ設定（ruleset が無くても効く）                                  |
+| CI が落ちたままのマージ     | マージする人が PR の CI を確かめる（PR テンプレートの「マージ前の確認」） |
+| force push                  | エージェントは設定で deny。人の操作は止められない                         |
 
 ## 変更したいとき
 

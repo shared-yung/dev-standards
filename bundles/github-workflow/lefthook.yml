@@ -1,0 +1,4 @@
+# 共通の hook（commit-msg・post-merge・pre-push）は lefthook-dev-standards.yml にある（sync-repo が管理）。
+# このファイルはプロジェクトのもの。スタック固有の hook（lint・format など）をここに足す。
+extends:
+  - lefthook-dev-standards.yml

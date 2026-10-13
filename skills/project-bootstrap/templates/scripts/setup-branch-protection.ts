@@ -14,7 +14,11 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-export const RulesetAction = { Create: 'create', Update: 'update', Unavailable: 'unavailable' } as const;
+export const RulesetAction = {
+  Create: 'create',
+  Update: 'update',
+  Unavailable: 'unavailable',
+} as const;
 export type RulesetAction = (typeof RulesetAction)[keyof typeof RulesetAction];
 
 export type RulesetDecision =
@@ -23,8 +27,7 @@ export type RulesetDecision =
   | { type: typeof RulesetAction.Unavailable };
 
 export type RulesetListing =
-  | { forbidden: true }
-  | { forbidden: false; rulesets: readonly { id: number; name: string }[] };
+  { forbidden: true } | { forbidden: false; rulesets: readonly { id: number; name: string }[] };
 
 /** 期待するリポジトリ設定と実際の値の違い。 */
 export function settingsDrift(
@@ -33,7 +36,10 @@ export function settingsDrift(
 ): string[] {
   return Object.entries(expected)
     .filter(([key, value]) => actual[key] !== value)
-    .map(([key, value]) => `${key}: 期待 ${String(value)} / 実際 ${key in actual ? String(actual[key]) : '(なし)'}`);
+    .map(
+      ([key, value]) =>
+        `${key}: 期待 ${String(value)} / 実際 ${key in actual ? String(actual[key]) : '(なし)'}`,
+    );
 }
 
 /** ruleset を作るか、同名を更新するか（重複作成しない）、使えないか。 */
@@ -70,7 +76,10 @@ function listRulesets(repo: string): RulesetListing {
   const result = gh(['api', `repos/${repo}/rulesets`]);
   if (result.forbidden) return { forbidden: true };
   if (!result.ok) throw new Error(`ruleset を取得できません: ${result.stderr}`);
-  return { forbidden: false, rulesets: JSON.parse(result.stdout) as { id: number; name: string }[] };
+  return {
+    forbidden: false,
+    rulesets: JSON.parse(result.stdout) as { id: number; name: string }[],
+  };
 }
 
 function check(repo: string, settings: Record<string, unknown>, rulesetName: string): boolean {
@@ -100,7 +109,15 @@ function check(repo: string, settings: Record<string, unknown>, rulesetName: str
 }
 
 function apply(repo: string, settingsFile: string, rulesetFile: string, rulesetName: string): void {
-  const patched = gh(['api', '--method', 'PATCH', `repos/${repo}`, '--input', settingsFile, '--silent']);
+  const patched = gh([
+    'api',
+    '--method',
+    'PATCH',
+    `repos/${repo}`,
+    '--input',
+    settingsFile,
+    '--silent',
+  ]);
   if (!patched.ok) throw new Error(`リポジトリ設定を変更できません: ${patched.stderr}`);
   console.log('✓ リポジトリ設定を反映しました');
 
@@ -114,11 +131,15 @@ function apply(repo: string, settingsFile: string, rulesetFile: string, rulesetN
           : ['api', '--method', 'PUT', `repos/${repo}/rulesets/${decision.id}`];
       const result = gh([...args, '--input', rulesetFile, '--silent']);
       if (!result.ok) throw new Error(`ruleset を設定できません: ${result.stderr}`);
-      console.log(`✓ ruleset を${decision.type === RulesetAction.Create ? '作成' : '更新'}しました`);
+      console.log(
+        `✓ ruleset を${decision.type === RulesetAction.Create ? '作成' : '更新'}しました`,
+      );
       return;
     }
     case RulesetAction.Unavailable:
-      console.warn('! ruleset はこのリポジトリでは使えないため、設定しませんでした（--check で状態を確認できます）');
+      console.warn(
+        '! ruleset はこのリポジトリでは使えないため、設定しませんでした（--check で状態を確認できます）',
+      );
       return;
     default:
       throw new Error(`未知の判定: ${JSON.stringify(decision satisfies never)}`);

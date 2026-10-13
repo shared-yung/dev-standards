@@ -15,6 +15,7 @@ WF・GR・REPO の一部を、git と GitHub の仕組みで実装する。言�
 
 ## ツール
 
+- 配布と更新: dev-standards の `bun run sync-repo <リポジトリ>`（`bundles/github-workflow/`）。共通の hook は `lefthook-dev-standards.yml`（管理ファイル）にあり、各リポジトリの `lefthook.yml`（雛形）が `extends` で読み込む。記録は `.dev-standards.json`
 - git hook: lefthook ＋ commitlint（どちらも Node 製）。**言語のスタックにかかわらず bun で入れる**。Node を使わないスタック（Python など）でも、リポジトリのルートにツール用の `package.json` を置く。代替（Python なら pre-commit など）に分けず、全リポジトリで同じ仕組み・同じ設定ファイルにするため
 - CI: GitHub Actions（`conventions.yml` と `pr-merged.yml`）
 - リポジトリの保護: `scripts/setup-branch-protection.ts`（リポジトリ設定 `repo-settings.json` ＋ ruleset `branch-protection-ruleset.json`。`--check` で確認）。手順は project-bootstrap の `templates/docs/workflow/branch-protection.md`

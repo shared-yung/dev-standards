@@ -1,0 +1,142 @@
+{
+  "source": "shared-yung/dev-standards",
+  "commit": "82934a70f9d14399651f02a8a96a70b6355497db",
+  "stack": "typescript-vue",
+  "bundles": ["github-workflow"],
+  "files": {
+    ".claude/hooks/guard-remote.mjs": {
+      "kind": "managed",
+      "local": "51816ef528381135118b3a8afee9056e0254f42c38f96ed309e3fbe7e2506f7d",
+      "upstream": "51816ef528381135118b3a8afee9056e0254f42c38f96ed309e3fbe7e2506f7d"
+    },
+    ".gitattributes": {
+      "kind": "managed",
+      "local": "f2346d645fc535eff70b0bcdbde6b7983e7b666c7d552aae8bc9fab56f0fce18",
+      "upstream": "f2346d645fc535eff70b0bcdbde6b7983e7b666c7d552aae8bc9fab56f0fce18"
+    },
+    ".github/ISSUE_TEMPLATE/bug.yml": {
+      "kind": "seed"
+    },
+    ".github/ISSUE_TEMPLATE/config.yml": {
+      "kind": "seed"
+    },
+    ".github/ISSUE_TEMPLATE/feature.yml": {
+      "kind": "seed"
+    },
+    ".github/pull_request_template.md": {
+      "kind": "seed"
+    },
+    ".github/workflows/conventions.yml": {
+      "kind": "managed",
+      "local": "5355768e2e66b8a288375bd58631ce9023d59c437fafbdefb5dce2113706c32b",
+      "upstream": "5355768e2e66b8a288375bd58631ce9023d59c437fafbdefb5dce2113706c32b"
+    },
+    ".github/workflows/pr-merged.yml": {
+      "kind": "managed",
+      "local": "55f6105452c7db7872c8f1e92485377f53dc5304a917f43486609e6c37692019",
+      "upstream": "55f6105452c7db7872c8f1e92485377f53dc5304a917f43486609e6c37692019"
+    },
+    "commitlint.config.js": {
+      "kind": "managed",
+      "local": "4dd2a112334942b3a4e884cf737db6b8a81ddce29448c7a8e34e954641375a8d",
+      "upstream": "4dd2a112334942b3a4e884cf737db6b8a81ddce29448c7a8e34e954641375a8d"
+    },
+    "commitlint.title.config.js": {
+      "kind": "managed",
+      "local": "485c2f819c1032a2de33de2b5b810e6c70e352f58b3d3dbbde87ac344f3fdd31",
+      "upstream": "485c2f819c1032a2de33de2b5b810e6c70e352f58b3d3dbbde87ac344f3fdd31"
+    },
+    "lefthook-dev-standards.yml": {
+      "kind": "managed",
+      "local": "f1be233f63c87beccf35ef369cc4db6428ae6210e02ffcaa74669c4b83b19aab",
+      "upstream": "f1be233f63c87beccf35ef369cc4db6428ae6210e02ffcaa74669c4b83b19aab"
+    },
+    "lefthook.yml": {
+      "kind": "seed"
+    },
+    "scripts/branch-protection-ruleset.json": {
+      "kind": "managed",
+      "local": "646094d8867d5de03ea681ec4ccc61a7d03d0613d3a8156144d9ce1ce15d8e21",
+      "upstream": "646094d8867d5de03ea681ec4ccc61a7d03d0613d3a8156144d9ce1ce15d8e21"
+    },
+    "scripts/check-branch-name.sh": {
+      "kind": "managed",
+      "local": "a221c497fee5f576aab17ec223924028b6cfbaabbc21c4c013dd21d54373709e",
+      "upstream": "a221c497fee5f576aab17ec223924028b6cfbaabbc21c4c013dd21d54373709e"
+    },
+    "scripts/check-pr-divergence.mjs": {
+      "kind": "managed",
+      "local": "8b4f6930152cb6096c82b421fb800cc1e25bc88deef1f56afab5400b13097552",
+      "upstream": "8b4f6930152cb6096c82b421fb800cc1e25bc88deef1f56afab5400b13097552"
+    },
+    "scripts/check-push-target.ts": {
+      "kind": "managed",
+      "local": "bb453d41196a32fd6390a44c68ddafbf076e911bbf6f1ac2a80f93b065f4a37d",
+      "upstream": "bb453d41196a32fd6390a44c68ddafbf076e911bbf6f1ac2a80f93b065f4a37d"
+    },
+    "scripts/commit-msg.sh": {
+      "kind": "managed",
+      "local": "11cef25aed97a8ea4c305e89be4522f7b6fff962e8004a7594d26e7a73730a72",
+      "upstream": "11cef25aed97a8ea4c305e89be4522f7b6fff962e8004a7594d26e7a73730a72"
+    },
+    "scripts/prune-merged-branches.sh": {
+      "kind": "managed",
+      "local": "414eb181d1aca33c721e8e3c7911befc1c03e80317d4e50045fcb90c98b5f0cf",
+      "upstream": "414eb181d1aca33c721e8e3c7911befc1c03e80317d4e50045fcb90c98b5f0cf"
+    },
+    "scripts/repo-settings.json": {
+      "kind": "managed",
+      "local": "dd6559d2f6f805a404a6884223129706ab9e8689cb18f96cc9e6d3ea08c18db2",
+      "upstream": "dd6559d2f6f805a404a6884223129706ab9e8689cb18f96cc9e6d3ea08c18db2"
+    },
+    "scripts/setup-branch-protection.ts": {
+      "kind": "managed",
+      "local": "198effb0916784cdd70cbd8ef5c9e3cc96855f5ca0a694c0ed9b66a26c05feca",
+      "upstream": "198effb0916784cdd70cbd8ef5c9e3cc96855f5ca0a694c0ed9b66a26c05feca"
+    }
+  },
+  "blocks": {
+    ".gitignore": {
+      "local": "fea29ac1c87f6293e054308cdc02540c68306c58f0c7a65575c76221b2c17f4c",
+      "upstream": "fea29ac1c87f6293e054308cdc02540c68306c58f0c7a65575c76221b2c17f4c"
+    }
+  },
+  "keys": {
+    "package.json": {
+      "[\"type\"]": {
+        "local": "51b03279c071bc2e55a377745fdd442c9eedc700152b19366572fa8f76d76017",
+        "upstream": "51b03279c071bc2e55a377745fdd442c9eedc700152b19366572fa8f76d76017"
+      },
+      "[\"scripts\",\"prepare\"]": {
+        "local": "099ad089a1363a7826bee1d37715a9fb9466f26d5bbed334f96534faa986c87d",
+        "upstream": "099ad089a1363a7826bee1d37715a9fb9466f26d5bbed334f96534faa986c87d"
+      },
+      "[\"devDependencies\",\"@commitlint/cli\"]": {
+        "local": "e44fd8865fd26efb5649402fc6ac8f6646a4ddaf3af5018494e1d35e800e3c03",
+        "upstream": "e44fd8865fd26efb5649402fc6ac8f6646a4ddaf3af5018494e1d35e800e3c03"
+      },
+      "[\"devDependencies\",\"@commitlint/config-conventional\"]": {
+        "local": "e44fd8865fd26efb5649402fc6ac8f6646a4ddaf3af5018494e1d35e800e3c03",
+        "upstream": "e44fd8865fd26efb5649402fc6ac8f6646a4ddaf3af5018494e1d35e800e3c03"
+      },
+      "[\"devDependencies\",\"lefthook\"]": {
+        "local": "4175be08aee972e10e005bc5581bb25bc6cf650ffa32127bc965d7926f88befa",
+        "upstream": "4175be08aee972e10e005bc5581bb25bc6cf650ffa32127bc965d7926f88befa"
+      }
+    }
+  },
+  "items": {
+    ".claude/settings.json": {
+      "[\"permissions\",\"deny\"]": [
+        "\"Bash(git push --force*)\"",
+        "\"Bash(git push -f *)\"",
+        "\"Bash(gh repo delete*)\"",
+        "\"Bash(gh pr merge*)\""
+      ],
+      "[\"permissions\",\"ask\"]": ["\"Bash(git push)\"", "\"Bash(git push *)\""],
+      "[\"hooks\",\"PreToolUse\"]": [
+        "{\"hooks\":[{\"command\":\"node .claude/hooks/guard-remote.mjs\",\"statusMessage\":\"リモート操作を確認中\",\"timeout\":10,\"type\":\"command\"}],\"matcher\":\"Bash\"}"
+      ]
+    }
+  }
+}

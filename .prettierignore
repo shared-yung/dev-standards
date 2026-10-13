@@ -1,3 +1,5 @@
 node_modules/
 bun.lock
-skills/*/templates/
+# テンプレートの Markdown は整形しない。Prettier は __REPO__ などのプレースホルダを太字とみなし **REPO** に書き換える
+# （check.ts が崩れたプレースホルダを検出する）。sync-repo の管理ファイルに Markdown は無いので、配布先の整形とは衝突しない
+skills/*/templates/**/*.md

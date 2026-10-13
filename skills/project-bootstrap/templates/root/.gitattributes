@@ -33,7 +33,6 @@ Makefile text eol=lf
 # GitHub の差分で折りたたまれ、言語統計からも除外される
 # ---------------------------------------------------------------------------
 bun.lock linguist-generated=true
-packages/api-client/src/generated/** linguist-generated=true
 
 # ---------------------------------------------------------------------------
 # 差分の見やすさ（git 組み込みの diff ドライバ。ハンク見出しに文脈が出る）

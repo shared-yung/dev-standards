@@ -21,8 +21,12 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - name: 規約（対応表・階層・radar・サイズ）
+      - name: 規約（対応表・階層・radar・バンドル・サイズ）
         run: bun run check
+
+      # dev-standards 自身も sync-repo の配布先。自分のテンプレートと食い違っていないかを確かめる
+      - name: 自分自身への同期が最新か
+        run: bun run sync-repo . --check
 
       - name: Format
         run: bun run format:check

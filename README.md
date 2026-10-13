@@ -28,6 +28,28 @@ bun run install-rules
 - `bun run install-rules --check` で、配布先が最新かを確かめる
 - コピーにしている理由: Windows のシンボリックリンクは開発者モードか管理者権限が要り、Cowork ではリポジトリの外を指すリンクのルールが読み込まれない
 
+## 既存リポジトリへの反映（sync-repo）
+
+リポジトリ側の仕組み（git hook・CI・テンプレート・ガードレール）を配り、更新する。ルールやスキルと違い、各リポジトリにファイルとして置くもの。
+
+```bash
+bun run sync-repo ../<リポジトリ> --stack python   # 初回（スタックを記録する）
+bun run sync-repo ../<リポジトリ>                  # 2回目以降
+bun run sync-repo ../<リポジトリ> --check          # 最新かだけを確かめる
+bun run sync-repo --all --check                    # consumers.json のすべて
+```
+
+- 配る内容は `bundles/<バンドル>/bundle.json`。スタックとバンドルの対応は `bundles/stacks.json`
+- ファイルの扱いは3種類
+  - **管理**（`managed`）: 前回配った内容（記録）・今の内容・新しい内容の3方向で比べる。ローカルだけ変えたものは保ち、両方変わったら衝突として止める
+  - **雛形**（`seed`）: 無いときだけ作る。以後はリポジトリのもの
+  - **部分管理**: `.gitignore` の印付きブロック、`package.json` の決まったキー、`.claude/settings.json` の配列の項目だけを扱い、ほかの内容は保つ
+- 衝突は `--overwrite <パス>`（上流の内容にする）か `--keep <パス>`（ローカルを採る）で解決する
+- 記録は配布先の `.dev-standards.json`（配った内容のハッシュ・dev-standards のコミット・スタック）
+- 配布先の作業ツリーに未コミットの変更があるときは配らない。結果は作業ツリーに書くだけで、コミットは issue 起点のブランチで行う
+- 配布先は `consumers.json`（兄弟のクローンを前提にした相対パス）。dev-standards 自身も配布先で、CI で最新かを確かめる
+- 管理ファイルは Prettier で整形済みにしておく（配布先の pre-commit で書式が変わり、ローカルの変更と判定されないように）
+
 ## 変更の流れ
 
 1. issue を起こす（WF-01）

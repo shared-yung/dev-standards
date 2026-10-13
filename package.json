@@ -9,7 +9,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "sync-repo": "bun scripts/sync-repo.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

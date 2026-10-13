@@ -1,0 +1,5 @@
+{
+  "$comment": "スタックごとに配るバンドル。sync-repo の --stack で選ぶ",
+  "typescript-vue": ["github-workflow"],
+  "python": ["github-workflow"]
+}
