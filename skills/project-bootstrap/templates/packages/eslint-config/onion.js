@@ -2,7 +2,7 @@ import boundaries from 'eslint-plugin-boundaries';
 import { importX, createNodeResolver } from 'eslint-plugin-import-x';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import tseslint from 'typescript-eslint';
-import { restrictedSyntax } from './base.js';
+import { nondeterministicSyntax, restrictedSyntax } from './base.js';
 
 /**
  * feature-first オニオンアーキテクチャの依存方向を機械的に強制する。
@@ -339,6 +339,22 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
         // base の禁止を引き継いだうえで足す。flat config は同じルールの options を
         // 丸ごと置き換えるので、展開しないと enum 相当の禁止がここで消える
         'no-restricted-syntax': ['error', ...restrictedSyntax, composableDeclaration],
+      },
+    },
+    {
+      // 現在時刻と時間の経過（Date.now・setTimeout など）を直接使えるのは infrastructure だけ
+      // （CODE-07、docs/architecture/nondeterministic-inputs.md）。ほかの層は時計とタイマーの port を
+      // 受け取る。テストでも vi.useFakeTimers は infrastructure の薄いテストに限る。
+      // 上の use～ の禁止より後ろ、入口の設定より前に置く（入口では入口の規則を優先する）
+      files: [`${root}/features/*/infrastructure/**`, `${testRoot}/features/*/infrastructure/**`],
+      rules: {
+        'no-restricted-properties': 'off',
+        'no-restricted-globals': 'off',
+        'no-restricted-syntax': [
+          'error',
+          ...restrictedSyntax.filter((entry) => !nondeterministicSyntax.includes(entry)),
+          composableDeclaration,
+        ],
       },
     },
     {

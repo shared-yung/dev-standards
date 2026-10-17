@@ -53,6 +53,7 @@ scripts/          hook と CI から呼ぶシェルスクリプト
 | API の型生成と腐敗防止層                    | [docs/architecture/api-client.md](docs/architecture/api-client.md)                               |
 | enum 相当の値、import のパスの書き方        | [docs/architecture/typescript-conventions.md](docs/architecture/typescript-conventions.md)       |
 | `create～` と `use～` の書き分け            | [docs/architecture/factories-and-composables.md](docs/architecture/factories-and-composables.md) |
+| 現在時刻・時間の経過を port で受け取る形    | [docs/architecture/nondeterministic-inputs.md](docs/architecture/nondeterministic-inputs.md)     |
 | `.vue` のブロックの順序                     | [docs/architecture/vue-sfc.md](docs/architecture/vue-sfc.md)                                     |
 | 入口（index.ts）の置き場所と中身            | [docs/architecture/module-entry.md](docs/architecture/module-entry.md)                           |
 | セットアップ、プロジェクト追加手順          | [docs/tooling/setup.md](docs/tooling/setup.md)                                                   |

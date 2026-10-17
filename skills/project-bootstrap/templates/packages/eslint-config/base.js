@@ -15,6 +15,49 @@ export const optionalPropertyWithUndefined = {
     '省略可能なプロパティには `| undefined` を書いてください（docs/architecture/typescript-conventions.md）',
 };
 
+const nondeterministicMessage =
+  '現在時刻と時間の経過は、時計とタイマーの port で受け取ってください。直接使えるのは infrastructure だけです（docs/architecture/nondeterministic-inputs.md）';
+
+/**
+ * 結果が環境や時間で変わる API のうち、`no-restricted-syntax` でしか書けない形（CODE-07）。
+ * restrictedSyntax に含めて全体に効かせ、infrastructure だけで外す（onion.js）。
+ * 引数のある `new Date(value)` は決定的なので対象にしない。
+ */
+export const nondeterministicSyntax = [
+  {
+    selector: "NewExpression[callee.name='Date'][arguments.length=0]",
+    message: nondeterministicMessage,
+  },
+  // 関数として呼ぶ Date() は、引数があっても現在時刻の文字列を返す
+  { selector: "CallExpression[callee.name='Date']", message: nondeterministicMessage },
+];
+
+/** 時間の経過を待つグローバル関数。`globalThis.` などを付けた形は下の properties で落とす。 */
+const waitingGlobals = ['setTimeout', 'setInterval', 'requestAnimationFrame'];
+
+/**
+ * 結果が環境や時間で変わる API（CODE-07）。`no-restricted-properties` と `no-restricted-globals`
+ * はこの設定だけが使うので、infrastructure ではルールごと外している（onion.js）。
+ * プロジェクト側で同じルールを足すときは、ここの配列を展開して合流させる。
+ */
+export const nondeterministicProperties = [
+  { object: 'Date', property: 'now', message: nondeterministicMessage },
+  { object: 'performance', property: 'now', message: nondeterministicMessage },
+  ...['globalThis', 'window', 'self'].flatMap((object) =>
+    waitingGlobals.map((property) => ({ object, property, message: nondeterministicMessage })),
+  ),
+  {
+    object: 'vi',
+    property: 'useFakeTimers',
+    message:
+      'vi.useFakeTimers は infrastructure のテストだけで使います。ほかの層では、手で進める fake の時計とタイマーを注入してください（docs/architecture/nondeterministic-inputs.md）',
+  },
+];
+export const nondeterministicGlobals = waitingGlobals.map((name) => ({
+  name,
+  message: nondeterministicMessage,
+}));
+
 /**
  * `no-restricted-syntax` で落とす形。
  *
@@ -84,6 +127,7 @@ export const restrictedSyntax = [
       'InjectionKey は export せず、同じファイルで provideXxx / useXxx を export してください（docs/architecture/factories-and-composables.md）',
   })),
   optionalPropertyWithUndefined,
+  ...nondeterministicSyntax,
 ];
 
 /** 全プロジェクト共通の JS/TS ベース設定。Prettier と競合するルールは最後に無効化する。 */
@@ -115,6 +159,10 @@ export const base = [
       ],
 
       'no-restricted-syntax': ['error', ...restrictedSyntax],
+
+      // 現在時刻と時間の経過は port で受け取る（CODE-07）。infrastructure だけで外す（onion.js）
+      'no-restricted-properties': ['error', ...nondeterministicProperties],
+      'no-restricted-globals': ['error', ...nondeterministicGlobals],
 
       // 相対パスは同じディレクトリ以下のファイルを直接指すときだけ。ディレクトリの外へ出る
       // import は @/ から依存先の要素を名指しする（docs/architecture/typescript-conventions.md）

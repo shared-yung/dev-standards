@@ -32,6 +32,35 @@ match mode:
 
 - 生成は `@dataclass(frozen=True)` か、依存を引数で受け取る関数。モジュールの最上位でインスタンスを作らない（合成ルートが作る）
 
+## 現在時刻と時間の経過（CODE-07）
+
+- 時計とタイマーは `Protocol` の port にまとめ、合成ルートから引数で渡す。実装は infrastructure、テストは手で進める fake
+- 強制は ruff の `banned-api`（TID251）。`from time import sleep` のような import の時点でも落ちる。引数のある `datetime(2020, 1, 1)` は落ちない（2026-10-17 に ruff で確認）
+
+```toml
+[tool.ruff.lint]
+extend-select = ["TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"time.time".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.time_ns".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.monotonic".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.perf_counter".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.datetime.now".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.datetime.utcnow".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.datetime.today".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.date.today".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.sleep".msg = "時間の経過はタイマーの port で待つ（CODE-07）"
+"asyncio.sleep".msg = "時間の経過はタイマーの port で待つ（CODE-07）"
+
+[tool.ruff.lint.per-file-ignores]
+# 直接使えるのは infrastructure だけ（テストも同じ層だけ）
+"src/*/features/*/infrastructure/**" = ["TID251"]
+"tests/**/infrastructure/**" = ["TID251"]
+```
+
+- CLI の進捗表示などで実時間が要るなら、infrastructure に時計の実装を置いて渡す
+
 ## 後始末（CODE-08）
 
 - 資源を持つものはコンテキストマネージャにし、`with` で寿命を区切る。複数の資源は `contextlib.ExitStack` に登録する（`enter_context` / `callback`）
