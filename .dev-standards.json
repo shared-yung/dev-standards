@@ -1,7 +1,7 @@
 {
   "source": "shared-yung/dev-standards",
   "commit": "82934a70f9d14399651f02a8a96a70b6355497db",
-  "stack": "typescript-vue",
+  "stack": "github-workflow",
   "bundles": ["github-workflow"],
   "files": {
     ".claude/hooks/guard-remote.mjs": {
