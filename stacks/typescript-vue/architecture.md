@@ -14,6 +14,7 @@ paths:
 - domain 層で import してよい外部ライブラリは **zod のみ**。Vue / Quasar / Pinia / HTTP クライアント / 日付ライブラリは禁止
 - 依存の向きは `eslint-plugin-boundaries` で機械的に強制する。feature をまたぐ参照は `features/<name>/index.ts` の公開 API 経由のみ
 - feature をまたぐ共有コードは shared / core に分離する
+- Vue に依存する共有コードは `shared-ui`（`src/shared/{i18n,composables}`）、時計・タイマー・乱数の共有の実装は `shared-platform`（`src/shared/platform`。合成ルートと infrastructure だけが import できる。CODE-07）に分ける
 
 ## import のパス（ARCH-08）
 

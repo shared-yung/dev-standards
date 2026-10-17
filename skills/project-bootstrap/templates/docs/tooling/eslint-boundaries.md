@@ -89,7 +89,9 @@ domain / use-case / infrastructure / shared（shared-ui を除く）で `useXxx`
 
 ## 現在時刻と時間の経過
 
-`Date.now()`・引数なしの `new Date()`・`setTimeout` などは、infrastructure（`src` と `test` の両方）の外で落ちる（`base.js` で禁止し、`onion.js` で infrastructure だけ外す）。時計とタイマーの port を受け取る形に直す（[結果が環境や時間で変わる入力](../architecture/nondeterministic-inputs.md)）。テストの `vi.useFakeTimers()` も infrastructure のテストでだけ通る。
+`Date.now()`・引数なしの `new Date()`・`setTimeout`・`Math.random()`・`crypto.randomUUID()`・`nanoid` / `uuid` の import などは、infrastructure と `src/shared/platform/`（`src` と `test` の両方）の外で落ちる（`base.js` で禁止し、`onion.js` でこの2か所だけ外す）。port を受け取る形に直す（[結果が環境や時間で変わる入力](../architecture/nondeterministic-inputs.md)）。テストの `vi.useFakeTimers()` も同じ2か所のテストでだけ通る。
+
+`src/shared/platform/`（要素 `shared-platform`）を import できるのは、合成ルート（`install.ts`・boot）と infrastructure だけ。use-case が `@/shared/platform` を直接呼ぶと `boundaries/element-types` で落ちる。
 
 ## import の循環
 
