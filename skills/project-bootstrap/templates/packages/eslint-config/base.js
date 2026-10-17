@@ -16,11 +16,11 @@ export const optionalPropertyWithUndefined = {
 };
 
 const nondeterministicMessage =
-  '現在時刻と時間の経過は、時計とタイマーの port で受け取ってください。直接使えるのは infrastructure だけです（docs/architecture/nondeterministic-inputs.md）';
+  '現在時刻・時間の経過・乱数は port で受け取ってください。直接使えるのは infrastructure と shared/platform だけです（docs/architecture/nondeterministic-inputs.md）';
 
 /**
  * 結果が環境や時間で変わる API のうち、`no-restricted-syntax` でしか書けない形（CODE-07）。
- * restrictedSyntax に含めて全体に効かせ、infrastructure だけで外す（onion.js）。
+ * restrictedSyntax に含めて全体に効かせ、infrastructure と shared/platform だけで外す（onion.js）。
  * 引数のある `new Date(value)` は決定的なので対象にしない。
  */
 export const nondeterministicSyntax = [
@@ -30,6 +30,11 @@ export const nondeterministicSyntax = [
   },
   // 関数として呼ぶ Date() は、引数があっても現在時刻の文字列を返す
   { selector: "CallExpression[callee.name='Date']", message: nondeterministicMessage },
+  // crypto.randomUUID() / globalThis.crypto.getRandomValues(…) など、どこから辿っても落とす
+  {
+    selector: 'MemberExpression[property.name=/^(randomUUID|getRandomValues)$/]',
+    message: nondeterministicMessage,
+  },
 ];
 
 /** 時間の経過を待つグローバル関数。`globalThis.` などを付けた形は下の properties で落とす。 */
@@ -37,12 +42,13 @@ const waitingGlobals = ['setTimeout', 'setInterval', 'requestAnimationFrame'];
 
 /**
  * 結果が環境や時間で変わる API（CODE-07）。`no-restricted-properties` と `no-restricted-globals`
- * はこの設定だけが使うので、infrastructure ではルールごと外している（onion.js）。
+ * はこの設定だけが使うので、infrastructure と shared/platform ではルールごと外している（onion.js）。
  * プロジェクト側で同じルールを足すときは、ここの配列を展開して合流させる。
  */
 export const nondeterministicProperties = [
   { object: 'Date', property: 'now', message: nondeterministicMessage },
   { object: 'performance', property: 'now', message: nondeterministicMessage },
+  { object: 'Math', property: 'random', message: nondeterministicMessage },
   ...['globalThis', 'window', 'self'].flatMap((object) =>
     waitingGlobals.map((property) => ({ object, property, message: nondeterministicMessage })),
   ),
@@ -57,6 +63,28 @@ export const nondeterministicGlobals = waitingGlobals.map((name) => ({
   name,
   message: nondeterministicMessage,
 }));
+
+/** 乱数で ID を作るライブラリ（CODE-07）。infrastructure と shared/platform だけで外す（onion.js）。 */
+export const nondeterministicImportPatterns = [
+  { regex: String.raw`^(nanoid|uuid)(/|$)`, message: nondeterministicMessage },
+];
+
+/**
+ * 相対パスの禁止（docs/architecture/typescript-conventions.md）。no-restricted-imports を
+ * 上書きする側（onion.js）が引き継げるよう export している。
+ */
+export const relativeImportPatterns = [
+  {
+    regex: String.raw`^\.\./`,
+    message:
+      '親ディレクトリへの相対パスは使わず、`@/` から依存先の要素を名指ししてください（例: `@/features/net/domain`）',
+  },
+  {
+    regex: String.raw`^\.(/(index(\.[cm]?[jt]s)?)?)?$`,
+    message:
+      '自分のディレクトリの入口（index.ts）を import しないでください。同じディレクトリのファイルを直接指します（循環 import の原因になるため）',
+  },
+];
 
 /**
  * `no-restricted-syntax` で落とす形。
@@ -160,28 +188,17 @@ export const base = [
 
       'no-restricted-syntax': ['error', ...restrictedSyntax],
 
-      // 現在時刻と時間の経過は port で受け取る（CODE-07）。infrastructure だけで外す（onion.js）
+      // 現在時刻・時間の経過・乱数は port で受け取る（CODE-07）。
+      // infrastructure と shared/platform だけで外す（onion.js）
       'no-restricted-properties': ['error', ...nondeterministicProperties],
       'no-restricted-globals': ['error', ...nondeterministicGlobals],
 
       // 相対パスは同じディレクトリ以下のファイルを直接指すときだけ。ディレクトリの外へ出る
-      // import は @/ から依存先の要素を名指しする（docs/architecture/typescript-conventions.md）
+      // import は @/ から依存先の要素を名指しする（docs/architecture/typescript-conventions.md）。
+      // 乱数で ID を作るライブラリの import もここで落とす（CODE-07）
       'no-restricted-imports': [
         'error',
-        {
-          patterns: [
-            {
-              regex: String.raw`^\.\./`,
-              message:
-                '親ディレクトリへの相対パスは使わず、`@/` から依存先の要素を名指ししてください（例: `@/features/net/domain`）',
-            },
-            {
-              regex: String.raw`^\.(/(index(\.[cm]?[jt]s)?)?)?$`,
-              message:
-                '自分のディレクトリの入口（index.ts）を import しないでください。同じディレクトリのファイルを直接指します（循環 import の原因になるため）',
-            },
-          ],
-        },
+        { patterns: [...relativeImportPatterns, ...nondeterministicImportPatterns] },
       ],
 
       // switch には default を必ず書く。判別可能ユニオンや enum 相当で分岐する switch は

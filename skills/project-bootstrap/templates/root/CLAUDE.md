@@ -42,24 +42,24 @@ scripts/          hook と CI から呼ぶシェルスクリプト
 
 ## ドキュメント
 
-| 知りたいこと                                | 参照先                                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 作業の始め方、issue-driven の強制方法       | [docs/workflow/issue-driven.md](docs/workflow/issue-driven.md)                                   |
-| ブランチ名とコミットメッセージの形式        | [docs/workflow/commit-and-branch.md](docs/workflow/commit-and-branch.md)                         |
-| GitHub 側の初期設定                         | [docs/workflow/branch-protection.md](docs/workflow/branch-protection.md)                         |
-| リモート操作の承認ガードレール              | [docs/workflow/remote-guardrails.md](docs/workflow/remote-guardrails.md)                         |
-| 層構成と依存の向き                          | [docs/architecture/onion-layers.md](docs/architecture/onion-layers.md)                           |
-| Pinia に何を書いてよいか                    | [docs/architecture/pinia.md](docs/architecture/pinia.md)                                         |
-| API の型生成と腐敗防止層                    | [docs/architecture/api-client.md](docs/architecture/api-client.md)                               |
-| enum 相当の値、import のパスの書き方        | [docs/architecture/typescript-conventions.md](docs/architecture/typescript-conventions.md)       |
-| `create～` と `use～` の書き分け            | [docs/architecture/factories-and-composables.md](docs/architecture/factories-and-composables.md) |
-| 現在時刻・時間の経過を port で受け取る形    | [docs/architecture/nondeterministic-inputs.md](docs/architecture/nondeterministic-inputs.md)     |
-| `.vue` のブロックの順序                     | [docs/architecture/vue-sfc.md](docs/architecture/vue-sfc.md)                                     |
-| 入口（index.ts）の置き場所と中身            | [docs/architecture/module-entry.md](docs/architecture/module-entry.md)                           |
-| セットアップ、プロジェクト追加手順          | [docs/tooling/setup.md](docs/tooling/setup.md)                                                   |
-| ESLint の層強制、違反時の直し方             | [docs/tooling/eslint-boundaries.md](docs/tooling/eslint-boundaries.md)                           |
-| 実装の進め方（TDD）、テストを変えてよい場面 | [docs/workflow/tdd.md](docs/workflow/tdd.md)                                                     |
-| テストの書き分け                            | [docs/tooling/testing.md](docs/tooling/testing.md)                                               |
-| ツール選定など全体の決定の経緯              | `docs/adr/`                                                                                      |
+| 知りたいこと                                   | 参照先                                                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 作業の始め方、issue-driven の強制方法          | [docs/workflow/issue-driven.md](docs/workflow/issue-driven.md)                                   |
+| ブランチ名とコミットメッセージの形式           | [docs/workflow/commit-and-branch.md](docs/workflow/commit-and-branch.md)                         |
+| GitHub 側の初期設定                            | [docs/workflow/branch-protection.md](docs/workflow/branch-protection.md)                         |
+| リモート操作の承認ガードレール                 | [docs/workflow/remote-guardrails.md](docs/workflow/remote-guardrails.md)                         |
+| 層構成と依存の向き                             | [docs/architecture/onion-layers.md](docs/architecture/onion-layers.md)                           |
+| Pinia に何を書いてよいか                       | [docs/architecture/pinia.md](docs/architecture/pinia.md)                                         |
+| API の型生成と腐敗防止層                       | [docs/architecture/api-client.md](docs/architecture/api-client.md)                               |
+| enum 相当の値、import のパスの書き方           | [docs/architecture/typescript-conventions.md](docs/architecture/typescript-conventions.md)       |
+| `create～` と `use～` の書き分け               | [docs/architecture/factories-and-composables.md](docs/architecture/factories-and-composables.md) |
+| 現在時刻・時間の経過・乱数を port で受け取る形 | [docs/architecture/nondeterministic-inputs.md](docs/architecture/nondeterministic-inputs.md)     |
+| `.vue` のブロックの順序                        | [docs/architecture/vue-sfc.md](docs/architecture/vue-sfc.md)                                     |
+| 入口（index.ts）の置き場所と中身               | [docs/architecture/module-entry.md](docs/architecture/module-entry.md)                           |
+| セットアップ、プロジェクト追加手順             | [docs/tooling/setup.md](docs/tooling/setup.md)                                                   |
+| ESLint の層強制、違反時の直し方                | [docs/tooling/eslint-boundaries.md](docs/tooling/eslint-boundaries.md)                           |
+| 実装の進め方（TDD）、テストを変えてよい場面    | [docs/workflow/tdd.md](docs/workflow/tdd.md)                                                     |
+| テストの書き分け                               | [docs/tooling/testing.md](docs/tooling/testing.md)                                               |
+| ツール選定など全体の決定の経緯                 | `docs/adr/`                                                                                      |
 
 プロジェクト固有の仕様は `<project-name>/docs/spec/` にある。設計判断の記録（ADR）は対象範囲で分かれ、**リポジトリ全体にまたがる判断は `docs/adr/`、プロジェクト固有の判断は `<project-name>/docs/adr/`** に置く。

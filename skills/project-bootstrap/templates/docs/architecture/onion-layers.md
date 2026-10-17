@@ -14,7 +14,8 @@
 │       ├── presentation/     Vue コンポーネントと Pinia ストア
 │       └── index.ts          この feature の公開 API。他 feature はここだけを見る
 ├── shared/                   feature をまたぐ共有コード。Vue に依存しない
-│   └── i18n/ composables/    Vue に依存する共有コード（shared-ui）
+│   ├── i18n/ composables/    Vue に依存する共有コード（shared-ui）
+│   └── platform/             環境に依存する実装。時計・タイマー・乱数（shared-platform）
 ├── App.vue
 └── boot/ router/ layouts/ pages/ components/ stores/ css/ assets/
                               アプリ組み立て層（合成ルート）
@@ -26,20 +27,23 @@
 
 外側から内側へ**一方向**。内側は外側を知らない。
 
-| 層                                      | import してよい先                                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `domain`                                | 自 feature の `domain`、`shared`                                                                  |
-| `use-case`                              | 自 feature の `domain` `use-case`、`shared`、他 feature の `index.ts`                             |
-| `infrastructure`                        | 自 feature の `domain` `use-case` `infrastructure`、`shared`、他 feature の `index.ts`            |
-| `presentation`                          | 自 feature の `domain` `use-case` `presentation`、`shared`、`shared-ui`、他 feature の `index.ts` |
-| `index.ts`                              | 自 feature の全層、`shared`、`shared-ui`                                                          |
-| `boot` / `router` / `layouts` / `pages` | 各 feature の `index.ts`、`shared`、`shared-ui`                                                   |
-| `shared`                                | `shared`                                                                                          |
-| `shared-ui`                             | `shared`、`shared-ui`                                                                             |
+| 層                                      | import してよい先                                                                                         |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `domain`                                | 自 feature の `domain`、`shared`                                                                          |
+| `use-case`                              | 自 feature の `domain` `use-case`、`shared`、他 feature の `index.ts`                                     |
+| `infrastructure`                        | 自 feature の `domain` `use-case` `infrastructure`、`shared`、`shared-platform`、他 feature の `index.ts` |
+| `presentation`                          | 自 feature の `domain` `use-case` `presentation`、`shared`、`shared-ui`、他 feature の `index.ts`         |
+| `index.ts`（と `install.ts`）           | 自 feature の全層、`shared`、`shared-ui`、`shared-platform`                                               |
+| `boot` / `router` / `layouts` / `pages` | 各 feature の `index.ts`、`shared`、`shared-ui`、`shared-platform`                                        |
+| `shared`                                | `shared`                                                                                                  |
+| `shared-ui`                             | `shared`、`shared-ui`                                                                                     |
+| `shared-platform`                       | `shared`、`shared-platform`                                                                               |
 
-押さえておくべき点が4つある。
+押さえておくべき点が5つある。
 
 **Vue に依存する共有コードは `shared-ui` に分けている。** `src/shared/i18n/` と `src/shared/composables/` がこれにあたり、import できるのは presentation と合成ルート（と feature の `index.ts`）だけ。`shared` のままだと domain / use-case から import でき、外部ライブラリの禁止（直接の import しか見ない）をすり抜けて Vue に依存できてしまうため（[ファクトリー関数とコンポーザブル](factories-and-composables.md)）。
+
+**環境に依存する実装は `shared-platform` に分けている。** `src/shared/platform/` には、feature をまたいで使う時計・タイマー・乱数の実装を置き、`Date.now` や `nanoid` を直接使ってよい。import できるのは合成ルート（`install.ts`・boot）と infrastructure だけで、domain / use-case / presentation は port を受け取る（[結果が環境や時間で変わる入力](nondeterministic-inputs.md)）。
 
 **presentation は infrastructure を直接 import できない。** 必ず use-case を経由する。これが Pinia ストアにビジネスロジックが溜まるのを防ぐ主な仕掛けになっている（[Pinia の責務境界](pinia.md)）。
 

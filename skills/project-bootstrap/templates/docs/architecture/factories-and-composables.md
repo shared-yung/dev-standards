@@ -339,15 +339,16 @@ Pinia の `defineStore` が返す `useXxxStore` もコンポーザブルとし�
 
 ## 置き場所
 
-| 何                                  | 置き場所                                                                            | 境界上の要素 |
-| ----------------------------------- | ----------------------------------------------------------------------------------- | ------------ |
-| ファクトリー関数                    | 作るものが属する層（ビジネスロジックなら use-case、port の実装なら infrastructure） | 各層         |
-| feature のコンポーザブル            | `features/<f>/presentation/composables/`                                            | presentation |
-| feature のストア                    | `features/<f>/presentation/stores/`                                                 | presentation |
-| feature をまたぐコンポーザブル      | `src/shared/composables/`                                                           | shared-ui    |
-| i18n                                | `src/shared/i18n/`                                                                  | shared-ui    |
-| テストの fake（ファクトリーで作る） | `test/features/<f>/<layer>/*.fake.ts`                                               | 各層         |
-| 寿命 `createLifetime()`             | `src/shared/lifetime.ts`                                                            | shared       |
+| 何                                  | 置き場所                                                                            | 境界上の要素    |
+| ----------------------------------- | ----------------------------------------------------------------------------------- | --------------- |
+| ファクトリー関数                    | 作るものが属する層（ビジネスロジックなら use-case、port の実装なら infrastructure） | 各層            |
+| feature のコンポーザブル            | `features/<f>/presentation/composables/`                                            | presentation    |
+| feature のストア                    | `features/<f>/presentation/stores/`                                                 | presentation    |
+| feature をまたぐコンポーザブル      | `src/shared/composables/`                                                           | shared-ui       |
+| i18n                                | `src/shared/i18n/`                                                                  | shared-ui       |
+| テストの fake（ファクトリーで作る） | `test/features/<f>/<layer>/*.fake.ts`                                               | 各層            |
+| 寿命 `createLifetime()`             | `src/shared/lifetime.ts`                                                            | shared          |
+| 時計・タイマー・乱数の共有の実装    | `src/shared/platform/`                                                              | shared-platform |
 
 **Vue に依存する共有コードは `shared-ui` に分けている。** `shared` のままだと domain / use-case から import でき、外部ライブラリの禁止（直接の import しか見ない）をすり抜けて Vue に依存できてしまうため。`shared-ui` を import できるのは presentation・合成ルート・feature の `index.ts` だけ（[オニオンの層構成](onion-layers.md)）。
 

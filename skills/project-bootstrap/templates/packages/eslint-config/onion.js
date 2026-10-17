@@ -2,7 +2,7 @@ import boundaries from 'eslint-plugin-boundaries';
 import { importX, createNodeResolver } from 'eslint-plugin-import-x';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import tseslint from 'typescript-eslint';
-import { nondeterministicSyntax, restrictedSyntax } from './base.js';
+import { nondeterministicSyntax, relativeImportPatterns, restrictedSyntax } from './base.js';
 
 /**
  * feature-first オニオンアーキテクチャの依存方向を機械的に強制する。
@@ -16,6 +16,8 @@ import { nondeterministicSyntax, restrictedSyntax } from './base.js';
  *   src/features/<feature>/install.ts      feature の組み立て（installXxx(app)）。index.ts と同じ要素
  *   src/shared/{i18n,composables}/**       Vue に依存する共有コード（shared-ui）。
  *                                          presentation と合成ルートからだけ使える
+ *   src/shared/platform/**                 環境に依存する実装（時計・タイマー・乱数。shared-platform）。
+ *                                          合成ルートと infrastructure からだけ使える
  *   src/shared/<module>.ts                 feature をまたぐ共有コード。Vue に依存しない。
  *   src/shared/<module>/index.ts           モジュールは「ファイル1つ」か「index.ts を持つフォルダ」
  *
@@ -79,7 +81,15 @@ const entryPoint = (extraRules = []) => [
       '${dependency.type} の内部ファイル（${dependency.internalPath}）は import できません。要素の入口（index.ts）から公開してください（docs/architecture/module-entry.md）',
     rules: [
       {
-        target: ['domain', 'use-case', 'infrastructure', 'presentation', 'shared', 'shared-ui'],
+        target: [
+          'domain',
+          'use-case',
+          'infrastructure',
+          'presentation',
+          'shared',
+          'shared-ui',
+          'shared-platform',
+        ],
         allow: 'index.ts',
       },
       // ファイル1つの shared モジュールと app はファイルそのものが要素
@@ -97,6 +107,9 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
 
   /** Vue に依存する共有コードの置き場所。 */
   const sharedUi = 'shared/{i18n,composables}';
+
+  /** 環境に依存する実装（時計・タイマー・乱数）の置き場所。CODE-07 の API を直接使ってよい。 */
+  const sharedPlatform = 'shared/platform';
 
   /** src と、それをミラーした test の両方のパターン。test 側も同じ要素として分類する。 */
   const mirrored = (path) => [`${root}/${path}`, `${testRoot}/${path}`];
@@ -166,6 +179,13 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
             pattern: mirrored(sharedUi),
             capture: ['module'],
           },
+          // shared-platform も shared より前に置く（同じ理由）。合成ルートと infrastructure だけが
+          // import でき、domain / use-case / presentation からは使えない（port を受け取らせる）
+          {
+            type: 'shared-platform',
+            mode: 'folder',
+            pattern: mirrored(sharedPlatform),
+          },
           // ファイル1つのモジュール。フォルダのモジュールより前に置く
           {
             type: 'shared',
@@ -213,6 +233,7 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
                   own('use-case'),
                   own('infrastructure'),
                   'shared',
+                  'shared-platform',
                   'feature-api',
                 ],
               },
@@ -242,16 +263,23 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
                   own('presentation'),
                   'shared',
                   'shared-ui',
+                  'shared-platform',
                 ],
               },
 
               // アプリ組み立て層は feature の公開 API と shared のみ
-              { from: ['app'], allow: ['app', 'feature-api', 'shared', 'shared-ui'] },
+              {
+                from: ['app'],
+                allow: ['app', 'feature-api', 'shared', 'shared-ui', 'shared-platform'],
+              },
 
               { from: ['shared'], allow: ['shared'] },
 
               // Vue に依存する共有コード。Vue に依存しない shared は使ってよい
               { from: ['shared-ui'], allow: ['shared', 'shared-ui'] },
+
+              // 環境に依存する実装。Vue に依存しない shared は使ってよい
+              { from: ['shared-platform'], allow: ['shared', 'shared-platform'] },
             ],
           },
         ],
@@ -270,7 +298,7 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
 
               // ファクトリー関数の層。Vue の setup コンテキストに依存させない
               {
-                from: ['use-case', 'infrastructure', 'shared'],
+                from: ['use-case', 'infrastructure', 'shared', 'shared-platform'],
                 disallow: vueDependencies,
                 message:
                   '${file.type} では Vue に依存するライブラリを import できません。presentation か shared-ui に置いてください（docs/architecture/factories-and-composables.md）',
@@ -342,14 +370,20 @@ export function onionBoundaries({ root = 'src', testRoot = 'test' } = {}) {
       },
     },
     {
-      // 現在時刻と時間の経過（Date.now・setTimeout など）を直接使えるのは infrastructure だけ
-      // （CODE-07、docs/architecture/nondeterministic-inputs.md）。ほかの層は時計とタイマーの port を
-      // 受け取る。テストでも vi.useFakeTimers は infrastructure の薄いテストに限る。
+      // 現在時刻・時間の経過・乱数（Date.now・setTimeout・Math.random・nanoid など）を直接使えるのは
+      // infrastructure と shared/platform だけ（CODE-07、docs/architecture/nondeterministic-inputs.md）。
+      // ほかの層は port を受け取る。テストでも vi.useFakeTimers はこの2か所のテストに限る。
       // 上の use～ の禁止より後ろ、入口の設定より前に置く（入口では入口の規則を優先する）
-      files: [`${root}/features/*/infrastructure/**`, `${testRoot}/features/*/infrastructure/**`],
+      files: [
+        `${root}/features/*/infrastructure/**`,
+        `${testRoot}/features/*/infrastructure/**`,
+        `${root}/${sharedPlatform}/**`,
+        `${testRoot}/${sharedPlatform}/**`,
+      ],
       rules: {
         'no-restricted-properties': 'off',
         'no-restricted-globals': 'off',
+        'no-restricted-imports': ['error', { patterns: relativeImportPatterns }],
         'no-restricted-syntax': [
           'error',
           ...restrictedSyntax.filter((entry) => !nondeterministicSyntax.includes(entry)),

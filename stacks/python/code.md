@@ -32,9 +32,9 @@ match mode:
 
 - 生成は `@dataclass(frozen=True)` か、依存を引数で受け取る関数。モジュールの最上位でインスタンスを作らない（合成ルートが作る）
 
-## 現在時刻と時間の経過（CODE-07）
+## 現在時刻・時間の経過・乱数（CODE-07）
 
-- 時計とタイマーは `Protocol` の port にまとめ、合成ルートから引数で渡す。実装は infrastructure、テストは手で進める fake
+- 時計とタイマーは `Protocol` の port にまとめ、合成ルートから引数で渡す。乱数（ID・トークン）も生成する関数を port で渡す。実装は infrastructure、テストは手で進める fake と連番
 - 強制は ruff の `banned-api`（TID251）。`from time import sleep` のような import の時点でも落ちる。引数のある `datetime(2020, 1, 1)` は落ちない（2026-10-17 に ruff で確認）
 
 ```toml
@@ -52,6 +52,11 @@ extend-select = ["TID251"]
 "datetime.date.today".msg = "現在時刻は時計の port で受け取る（CODE-07）"
 "time.sleep".msg = "時間の経過はタイマーの port で待つ（CODE-07）"
 "asyncio.sleep".msg = "時間の経過はタイマーの port で待つ（CODE-07）"
+"random".msg = "乱数は port で受け取る（CODE-07）"
+"secrets".msg = "乱数は port で受け取る（CODE-07）"
+"uuid.uuid1".msg = "乱数は port で受け取る（CODE-07）"
+"uuid.uuid4".msg = "乱数は port で受け取る（CODE-07）"
+"os.urandom".msg = "乱数は port で受け取る（CODE-07）"
 
 [tool.ruff.lint.per-file-ignores]
 # 直接使えるのは infrastructure だけ（テストも同じ層だけ）
@@ -59,6 +64,7 @@ extend-select = ["TID251"]
 "tests/**/infrastructure/**" = ["TID251"]
 ```
 
+- `random` と `secrets` はモジュールごと禁止するので、シードを渡す `random.Random(seed)` も import の時点で落ちる（原則では対象外）。使うなら infrastructure で作って渡す。`uuid.UUID(…)` のような値の変換は落ちない（2026-10-17 に ruff で確認）
 - CLI の進捗表示などで実時間が要るなら、infrastructure に時計の実装を置いて渡す
 
 ## 後始末（CODE-08）
