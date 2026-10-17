@@ -48,6 +48,7 @@ paths:
 | CODE-04 | 実装   | `T \| None = None`。区別が要るときだけ番兵オブジェクト                                                                                 |
 | CODE-05 | 対象外 | フレームワークの実行時文脈を持つ関数が無い（CLI）。生成関数の規則（最上位でインスタンスを作らない等）は守る                            |
 | CODE-06 | 実装   | `# pyright: ignore[<rule>] -- 理由`、`# noqa: <code> -- 理由`                                                                          |
+| CODE-08 | 実装   | コンテキストマネージャ（`with`）と `contextlib.ExitStack`（言語の仕組み。適合性の確認 1。code.md、**未検証**）                         |
 | I18N-*  | 対象外 | 今は日本語のメッセージだけの CLI。多言語化するときに具体化する                                                                         |
 | TEST-*  | 実装   | pytest（testing.md）                                                                                                                   |
 | SES-01  | 実装   | `work-checkpoint` スキル                                                                                                               |

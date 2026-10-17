@@ -46,6 +46,7 @@ paths:
 | CODE-04 | 実装 | `exactOptionalPropertyTypes` ＋ `foo?: T \| undefined`（code.md）                             |
 | CODE-05 | 実装 | `create～` / `use～`（code.md）                                                               |
 | CODE-06 | 実装 | `eslint-disable` は行単位＋`--` の後に理由（code.md）                                         |
+| CODE-08 | 実装 | shared の `createLifetime()`（code.md）                                                       |
 | I18N-*  | 実装 | vue-i18n と `no-raw-text`（i18n.md）                                                          |
 | TEST-*  | 実装 | Vitest projects、MSW（testing.md）                                                            |
 | SES-01  | 実装 | `work-checkpoint` スキル（言語に依存しない）                                                  |

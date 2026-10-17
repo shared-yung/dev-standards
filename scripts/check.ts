@@ -15,8 +15,12 @@ import {
 } from './lib/rules';
 import { bundlesForStack, loadDesired } from './lib/sync/bundle';
 
-/** 常時読み込む principles/ の合計の上限。移行前の ~/.claude/CLAUDE.md（20,597 バイト）より小さく保つ。 */
-const ALWAYS_LOADED_BYTE_LIMIT = 20_000;
+/**
+ * 常時読み込む principles/ の合計の上限。移行前の ~/.claude/CLAUDE.md（20,597 バイト）を目安にし、
+ * 後から足す原則（CODE-07・CODE-08・GR-04 と乱数）の分だけ広げた（2026-10-17、#15）。
+ * 足りなくなったら上限を上げる前に、長い説明を rationale/ へ出せないかを見る。
+ */
+const ALWAYS_LOADED_BYTE_LIMIT = 22_000;
 /** 1ファイルの行数の上限（Claude Code のドキュメントの推奨）。 */
 const LINE_LIMIT = 200;
 

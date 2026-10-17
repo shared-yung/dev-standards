@@ -47,3 +47,13 @@ paths:
 ## lint の抑制（CODE-06）
 
 - `eslint-disable` は行単位で、`--` の後に理由を書く。理由の無いものと使われていないものは lint で落ちる（`require-description` / `reportUnusedDisableDirectives`）。外す前に、外さずに済む形を探す
+
+## 後始末（CODE-08）
+
+- 資源（タイマー・購読・接続）を持つファクトリーは、`src/shared/lifetime.ts` の `createLifetime()` で寿命を作り、止めるものを `defer` で登録して、`dispose` を返す。解除関数を個別の変数や配列で手で持たない
+- 形は TC39 の `DisposableStack` の一部（`disposed` / `defer` / `dispose`）に合わせる。破棄後の `defer` は `ReferenceError`。後始末の例外は1件ならそのまま、複数なら `AggregateError` で返す（ネイティブは `SuppressedError` だが Safari に無い）
+- **`AbortController` は寿命に使わない。** `abort()` は登録順に呼び、リスナーの例外を呼び出し側に返さないので、逆順と例外の性質を満たさない。signal を受け取る API（`fetch`、`addEventListener` など）に渡すときだけ、`createAbortSignal(lifetime)` で寿命から作る
+- 寿命は決定的なので use-case で使ってよい。Vue の側はコンポーザブルで `onScopeDispose(x.dispose)`、Pinia ストアも同じ
+- 実装とテストはテンプレートの `docs/architecture/factories-and-composables.md` の「後始末」。テストでは、破棄後の操作を受け付けないことと、2回目の `dispose` が何もしないことを確かめる
+- 強制: 規約とテスト。`let disposed` のような宣言を lint で落とすのは名前に頼るだけで効果が薄いので、入れていない
+- 再検討のトリガー: `DisposableStack` が Baseline（Safari の安定版と iOS を含む）になったら、ネイティブへ置き換える（`radar/disposable-stack.md`）
