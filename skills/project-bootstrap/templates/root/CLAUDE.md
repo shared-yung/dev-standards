@@ -16,6 +16,13 @@
   - **テストを変えてよいのは実装の前だけ。** 実装の後でテストや期待値を変えたくなったら、手を止めて理由を述べる
 - **パッケージ操作は bun。** npm / yarn / pnpm は使わない
 
+## 進め方（AI エージェント）
+
+- 互いに依存しない読み込み・編集・テストは、まとめて並列に実行する
+- ローカルの編集・テスト・コミットまでは、承認を待たずに進める
+- **リモート操作（push・PR の作成・issue やコメント）は作業の区切りごとに一覧にして見せ、1回の承認でまとめて実行する。** 一覧に無い操作は実行しない → [docs/workflow/remote-guardrails.md](docs/workflow/remote-guardrails.md)
+  - 例外: 作業の前提になるリモート操作（着手前の issue の作成など）は先に承認を取る。CI の結果を見て直したら、もう一度まとめて承認を取る
+
 ## スタック
 
 Vue 3 + Quasar（SPA）+ TypeScript / bun / Pinia / zod / vue-i18n / ESLint + Prettier / Vitest + Playwright。
