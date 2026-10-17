@@ -1,6 +1,6 @@
 {
   "source": "shared-yung/dev-standards",
-  "commit": "82934a70f9d14399651f02a8a96a70b6355497db",
+  "commit": "5d5f506d6901e36a0a7aa95b64d9c82502a0be72",
   "stack": "github-workflow",
   "bundles": ["github-workflow"],
   "files": {
@@ -61,8 +61,8 @@
     },
     "scripts/check-branch-name.sh": {
       "kind": "managed",
-      "local": "a221c497fee5f576aab17ec223924028b6cfbaabbc21c4c013dd21d54373709e",
-      "upstream": "a221c497fee5f576aab17ec223924028b6cfbaabbc21c4c013dd21d54373709e"
+      "local": "029789a88d01e96eaa54c3f56725aec0867d364c5e0f0866e9223653fe302e7a",
+      "upstream": "029789a88d01e96eaa54c3f56725aec0867d364c5e0f0866e9223653fe302e7a"
     },
     "scripts/check-pr-divergence.mjs": {
       "kind": "managed",

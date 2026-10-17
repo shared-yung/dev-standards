@@ -1,10 +1,10 @@
 #!/bin/sh
-# ブランチ名が <type>/<issue番号>-<slug> 形式かを検証する。
+# ブランチ名が <type>/<issue番号>-<slug> 形式かを検証する。type は Conventional Commits の語彙と spike（マージせずに捨てる試作）。
 # 引数でブランチ名を渡せる（CI 用）。省略時は現在のブランチを見る。
 set -e
 
 BRANCH="${1:-$(git rev-parse --abbrev-ref HEAD)}"
-PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)/[0-9]+-[a-z0-9._-]+$'
+PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|spike)/[0-9]+-[a-z0-9._-]+$'
 
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "HEAD" ]; then
   exit 0
