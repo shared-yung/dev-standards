@@ -48,6 +48,17 @@ paths:
 
 - `eslint-disable` は行単位で、`--` の後に理由を書く。理由の無いものと使われていないものは lint で落ちる（`require-description` / `reportUnusedDisableDirectives`）。外す前に、外さずに済む形を探す
 
+## 現在時刻と時間の経過（CODE-07）
+
+- 時計とタイマーは1つの port（`now` / `schedule`）にまとめて注入する。実装は infrastructure、選択は `install.ts`、テストは手で進める fake
+- 禁止: `Date.now`、`performance.now`、引数なしの `new Date()`、`Date()`、`setTimeout` / `setInterval` / `requestAnimationFrame`（`globalThis.` などを付けた形も）。引数のある `new Date(value)` は決定的なので許す
+- 強制: `base.js` の `no-restricted-properties`・`no-restricted-globals`・`no-restricted-syntax`（`nondeterministicSyntax` を `restrictedSyntax` に含める）。`onion.js` で infrastructure（`src` と `test`）だけ外す
+- テストの `vi.useFakeTimers` も同じ仕組みで、infrastructure のテストに限る
+- presentation も例外にしない。画面のカウントダウンも provide されたタイマーを使う。どうしても直接要るなら、行単位の disable に理由を書く（CODE-06）
+- 検出できないもの: 別名を経由した呼び出し（`const { now } = Date`）、時刻を内部で取る外部ライブラリ
+- `no-restricted-properties` / `no-restricted-globals` をプロジェクト側で足すときも、`base.js` の配列を展開して合流させる
+- 詳細と fake の例はテンプレートの `docs/architecture/nondeterministic-inputs.md`
+
 ## 後始末（CODE-08）
 
 - 資源（タイマー・購読・接続）を持つファクトリーは、`src/shared/lifetime.ts` の `createLifetime()` で寿命を作り、止めるものを `defer` で登録して、`dispose` を返す。解除関数を個別の変数や配列で手で持たない

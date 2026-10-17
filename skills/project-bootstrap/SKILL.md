@@ -88,6 +88,7 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 - 次が**落ちる**（規約は `docs/architecture/typescript-conventions.md`）: `enum Foo {}`、`z.enum(['a', 'b'])`、`z.literal('x')`、`case 'x':`、`x === 'x'`、default の無い switch
 - 次は**落ちない**: `typeof x === 'string'` と `x === ''`（意図した除外）、型定義側の `{ type: 'x' }` と素のユニオン型（検出できない仕様で、規約に委ねている）。**落ちないことも確認して、強制範囲を取り違えないこと**
 - `import … from '../x'`（親ディレクトリへの相対パス）と、自分の入口の `import … from '.'` / `'./index'` が**落ちる**。`./x` と `@/x` は**落ちない**。動的 `import('../x')` は検出できない仕様（`docs/architecture/typescript-conventions.md`）
+- use-case の `Date.now()`・`setTimeout(…)`・引数なしの `new Date()` と、use-case のテストの `vi.useFakeTimers()` が**落ちる**。infrastructure では同じものが**落ちない**。`new Date(0)` は**落ちない**（`docs/architecture/nondeterministic-inputs.md`）
 - 理由の無い `// eslint-disable-next-line no-console` と、使われていない disable（理由つきでも）が**落ちる**。`interface X extends Y {}` と `.d.ts` の空 interface は**落ちない**
 
 ## フェーズ 4: プロジェクト scaffold

@@ -87,6 +87,10 @@ domain / use-case / infrastructure / shared（shared-ui を除く）で `useXxx`
 
 この設定は `base.js` の禁止（enum 相当など）を `restrictedSyntax` として引き継いだうえで足している。**flat config は、後段で同じルールを指定すると options を丸ごと置き換える**ため、展開しないとそのファイルで enum 相当の禁止が黙って消える。プロジェクト側で `no-restricted-syntax` を足すときも同じようにすること。
 
+## 現在時刻と時間の経過
+
+`Date.now()`・引数なしの `new Date()`・`setTimeout` などは、infrastructure（`src` と `test` の両方）の外で落ちる（`base.js` で禁止し、`onion.js` で infrastructure だけ外す）。時計とタイマーの port を受け取る形に直す（[結果が環境や時間で変わる入力](../architecture/nondeterministic-inputs.md)）。テストの `vi.useFakeTimers()` も infrastructure のテストでだけ通る。
+
 ## import の循環
 
 `eslint-plugin-import-x` の `import-x/no-cycle` で、**実行時に残る import の循環**を落とす。ES モジュールで初期化前の値を参照して `ReferenceError` になるのは、import が循環しているときだけ。zod のスキーマのように最上位で関数を呼んで初期化する定数は避けられないので、初期化の書き方ではなく循環そのものを禁止する。
