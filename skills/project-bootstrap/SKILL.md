@@ -128,7 +128,7 @@ bun create quasar@latest __PROJECT__ \
 
 `features/<feature>/{domain,use-case,infrastructure,presentation}` と `shared/` を作り、各 feature に公開 API の `index.ts` を置く。層や shared のモジュールにファイルを置いたら、その要素の入口 `index.ts` も置く。他の要素からは入口しか import できない（`boundaries/entry-point`。テストは対象外）。入口（`index.ts`）には名前を明示した再 export だけを書く。公開するものが無いうちはコメントだけのファイルにし、`export {}` は書かない（`docs/architecture/module-entry.md`）。i18n の入口も実装を持たせず、`messages.ts`・`message-schema.ts`・`vue-i18n-augmentation.d.ts` に分ける（`docs/architecture/i18n.md`）。
 
-`src/shared/exhaustive-error.ts` に `ExhaustiveError` を置く（中身は `docs/architecture/typescript-conventions.md`）。switch の default で投げ、case の漏れを `never` 引数で typecheck に落とさせるのに使う。
+`src/shared/exhaustive-error.ts` に `ExhaustiveError` を置く（中身は `docs/architecture/typescript-conventions.md`）。switch の default で投げ、case の漏れを `never` 引数で typecheck に落とさせるのに使う。同じく `src/shared/lifetime.ts` に `createLifetime()` を、`test/shared/lifetime.spec.ts` にそのテストを置く（中身は `docs/architecture/factories-and-composables.md` の「後始末」）。資源を持つファクトリーの後始末に使う。
 
 ### 検証ゲート
 

@@ -45,8 +45,229 @@ export const createQuestionSession = ({
 - **戻り値の型を export し、注釈する。** 公開する面を型で固定し、内部の変数は閉包に閉じる
 - **class ではなく、閉包を持つオブジェクトを返す。** `this` の束縛が無いので、メソッドを分割代入してそのまま渡せる（`const { buzz } = session`）。非公開の状態は実行時にも触れない
 - **モジュールの最上位でインスタンスを作らない。** `export const session = createQuestionSession(…)` と書かない。アプリで1つにするか画面ごとに作るかを決めるのは合成ルート（feature の `index.ts` か boot）。最上位で作ると、テストのたびに状態が持ち越される
-- **生成時は配線だけにする。** タイマーの開始・購読・通信は、生成とは別のメソッドで明示的に行う。資源を持つなら解放用のメソッド（`dispose`）を返す
+- **生成時は配線だけにする。** タイマーの開始・購読・通信は、生成とは別のメソッドで明示的に行う。資源を持つなら後始末の手段（`dispose`）を返す。性質と書き方は下の「後始末（`dispose`）」
 - **Vue 系を import しない。** リアクティブな状態が要るなら、ファクトリーを包むコンポーザブルを presentation に書く
+
+## 後始末（`dispose`）
+
+資源（タイマー・購読・接続）を持つファクトリーは、後始末の手段 `dispose` を返す。`dispose` は次の性質をすべて満たす（CODE-08）。
+
+1. **冪等。** 2回目以降は何もしない
+2. **破棄は一方向。** 破棄した後の操作は受け付けない（例外を投げる）。受け付けないことをテストで確かめる
+3. **後始末は寿命に登録し、`dispose` で一括して行う。順序は登録の逆順。** 後から作ったものは先に作ったものに依存しうる
+4. **後始末の途中の例外を握りつぶさない。** 1つが失敗しても残りは行い、失敗は呼び出し側に返す
+5. **破棄したかを、再代入できる値（`let disposed = false`）で持たない**
+
+この性質を書き手の注意に頼らず満たすため、寿命は `createLifetime()` で作る。解除関数を個別の変数や配列で手で持たない。
+
+```ts
+// features/quiz/use-case/question-session.ts（例。上の QuestionSession に start と dispose を足した形）
+export const createQuestionSession = ({
+  rules,
+  timer,
+  notifier,
+}: QuestionSessionDeps): QuestionSession => {
+  const lifetime = createLifetime();
+  let current: QuestionState = initialQuestionState();
+
+  const start = (): void => {
+    lifetime.defer(timer.schedule(rules.revealInterval, reveal)); // 解除関数を寿命に登録する
+  };
+
+  const buzz = (playerId: PlayerId): void => {
+    if (lifetime.disposed) throw new Error('破棄した出題セッションは操作できません');
+    // …
+  };
+
+  return { state: () => current, start, buzz, dispose: lifetime.dispose };
+};
+```
+
+- **寿命は決定的なので、use-case で使ってよい。** 結果が環境や時間で変わらない
+- **Vue の側では、コンポーザブルのスコープの破棄に結びつける。** `onScopeDispose(session.dispose)`。Pinia のストアも同じ
+- **`AbortController` は寿命に使わない。** `abort()` はリスナーを登録順に呼び、リスナーの例外を `abort()` の呼び出し側に返さないので、性質の 3 と 4 を満たさない。signal を受け取る API（`fetch`、`addEventListener` など）に渡すときだけ、`createAbortSignal(lifetime)` で寿命から作って渡す
+- **業務の状態で一方向にしか変わらないもの（勝利条件を満たして「ゲームが終わった」など）は寿命ではない。** 状態機械の状態として表す
+
+### `createLifetime()` の実装
+
+`src/shared/lifetime.ts` に置く。形は TC39 の `DisposableStack` の一部（`disposed` / `defer` / `dispose`）に合わせ、ネイティブへ機械的に移れるようにしている。違いは、後始末で複数の例外が起きたときに `SuppressedError` ではなく `AggregateError` を投げること（`SuppressedError` は Safari に無い）。
+
+```ts
+/**
+ * 資源を持つ生成物の寿命。形は TC39 の `DisposableStack` の一部（`disposed` / `defer` / `dispose`）に合わせる。
+ * `DisposableStack` が Baseline（Safari の安定版と iOS を含む）になったら、ネイティブに置き換える。
+ */
+export type Lifetime = {
+  /** `dispose` を呼んだ後は `true`。`false` には戻らない */
+  readonly disposed: boolean;
+  /** `dispose` で行う後始末を登録する。破棄した後に呼ぶと例外を投げる */
+  defer: (onDispose: () => void) => void;
+  /** 登録の逆順に後始末を行う。2回目以降は何もしない */
+  dispose: () => void;
+};
+
+export const createLifetime = (): Lifetime => {
+  // 破棄したかは、戻せない signal.aborted で持つ。AbortController に任せるのはこの旗だけで、
+  // 逆順の後始末と例外の扱いは自前で行う（abort() は登録順に呼び、例外を呼び出し側に返さない）
+  const ended = new AbortController();
+  const onDisposes: (() => void)[] = [];
+
+  return {
+    get disposed() {
+      return ended.signal.aborted;
+    },
+    defer: (onDispose) => {
+      if (ended.signal.aborted) {
+        throw new ReferenceError('破棄した寿命には後始末を登録できません');
+      }
+      onDisposes.push(onDispose);
+    },
+    dispose: () => {
+      if (ended.signal.aborted) return;
+      ended.abort();
+
+      const errors: unknown[] = [];
+      // 後から作ったものは先に作ったものに依存しうるので、逆順に行う
+      for (const onDispose of onDisposes.splice(0).reverse()) {
+        try {
+          onDispose();
+        } catch (error) {
+          // 1つが失敗しても残りは行い、失敗はまとめて呼び出し側に返す
+          errors.push(error);
+        }
+      }
+      if (errors.length === 1) throw errors[0];
+      if (errors.length > 1) {
+        throw new AggregateError(errors, '後始末の途中で複数の例外が起きました');
+      }
+    },
+  };
+};
+
+/** signal を受け取る API（`fetch`、`addEventListener` など）に渡す signal を、寿命から作る。 */
+export const createAbortSignal = (lifetime: Lifetime): AbortSignal => {
+  const controller = new AbortController();
+  lifetime.defer(() => controller.abort());
+  return controller.signal;
+};
+```
+
+`DisposableStack` は Chrome / Edge / Firefox / Node では使えるが、Safari は Technology Preview に入ったところ（2026-08）。polyfill は依存が増えるので足さない。**`DisposableStack` が Baseline（Safari の安定版と iOS を含む）になったら、ネイティブに置き換える。**
+
+### テスト
+
+`test/shared/lifetime.spec.ts`。性質の 1〜4 と、`disposed` を外から書き換えられないことを確かめる。資源を持つファクトリーのテストでも、**破棄した後の操作を受け付けないこと**と、**2回目の `dispose` が何もしないこと**を確かめる。
+
+```ts
+import { describe, expect, it, vi } from 'vitest';
+import { createAbortSignal, createLifetime } from '@/shared/lifetime';
+
+describe('createLifetime', () => {
+  it('作った直後は破棄していない', () => {
+    expect(createLifetime().disposed).toBe(false);
+  });
+
+  it('dispose の後は破棄している', () => {
+    const lifetime = createLifetime();
+    lifetime.dispose();
+    expect(lifetime.disposed).toBe(true);
+  });
+
+  it('登録の逆順に後始末を行う', () => {
+    const lifetime = createLifetime();
+    const calls: string[] = [];
+    lifetime.defer(() => calls.push('先'));
+    lifetime.defer(() => calls.push('後'));
+    lifetime.dispose();
+    expect(calls).toEqual(['後', '先']);
+  });
+
+  it('2回目の dispose は何もしない', () => {
+    const lifetime = createLifetime();
+    const onDispose = vi.fn();
+    lifetime.defer(onDispose);
+    lifetime.dispose();
+    lifetime.dispose();
+    expect(onDispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('破棄した後の defer は例外を投げ、後始末を登録しない', () => {
+    const lifetime = createLifetime();
+    lifetime.dispose();
+    const onDispose = vi.fn();
+    expect(() => lifetime.defer(onDispose)).toThrow(ReferenceError);
+    lifetime.dispose();
+    expect(onDispose).not.toHaveBeenCalled();
+  });
+
+  it('後始末の途中で破棄済みと読める', () => {
+    const lifetime = createLifetime();
+    const seen: boolean[] = [];
+    lifetime.defer(() => seen.push(lifetime.disposed));
+    lifetime.dispose();
+    expect(seen).toEqual([true]);
+  });
+
+  it('1つが例外を投げても残りを行い、その例外を返す', () => {
+    const lifetime = createLifetime();
+    const failure = new Error('失敗');
+    const first = vi.fn();
+    lifetime.defer(first);
+    lifetime.defer(() => {
+      throw failure;
+    });
+    expect(() => lifetime.dispose()).toThrow(failure);
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(lifetime.disposed).toBe(true);
+  });
+
+  it('複数が例外を投げたら AggregateError にまとめて返す', () => {
+    const lifetime = createLifetime();
+    const a = new Error('a');
+    const b = new Error('b');
+    lifetime.defer(() => {
+      throw a;
+    });
+    lifetime.defer(() => {
+      throw b;
+    });
+    let thrown: unknown;
+    try {
+      lifetime.dispose();
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(AggregateError);
+    // 実行した順（登録の逆順）に並ぶ
+    expect((thrown as AggregateError).errors).toEqual([b, a]);
+  });
+
+  it('disposed は外から書き換えられない', () => {
+    const lifetime = createLifetime();
+    expect(() => {
+      // @ts-expect-error -- readonly を外から書き換えられないことの確認
+      lifetime.disposed = true;
+    }).toThrow(TypeError);
+    expect(lifetime.disposed).toBe(false);
+  });
+});
+
+describe('createAbortSignal', () => {
+  it('寿命を破棄すると abort される', () => {
+    const lifetime = createLifetime();
+    const signal = createAbortSignal(lifetime);
+    expect(signal.aborted).toBe(false);
+    lifetime.dispose();
+    expect(signal.aborted).toBe(true);
+  });
+
+  it('破棄した寿命からは作れない', () => {
+    const lifetime = createLifetime();
+    lifetime.dispose();
+    expect(() => createAbortSignal(lifetime)).toThrow(ReferenceError);
+  });
+});
+```
 
 ## コンポーザブル
 
@@ -126,6 +347,7 @@ Pinia の `defineStore` が返す `useXxxStore` もコンポーザブルとし�
 | feature をまたぐコンポーザブル      | `src/shared/composables/`                                                           | shared-ui    |
 | i18n                                | `src/shared/i18n/`                                                                  | shared-ui    |
 | テストの fake（ファクトリーで作る） | `test/features/<f>/<layer>/*.fake.ts`                                               | 各層         |
+| 寿命 `createLifetime()`             | `src/shared/lifetime.ts`                                                            | shared       |
 
 **Vue に依存する共有コードは `shared-ui` に分けている。** `shared` のままだと domain / use-case から import でき、外部ライブラリの禁止（直接の import しか見ない）をすり抜けて Vue に依存できてしまうため。`shared-ui` を import できるのは presentation・合成ルート・feature の `index.ts` だけ（[オニオンの層構成](onion-layers.md)）。
 
@@ -144,6 +366,8 @@ Pinia の `defineStore` が返す `useXxxStore` もコンポーザブルとし�
 | presentation の中の `createXxx` が Vue を使っている                             | ❌     | 規約のみ                            |
 | コンポーザブルを setup の外で呼ぶ                                               | ❌     | 規約のみ（実行時の警告だけ）        |
 | コンポーザブルにビジネスロジックが入る                                          | ❌     | レビュー                            |
+| 破棄したかを `let disposed = false` のような再代入できる値で持つ                | ❌     | 規約のみ                            |
+| 破棄した後の操作を受け付けない                                                  | ❌     | テスト（ファクトリーごとに書く）    |
 
 vue 系は `vue`・`pinia`・`vue-router`・`vue-i18n`・`@vueuse/*`。
 

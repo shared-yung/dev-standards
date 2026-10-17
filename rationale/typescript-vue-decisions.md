@@ -67,3 +67,13 @@ permission ルールは**前方一致**でしか判定できないため、`cd x
 `use～` の宣言の禁止は `no-restricted-syntax` で足した。flat config は後段の同名ルールで options を丸ごと置き換えるので、base の禁止を `restrictedSyntax` として export し、足す側で展開して合流させている。
 
 ファクトリーが class ではなく閉包のオブジェクトを返すのは、`this` の束縛が無く、メソッドを分割代入してそのまま渡せるため。
+
+## 後始末は自前の寿命で行う
+
+資源を持つ生成物の後始末（CODE-08）は、shared の `createLifetime()` で行う。きっかけは quiz-match の出題セッション（shared-yung/quiz-match#101）で、破棄したかを `let disposed = false` で持ったこと。一度だけ `true` に変わり戻せない値を、書き戻せる `let` で持つのはおかしい、という指摘から、性質（冪等・一方向・逆順・例外を返す・再代入できる値で持たない）を原則にし、手段をスタックに分けた（dev-standards #15）。
+
+- **`AbortController` をそのまま寿命に使う案は採らない。** `signal.aborted` は戻せず `abort()` は冪等だが、`abort()` はリスナーを登録順に呼び、リスナーの例外を呼び出し側に返さない。逆順と例外の性質を満たせない。signal を受け取る API に渡すときだけ、寿命から作る（`createAbortSignal`）。自前の寿命の中でも、破棄したかの旗だけは `AbortController` に持たせ、`let` を使わずに済ませている
+- **ネイティブの `DisposableStack` / `using` は今は見送る**（`radar/disposable-stack.md`）。Safari の安定版と iOS での提供を確認できず、polyfill は依存が増える。形を `disposed` / `defer` / `dispose` に合わせ、Baseline になったら機械的に置き換える。複数の例外は `SuppressedError` ではなく `AggregateError` で返す（`SuppressedError` も Safari に無い）
+- **強制は規約とテストに委ねる。** `let disposed` のような宣言を lint で落とすのは名前に頼るだけで、別の名前ですり抜ける
+- 業務の状態で一方向にしか変わらないもの（「ゲームが終わった」）は寿命ではないので対象外。状態機械の状態として表す
+- 寿命は決定的（結果が環境や時間で変わらない）なので use-case で使ってよい。現在時刻・時間の経過・乱数を port で受け取る原則（#13・#14）とは、この基準で線を引く
