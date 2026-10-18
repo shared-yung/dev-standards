@@ -22,12 +22,15 @@ import { bundlesForStack, loadDesired } from './lib/sync/bundle';
  * 常時読み込む principles/ の合計の上限（文字数）。
  * 常時読み込むものは毎回のリクエストで送られ、subagent や teammate ごとにも読み込まれる。長いほど指示が
  * 無視されやすくなる（Claude Code の Best practices）。そこで、コンテキスト（200k トークン）の 5%
- * = 10,000 トークンに収める。トークン数は手元で数えられないので文字数で数え、換算比で上限に直す。
- * 換算比: 仮に 1 文字 = 1 トークン（日本語の上限側の見積もり）。/context で測ったら更新する。
+ * = 10,000 トークンに収める。1M のコンテキストのモデルでも 200k を基準のままにする（200k のモデルの
+ * subagent にも読み込まれ、指示が無視されやすくなるのは指示の長さによるため）。
+ * トークン数は手元で数えられないので文字数で数え、換算比で上限に直す。
+ * 換算比: 2026-10-18 に /context で測った principles の7ファイルが 4,265 文字 / 3,704 トークン
+ * = 1.15（ファイルごとに 1.05〜1.37）。日本語の多いファイルに寄せて 1.1 にした（#27）。
  * 足りなくなったら上限を上げる前に、手段を stacks/ へ、長い根拠を rationale/ へ出せないかを見る。
  */
 const ALWAYS_LOADED_TOKEN_BUDGET = 10_000;
-const CHARS_PER_TOKEN = 1;
+const CHARS_PER_TOKEN = 1.1;
 const ALWAYS_LOADED_CHAR_LIMIT = Math.floor(ALWAYS_LOADED_TOKEN_BUDGET * CHARS_PER_TOKEN);
 /**
  * 原則1つ（見出しから次の見出しまで）の文字数の上限。原則には何を・なぜだけを書く。
