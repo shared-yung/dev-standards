@@ -41,7 +41,7 @@ bun run sync-repo ../<リポジトリ> --check          # 最新かだけを確�
 bun run sync-repo --all --check                    # consumers.json のすべて
 ```
 
-- 配る内容は `bundles/<バンドル>/bundle.json`。スタックとバンドルの対応は `bundles/stacks.json`
+- 配る内容は `bundles/<バンドル>/bundle.json`。スタックとバンドルの対応は `bundles/stacks.json`（言語のスタックは `github-workflow` に自分のバンドルを足す。dev-standards 自身は `github-workflow` だけ）
 - ファイルの扱いは3種類
   - **管理**（`managed`）: 前回配った内容（記録）・今の内容・新しい内容の3方向で比べる。ローカルだけ変えたものは保ち、両方変わったら衝突として止める
   - **雛形**（`seed`）: 無いときだけ作る。以後はリポジトリのもの

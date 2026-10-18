@@ -23,19 +23,25 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 | `__OWNER__`   | GitHub のオーナー名    | `shared-yung` |
 | `__REPO__`    | リポジトリ名           | `quiz-match`  |
 | `__PROJECT__` | プロジェクトフォルダ名 | `quiz-app`    |
+| `__PACKAGE__` | Python のパッケージ名  | `quiz_app`    |
 
-置換漏れの確認: `grep -rn '__REPO__\|__PROJECT__\|__OWNER__' .`
+置換漏れの確認: `grep -rn '__REPO__\|__PROJECT__\|__OWNER__\|__PACKAGE__' .`
 
 ## 配置
 
-| テンプレート                         | 配置先                    |
-| ------------------------------------ | ------------------------- |
-| `templates/root/*`                   | リポジトリルート          |
-| `templates/github/*`                 | `.github/`                |
-| `templates/scripts/*`                | `scripts/`                |
-| `templates/claude/*`                 | `.claude/`                |
-| `templates/packages/eslint-config/*` | `packages/eslint-config/` |
-| `templates/docs/*`                   | `docs/`                   |
+テンプレートはスタック別のフォルダにある。`github-workflow/` はどのスタックでも使い、言語のスタック（`typescript-vue/`・`python/`）と組み合わせる。各フォルダの中は配置先ごとに分かれている。
+
+| テンプレート                                        | 配置先                           |
+| --------------------------------------------------- | -------------------------------- |
+| `templates/<スタック>/root/*`                       | リポジトリルート                 |
+| `templates/<スタック>/github/*`                     | `.github/`                       |
+| `templates/<スタック>/scripts/*`                    | `scripts/`                       |
+| `templates/<スタック>/claude/*`                     | `.claude/`                       |
+| `templates/<スタック>/docs/*`                       | `docs/`                          |
+| `templates/typescript-vue/packages/eslint-config/*` | `packages/eslint-config/`        |
+| `templates/python/project/*`                        | `<project>/`（プロジェクトごと） |
+
+既存のリポジトリには、dev-standards の `bun run sync-repo <リポジトリ> --stack <スタック>` で配る（`bundles/`）。配るのは管理ファイルと雛形だけで、ここにあるテンプレートのすべてではない。sync-repo はプレースホルダを置換しないので、配った雛形（`.github/workflows/ci.yml`・`CLAUDE.md`）は上の表に従って手で置換し、置換漏れを確かめる。
 
 ---
 
@@ -43,7 +49,7 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 
 **`.gitattributes` を最初に置く。** 後回しにすると改行コードが混ざり `git add --renormalize .` が必要になる。
 
-1. `templates/root/` と `templates/github/`、`templates/scripts/`、`templates/docs/` を配置し置換する
+1. `templates/github-workflow/` と `templates/typescript-vue/` の `root/`・`github/`・`scripts/`・`docs/` を配置し置換する
 2. `bun install`（`prepare` で lefthook の hook が登録される）
 3. 初回コミットを `main` に置く。**root commit のみ issue 参照が免除される**
 4. `gh repo create` して push
@@ -64,7 +70,7 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 
 ## フェーズ 2: リモート操作のガードレール
 
-`templates/claude/` を `.claude/` に配置する。
+`templates/github-workflow/claude/` と `templates/typescript-vue/claude/` を `.claude/` に配置する。
 
 **設定後にセッションの再起動が必要。** `.claude/` がセッション開始時に無かった場合、設定ウォッチャーが見ておらずフックが発火しない。
 
@@ -79,7 +85,7 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 
 ## フェーズ 3: 共有 ESLint 設定
 
-`templates/packages/eslint-config/` を配置し、ルートの `workspaces` に `packages/*` があることを確認する。
+`templates/typescript-vue/packages/eslint-config/` を配置し、ルートの `workspaces` に `packages/*` があることを確認する。
 
 ### 検証ゲート
 

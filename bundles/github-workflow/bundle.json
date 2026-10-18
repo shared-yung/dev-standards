@@ -3,72 +3,72 @@
   "files": [
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/root/.gitattributes",
+      "source": "skills/project-bootstrap/templates/github-workflow/root/.gitattributes",
       "target": ".gitattributes"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/root/commitlint.config.js",
+      "source": "skills/project-bootstrap/templates/github-workflow/root/commitlint.config.js",
       "target": "commitlint.config.js"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/root/commitlint.title.config.js",
+      "source": "skills/project-bootstrap/templates/github-workflow/root/commitlint.title.config.js",
       "target": "commitlint.title.config.js"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/github/workflows/conventions.yml",
+      "source": "skills/project-bootstrap/templates/github-workflow/github/workflows/conventions.yml",
       "target": ".github/workflows/conventions.yml"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/github/workflows/pr-merged.yml",
+      "source": "skills/project-bootstrap/templates/github-workflow/github/workflows/pr-merged.yml",
       "target": ".github/workflows/pr-merged.yml"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/commit-msg.sh",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/commit-msg.sh",
       "target": "scripts/commit-msg.sh"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/check-branch-name.sh",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/check-branch-name.sh",
       "target": "scripts/check-branch-name.sh"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/check-pr-divergence.mjs",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/check-pr-divergence.mjs",
       "target": "scripts/check-pr-divergence.mjs"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/prune-merged-branches.sh",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/prune-merged-branches.sh",
       "target": "scripts/prune-merged-branches.sh"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/check-push-target.ts",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/check-push-target.ts",
       "target": "scripts/check-push-target.ts"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/setup-branch-protection.ts",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/setup-branch-protection.ts",
       "target": "scripts/setup-branch-protection.ts"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/branch-protection-ruleset.json",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/branch-protection-ruleset.json",
       "target": "scripts/branch-protection-ruleset.json"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/scripts/repo-settings.json",
+      "source": "skills/project-bootstrap/templates/github-workflow/scripts/repo-settings.json",
       "target": "scripts/repo-settings.json"
     },
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/claude/hooks/guard-remote.mjs",
+      "source": "skills/project-bootstrap/templates/github-workflow/claude/hooks/guard-remote.mjs",
       "target": ".claude/hooks/guard-remote.mjs"
     },
     {
@@ -84,17 +84,17 @@
     },
     {
       "kind": "seed",
-      "source": "skills/project-bootstrap/templates/github/ISSUE_TEMPLATE/bug.yml",
+      "source": "skills/project-bootstrap/templates/github-workflow/github/ISSUE_TEMPLATE/bug.yml",
       "target": ".github/ISSUE_TEMPLATE/bug.yml"
     },
     {
       "kind": "seed",
-      "source": "skills/project-bootstrap/templates/github/ISSUE_TEMPLATE/feature.yml",
+      "source": "skills/project-bootstrap/templates/github-workflow/github/ISSUE_TEMPLATE/feature.yml",
       "target": ".github/ISSUE_TEMPLATE/feature.yml"
     },
     {
       "kind": "seed",
-      "source": "skills/project-bootstrap/templates/github/ISSUE_TEMPLATE/config.yml",
+      "source": "skills/project-bootstrap/templates/github-workflow/github/ISSUE_TEMPLATE/config.yml",
       "target": ".github/ISSUE_TEMPLATE/config.yml"
     }
   ],

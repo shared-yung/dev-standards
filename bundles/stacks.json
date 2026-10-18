@@ -1,5 +1,6 @@
 {
-  "$comment": "スタックごとに配るバンドル。sync-repo の --stack で選ぶ",
-  "typescript-vue": ["github-workflow"],
-  "python": ["github-workflow"]
+  "$comment": "スタックごとに配るバンドル。sync-repo の --stack で選ぶ。github-workflow だけを配るのは、言語のスタックの仕組みを入れないリポジトリ（dev-standards 自身）",
+  "github-workflow": ["github-workflow"],
+  "typescript-vue": ["github-workflow", "typescript-vue"],
+  "python": ["github-workflow", "python"]
 }

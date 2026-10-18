@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { rejectedPushes } from '../skills/project-bootstrap/templates/scripts/check-push-target';
+import { rejectedPushes } from '../skills/project-bootstrap/templates/github-workflow/scripts/check-push-target';
 import {
   RulesetAction,
   decideRulesetAction,
   settingsDrift,
-} from '../skills/project-bootstrap/templates/scripts/setup-branch-protection';
+} from '../skills/project-bootstrap/templates/github-workflow/scripts/setup-branch-protection';
 
 describe('settingsDrift', () => {
   const expected = { delete_branch_on_merge: true, allow_merge_commit: false };

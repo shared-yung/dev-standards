@@ -1,0 +1,76 @@
+# Python プロジェクトの設定の雛形（stacks/python/）。リポジトリのルートの1階層下、`__PROJECT__/` に置く（REPO-04）
+[project]
+name = "__PROJECT__"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+__PROJECT__ = "__PACKAGE__.cli:main"
+
+[dependency-groups]
+dev = [
+  "import-linter>=2.5",
+  "pyright>=1.1.406",
+  "pytest>=8.4",
+  "ruff>=0.13",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "PT"]
+extend-select = ["TID251"]
+# 文言・コメントは日本語で書くので、全角の括弧や読点を「紛らわしい文字」として扱わない
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+# 現在時刻・時間の経過・乱数は port で受け取る（CODE-07）
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"time.time".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.time_ns".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.monotonic".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.perf_counter".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.datetime.now".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.datetime.utcnow".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.datetime.today".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"datetime.date.today".msg = "現在時刻は時計の port で受け取る（CODE-07）"
+"time.sleep".msg = "時間の経過はタイマーの port で待つ（CODE-07）"
+"asyncio.sleep".msg = "時間の経過はタイマーの port で待つ（CODE-07）"
+"random".msg = "乱数は port で受け取る（CODE-07）"
+"secrets".msg = "乱数は port で受け取る（CODE-07）"
+"uuid.uuid1".msg = "乱数は port で受け取る（CODE-07）"
+"uuid.uuid4".msg = "乱数は port で受け取る（CODE-07）"
+"os.urandom".msg = "乱数は port で受け取る（CODE-07）"
+
+[tool.ruff.lint.per-file-ignores]
+# テスト名は日本語で書く（小文字・大文字の区別が無い）
+"tests/**" = ["N802"]
+# 時計・タイマー・乱数を直接使えるのは infrastructure だけ（テストも同じ層だけ）
+"src/*/features/*/infrastructure/**" = ["TID251"]
+"tests/**/infrastructure/**" = ["TID251"]
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "strict"
+pythonVersion = "3.13"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
+
+[tool.importlinter]
+root_package = "__PACKAGE__"
+include_external_packages = true
+
+# feature を作ったら、feature ごとに containers へ足す（ARCH-01, ARCH-03）
+# [[tool.importlinter.contracts]]
+# name = "オニオン: 依存は外側から内側の一方向"
+# type = "layers"
+# containers = ["__PACKAGE__.features.<feature>"]
+# layers = ["infrastructure", "use_case", "domain"]

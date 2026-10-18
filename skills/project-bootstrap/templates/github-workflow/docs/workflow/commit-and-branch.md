@@ -6,12 +6,15 @@
 <type>/<issue番号>-<slug>
 ```
 
-`<type>` は Conventional Commits と同じ語彙（`feat` `fix` `docs` `style` `refactor` `perf` `test` `build` `ci` `chore` `revert`）。slug は英小文字・数字・ハイフン。
+`<type>` は Conventional Commits と同じ語彙（`feat` `fix` `docs` `style` `refactor` `perf` `test` `build` `ci` `chore` `revert`）と、ブランチだけの `spike`。slug は英小文字・数字・ハイフン。
+
+`spike` は動くか分からないものを、テストを書かずに試すブランチ。**マージせずに捨てる。** 分かったことを issue に残し、`feat` などの別ブランチで TDD でやり直す（[TDD](tdd.md)）。コミットの type には `spike` は無い（試作のコミットも `feat` などで書く。どうせマージしない）。
 
 ```
 feat/42-quiz-scoring
 fix/57-answer-validation
 chore/61-bump-quasar
+spike/63-try-onnx-runtime
 ```
 
 検証しているのは `scripts/check-branch-name.sh`。`main` は対象外（`main` への push そのものは pre-push の `scripts/check-push-target.ts` が拒否する）。

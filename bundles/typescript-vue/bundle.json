@@ -1,0 +1,40 @@
+{
+  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形の CLAUDE.md の __REPO__ は配布後に手で置換する",
+  "files": [
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/packages/eslint-config/base.js",
+      "target": "packages/eslint-config/base.js"
+    },
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/packages/eslint-config/index.js",
+      "target": "packages/eslint-config/index.js"
+    },
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/packages/eslint-config/onion.js",
+      "target": "packages/eslint-config/onion.js"
+    },
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/packages/eslint-config/package.json",
+      "target": "packages/eslint-config/package.json"
+    },
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/packages/eslint-config/vue.js",
+      "target": "packages/eslint-config/vue.js"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/github/workflows/ci.yml",
+      "target": ".github/workflows/ci.yml"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/root/CLAUDE.md",
+      "target": "CLAUDE.md"
+    }
+  ]
+}
