@@ -53,5 +53,6 @@ paths:
 | I18N-*  | 対象外 | 今は日本語のメッセージだけの CLI。多言語化するときに具体化する                                                                         |
 | TEST-*  | 実装   | pytest（testing.md）                                                                                                                   |
 | SES-01  | 実装   | `work-checkpoint` スキル                                                                                                               |
+| AGENT-* | 実装   | `stacks/claude-code/`                                                                                                                  |
 
 詳細: architecture.md / code.md / testing.md

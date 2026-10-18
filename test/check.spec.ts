@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  checkByteBudget,
+  checkCharBudget,
   checkPrincipleFile,
+  checkPrincipleLength,
   checkRadarEntry,
   checkStackFile,
   checkStackMapping,
@@ -157,20 +158,41 @@ describe('checkRadarEntry', () => {
   });
 });
 
-describe('checkByteBudget', () => {
+describe('checkCharBudget', () => {
   it('常時読み込むファイルの合計が上限を超えたらエラー', () => {
     expect(
-      checkByteBudget(
+      checkCharBudget(
         [
-          { path: 'a.md', bytes: 600 },
-          { path: 'b.md', bytes: 500 },
+          { path: 'a.md', chars: 600 },
+          { path: 'b.md', chars: 500 },
         ],
         1000,
       ),
-    ).toEqual(['常時読み込むファイルの合計が 1100 バイトで、上限 1000 バイトを超えています']);
+    ).toEqual(['常時読み込むファイルの合計が 1100 文字で、上限 1000 文字を超えています']);
   });
 
   it('上限以内なら通る', () => {
-    expect(checkByteBudget([{ path: 'a.md', bytes: 1000 }], 1000)).toEqual([]);
+    expect(checkCharBudget([{ path: 'a.md', chars: 1000 }], 1000)).toEqual([]);
+  });
+});
+
+describe('checkPrincipleLength', () => {
+  it('見出しから次の見出しまでを1つの原則として、上限を超えたらエラー', () => {
+    const md =
+      '# X\n\n### A-01 長い〔標準〕\n\nあいうえおかきくけこ\n\n### A-02 短い〔標準〕\n\nあ\n';
+
+    expect(checkPrincipleLength('principles/a.md', md, 20)).toEqual([
+      'principles/a.md: A-01 が 27 文字で、上限 20 文字を超えています（手段は stacks/、長い根拠は rationale/ へ）',
+    ]);
+  });
+
+  it('バイト数ではなく文字数で数える', () => {
+    expect(checkPrincipleLength('principles/a.md', '### A-01 あ〔標準〕\n', 14)).toEqual([]);
+  });
+
+  it('## の見出しで原則が終わる', () => {
+    const md = '### A-01 x〔標準〕\n\n## 次の節\n\nあいうえおかきくけこさしすせそ\n';
+
+    expect(checkPrincipleLength('principles/a.md', md, 20)).toEqual([]);
   });
 });
