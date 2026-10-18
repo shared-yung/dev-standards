@@ -1,5 +1,5 @@
 {
-  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス",
+  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形の CLAUDE.md の __REPO__ は配布後に手で置換する",
   "files": [
     {
       "kind": "managed",
