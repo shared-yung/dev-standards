@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkPlaceholders, checkSkillFile } from '../scripts/lib/rules';
+import { checkAgentFile, checkPlaceholders, checkSkillFile } from '../scripts/lib/rules';
 import { diffTrees } from '../scripts/lib/tree';
 
 describe('checkPlaceholders', () => {
@@ -36,6 +36,30 @@ describe('checkSkillFile', () => {
 
     expect(checkSkillFile('skills/work-checkpoint/SKILL.md', md)).toEqual([
       'skills/work-checkpoint/SKILL.md: description がありません（スキルが呼ばれる条件になる）',
+    ]);
+  });
+});
+
+describe('checkAgentFile', () => {
+  it('name がファイル名と一致し、description があれば通る', () => {
+    const md = '---\nname: reviewer\ndescription: 差分をレビューする\n---\n# X\n';
+
+    expect(checkAgentFile('agents/reviewer.md', md)).toEqual([]);
+  });
+
+  it('name がファイル名と違えばエラー', () => {
+    const md = '---\nname: other\ndescription: x\n---\n';
+
+    expect(checkAgentFile('agents/reviewer.md', md)).toEqual([
+      'agents/reviewer.md: name（other）がファイル名（reviewer）と違います',
+    ]);
+  });
+
+  it('description が無ければエラー', () => {
+    const md = '---\nname: reviewer\n---\n';
+
+    expect(checkAgentFile('agents/reviewer.md', md)).toEqual([
+      'agents/reviewer.md: description がありません（subagent が呼ばれる条件になる）',
     ]);
   });
 });

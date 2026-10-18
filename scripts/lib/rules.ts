@@ -156,6 +156,21 @@ export function checkSkillFile(path: string, markdown: string): string[] {
   return errors;
 }
 
+export function checkAgentFile(path: string, markdown: string): string[] {
+  const data = splitFrontmatter(markdown).data ?? {};
+  const file = (path.split('/').at(-1) ?? '').replace(/\.md$/, '');
+  const name = typeof data['name'] === 'string' ? data['name'] : '';
+  const description = typeof data['description'] === 'string' ? data['description'] : '';
+  const errors: string[] = [];
+  if (name !== file) {
+    errors.push(`${path}: name（${name}）がファイル名（${file}）と違います`);
+  }
+  if (description === '') {
+    errors.push(`${path}: description がありません（subagent が呼ばれる条件になる）`);
+  }
+  return errors;
+}
+
 const PLACEHOLDER_NAMES = ['REPO', 'PROJECT', 'OWNER'] as const;
 const mangledPlaceholder = new RegExp(`\\*\\*(${PLACEHOLDER_NAMES.join('|')})\\*\\*`, 'g');
 

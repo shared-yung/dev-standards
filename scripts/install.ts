@@ -1,4 +1,4 @@
-// principles/ と stacks/ をルールとして、skills/ をスキルとして、ユーザー単位のフォルダへ配る。
+// principles/ と stacks/ をルールとして、skills/ をスキルとして、agents/ を subagent として、ユーザー単位のフォルダへ配る。
 //   bun run install-rules            配る（配布先の dev-standards の分は丸ごと置き換える）
 //   bun run install-rules --check    配布先が最新かだけを確かめる（差分があれば終了コード 1）
 //
@@ -21,6 +21,7 @@ import { diffTrees } from './lib/tree';
 const root = join(import.meta.dirname, '..');
 const claudeRulesDir = join(homedir(), '.claude', 'rules', 'dev-standards');
 const claudeSkillsDir = join(homedir(), '.claude', 'skills');
+const claudeAgentsDir = join(homedir(), '.claude', 'agents');
 const copilotDir = join(homedir(), '.copilot', 'instructions');
 const copilotPrefix = 'dev-standards-';
 const checkOnly = process.argv.includes('--check');
@@ -66,6 +67,9 @@ const skills = readdirSync(join(root, 'skills')).map((name) => ({
   files: readTree(join(root, 'skills', name)),
 }));
 
+// subagent（agents/<名前>.md → ~/.claude/agents/<名前>.md）。dev-standards に無い名前の subagent には触らない
+const agents = readTree(join(root, 'agents'), (p) => p.endsWith('.md') && !p.includes('/'));
+
 const drift = [
   ...diffTrees(rules, readTree(claudeRulesDir)).map((p) => join(claudeRulesDir, p)),
   ...diffTrees(
@@ -77,6 +81,10 @@ const drift = [
       join(claudeSkillsDir, name, p),
     ),
   ),
+  ...diffTrees(
+    agents,
+    readTree(claudeAgentsDir, (p) => agents.has(p)),
+  ).map((p) => join(claudeAgentsDir, p)),
 ];
 
 if (checkOnly) {
@@ -103,8 +111,14 @@ for (const { name, files } of skills) {
   writeTree(join(claudeSkillsDir, name), files);
 }
 
+mkdirSync(claudeAgentsDir, { recursive: true });
+for (const [name, content] of agents) {
+  writeFileSync(join(claudeAgentsDir, name), content);
+}
+
 console.log(`✓ Claude Code のルール: ${rules.size} ファイル → ${claudeRulesDir}`);
 console.log(`✓ Copilot: ${copilot.size} ファイル → ${copilotDir}`);
 for (const { name, files } of skills) {
   console.log(`✓ スキル ${name}: ${files.size} ファイル → ${join(claudeSkillsDir, name)}`);
 }
+console.log(`✓ subagent: ${agents.size} ファイル → ${claudeAgentsDir}`);

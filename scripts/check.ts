@@ -3,6 +3,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import {
+  checkAgentFile,
   checkCharBudget,
   checkPlaceholders,
   checkPrincipleFile,
@@ -87,6 +88,9 @@ for (const skill of readdirSync(join(root, 'skills'))) {
   }
   errors.push(...checkSkillFile(path, read(path)));
 }
+
+// agents（subagent の定義）
+for (const path of markdownFiles('agents')) errors.push(...checkAgentFile(path, read(path)));
 
 // テンプレートのプレースホルダが整形で崩れていないか
 for (const dir of ['skills', 'bundles']) {
