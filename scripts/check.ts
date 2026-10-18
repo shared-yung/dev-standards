@@ -3,24 +3,37 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import {
-  checkByteBudget,
+  checkAgentFile,
+  checkCharBudget,
   checkPlaceholders,
   checkPrincipleFile,
+  checkPrincipleLength,
   checkRadarEntry,
   checkSkillFile,
   checkStackFile,
   checkStackMapping,
+  countChars,
   extractPrinciples,
   parseMappingTable,
 } from './lib/rules';
 import { bundlesForStack, loadDesired } from './lib/sync/bundle';
 
 /**
- * 常時読み込む principles/ の合計の上限。移行前の ~/.claude/CLAUDE.md（20,597 バイト）を目安にし、
- * 後から足す原則（CODE-07・CODE-08・GR-04 と乱数）の分だけ広げた（2026-10-17、#15）。
- * 足りなくなったら上限を上げる前に、長い説明を rationale/ へ出せないかを見る。
+ * 常時読み込む principles/ の合計の上限（文字数）。
+ * 常時読み込むものは毎回のリクエストで送られ、subagent や teammate ごとにも読み込まれる。長いほど指示が
+ * 無視されやすくなる（Claude Code の Best practices）。そこで、コンテキスト（200k トークン）の 5%
+ * = 10,000 トークンに収める。トークン数は手元で数えられないので文字数で数え、換算比で上限に直す。
+ * 換算比: 仮に 1 文字 = 1 トークン（日本語の上限側の見積もり）。/context で測ったら更新する。
+ * 足りなくなったら上限を上げる前に、手段を stacks/ へ、長い根拠を rationale/ へ出せないかを見る。
  */
-const ALWAYS_LOADED_BYTE_LIMIT = 22_000;
+const ALWAYS_LOADED_TOKEN_BUDGET = 10_000;
+const CHARS_PER_TOKEN = 1;
+const ALWAYS_LOADED_CHAR_LIMIT = Math.floor(ALWAYS_LOADED_TOKEN_BUDGET * CHARS_PER_TOKEN);
+/**
+ * 原則1つ（見出しから次の見出しまで）の文字数の上限。原則には何を・なぜだけを書く。
+ * これを超えるものには手段か長い根拠が混ざっているので、stacks/ か rationale/ へ出す。
+ */
+const PRINCIPLE_CHAR_LIMIT = 400;
 /** 1ファイルの行数の上限（Claude Code のドキュメントの推奨）。 */
 const LINE_LIMIT = 200;
 
@@ -40,6 +53,7 @@ const ids: string[] = [];
 for (const path of principleFiles) {
   const markdown = read(path);
   errors.push(...checkPrincipleFile(path, markdown));
+  errors.push(...checkPrincipleLength(path, markdown, PRINCIPLE_CHAR_LIMIT));
   const extracted = extractPrinciples(markdown);
   errors.push(...extracted.errors.map((e) => `${path}: ${e}`));
   ids.push(...extracted.principles.map((p) => p.id));
@@ -75,6 +89,9 @@ for (const skill of readdirSync(join(root, 'skills'))) {
   errors.push(...checkSkillFile(path, read(path)));
 }
 
+// agents（subagent の定義）
+for (const path of markdownFiles('agents')) errors.push(...checkAgentFile(path, read(path)));
+
 // テンプレートのプレースホルダが整形で崩れていないか
 for (const dir of ['skills', 'bundles']) {
   for (const name of readdirSync(join(root, dir), { recursive: true, encoding: 'utf8' })) {
@@ -97,8 +114,8 @@ for (const stack of stackNames) {
 }
 
 // サイズ
-const sized = principleFiles.map((path) => ({ path, bytes: statSync(join(root, path)).size }));
-errors.push(...checkByteBudget(sized, ALWAYS_LOADED_BYTE_LIMIT));
+const sized = principleFiles.map((path) => ({ path, chars: countChars(read(path)) }));
+errors.push(...checkCharBudget(sized, ALWAYS_LOADED_CHAR_LIMIT));
 for (const path of [...principleFiles, ...markdownFiles('stacks')]) {
   const lines = read(path).split('\n').length;
   if (lines > LINE_LIMIT)
@@ -109,8 +126,8 @@ if (errors.length > 0) {
   for (const error of errors) console.error(`✗ ${error}`);
   process.exit(1);
 }
-const total = sized.reduce((sum, f) => sum + f.bytes, 0);
+const total = sized.reduce((sum, f) => sum + f.chars, 0);
 console.log(
   `✓ 原則 ${ids.length} 件、スタック ${readdirSync(join(root, 'stacks')).length} 件、` +
-    `常時読み込み ${total} / ${ALWAYS_LOADED_BYTE_LIMIT} バイト（${relative(process.cwd(), root) || '.'}）`,
+    `常時読み込み ${total} / ${ALWAYS_LOADED_CHAR_LIMIT} 文字（${relative(process.cwd(), root) || '.'}）`,
 );

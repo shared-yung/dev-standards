@@ -48,6 +48,7 @@ WF・GR・REPO の一部を、git と GitHub の仕組みで実装する。言�
 | I18N-*  | 対象外 | 言語のスタックで扱う                                                                                                                                                                                                                                                                                                                      |
 | TEST-*  | 対象外 | 言語のスタックで扱う                                                                                                                                                                                                                                                                                                                      |
 | SES-01  | 対象外 | `work-checkpoint` スキルで扱う                                                                                                                                                                                                                                                                                                            |
+| AGENT-* | 対象外 | `stacks/claude-code/` で扱う                                                                                                                                                                                                                                                                                                              |
 
 ## 実装上の注意（実際に踏んだ罠）
 

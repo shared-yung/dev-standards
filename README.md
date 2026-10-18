@@ -4,16 +4,17 @@
 
 ## 構成
 
-| フォルダ             | 内容                                                           | 配布                                                         |
-| -------------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
-| `principles/`        | 原則（何を・なぜ）。ID・階層（必須／標準）・目的・適合性の注意 | する。常に読み込まれる                                       |
-| `stacks/<スタック>/` | 具体化（どうやって）。`00-index.md` に全原則との対応表         | する。`paths` に一致するファイルを触ったときだけ読み込まれる |
-| `rationale/`         | 長い根拠・比較検討                                             | しない                                                       |
-| `radar/`             | 手法ごとの段階（Adopt / Trial / Assess / Hold）                | しない                                                       |
-| `experiments/`       | Trial の記録（仮説・基準・観察・振り返り）                     | しない                                                       |
-| `skills/<名前>/`     | スキル（`project-bootstrap`・`work-checkpoint`）とテンプレート | する。`~/.claude/skills/<名前>/` に丸ごと置き換えでコピー    |
+| フォルダ             | 内容                                                                               | 配布                                                         |
+| -------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `principles/`        | 原則（何を・なぜ）。ID・階層（必須／標準）・目的・適合性の注意                     | する。常に読み込まれる                                       |
+| `stacks/<スタック>/` | 具体化（どうやって）。`00-index.md` に全原則との対応表                             | する。`paths` に一致するファイルを触ったときだけ読み込まれる |
+| `rationale/`         | 長い根拠・比較検討                                                                 | しない                                                       |
+| `radar/`             | 手法ごとの段階（Adopt / Trial / Assess / Hold）                                    | しない                                                       |
+| `experiments/`       | Trial の記録（仮説・基準・観察・振り返り）                                         | しない                                                       |
+| `skills/<名前>/`     | スキル（`project-bootstrap`・`work-checkpoint`・`implement-review`）とテンプレート | する。`~/.claude/skills/<名前>/` に丸ごと置き換えでコピー    |
+| `agents/`            | subagent の定義（`reviewer`）                                                      | する。`~/.claude/agents/<名前>.md` にコピー                  |
 
-スタック: `typescript-vue`（Adopt）、`python`（Trial）、`github-workflow`（言語に依存しない git / GitHub の実装）
+スタック: `typescript-vue`（Adopt）、`python`（Trial）、`github-workflow`（言語に依存しない git / GitHub の実装）、`claude-code`（言語に依存しないエージェントの分業）
 
 ## 導入・更新
 
@@ -25,6 +26,7 @@ bun run install-rules
 - Claude Code: `~/.claude/rules/dev-standards/` に丸ごと置き換えでコピーする
 - Copilot: `~/.copilot/instructions/dev-standards-*.instructions.md` を生成する（`paths` → `applyTo`）
 - スキル: `skills/<名前>/` を `~/.claude/skills/<名前>/` に丸ごと置き換えでコピーする。dev-standards に無い名前のスキルには触らない
+- subagent: `agents/<名前>.md` を `~/.claude/agents/<名前>.md` にコピーする。dev-standards に無い名前の subagent には触らない
 - `bun run install-rules --check` で、配布先が最新かを確かめる
 - コピーにしている理由: Windows のシンボリックリンクは開発者モードか管理者権限が要り、Cowork ではリポジトリの外を指すリンクのルールが読み込まれない
 

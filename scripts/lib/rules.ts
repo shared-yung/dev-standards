@@ -21,7 +21,7 @@ export type RadarStatus = (typeof RadarStatus)[keyof typeof RadarStatus];
 
 export type Principle = { id: string; tier: Tier };
 export type MappingRow = { id: string; kind: string; note: string };
-export type SizedFile = { path: string; bytes: number };
+export type SizedFile = { path: string; chars: number };
 
 const tierSchema = z.enum(Tier);
 const kindSchema = z.enum(MappingKind);
@@ -156,6 +156,21 @@ export function checkSkillFile(path: string, markdown: string): string[] {
   return errors;
 }
 
+export function checkAgentFile(path: string, markdown: string): string[] {
+  const data = splitFrontmatter(markdown).data ?? {};
+  const file = (path.split('/').at(-1) ?? '').replace(/\.md$/, '');
+  const name = typeof data['name'] === 'string' ? data['name'] : '';
+  const description = typeof data['description'] === 'string' ? data['description'] : '';
+  const errors: string[] = [];
+  if (name !== file) {
+    errors.push(`${path}: name（${name}）がファイル名（${file}）と違います`);
+  }
+  if (description === '') {
+    errors.push(`${path}: description がありません（subagent が呼ばれる条件になる）`);
+  }
+  return errors;
+}
+
 const PLACEHOLDER_NAMES = ['REPO', 'PROJECT', 'OWNER'] as const;
 const mangledPlaceholder = new RegExp(`\\*\\*(${PLACEHOLDER_NAMES.join('|')})\\*\\*`, 'g');
 
@@ -174,9 +189,27 @@ export function checkPlaceholders(path: string, text: string): string[] {
     );
 }
 
-export function checkByteBudget(files: SizedFile[], limit: number): string[] {
-  const total = files.reduce((sum, file) => sum + file.bytes, 0);
+/** 文字数（コードポイント数）。バイト数は日本語を ASCII の3倍に数え、トークン数と比例しない。 */
+export function countChars(text: string): number {
+  return [...text].length;
+}
+
+export function checkCharBudget(files: SizedFile[], limit: number): string[] {
+  const total = files.reduce((sum, file) => sum + file.chars, 0);
   return total > limit
-    ? [`常時読み込むファイルの合計が ${total} バイトで、上限 ${limit} バイトを超えています`]
+    ? [`常時読み込むファイルの合計が ${total} 文字で、上限 ${limit} 文字を超えています`]
     : [];
+}
+
+/** 原則（`###` の見出しから次の見出しまで）が上限の文字数を超えていないかを検査する。 */
+export function checkPrincipleLength(path: string, markdown: string, limit: number): string[] {
+  return markdown.split(/^(?=#{1,3} )/m).flatMap((section) => {
+    const id = headingPattern.exec(section.split(/\r?\n/, 1)[0] ?? '')?.[1];
+    const chars = countChars(section.trimEnd());
+    return id != undefined && chars > limit
+      ? [
+          `${path}: ${id} が ${chars} 文字で、上限 ${limit} 文字を超えています（手段は stacks/、長い根拠は rationale/ へ）`,
+        ]
+      : [];
+  });
 }

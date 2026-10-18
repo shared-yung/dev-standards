@@ -51,6 +51,7 @@ paths:
 | I18N-*  | 実装 | vue-i18n と `no-raw-text`（i18n.md）                                                                         |
 | TEST-*  | 実装 | Vitest projects、MSW（testing.md）                                                                           |
 | SES-01  | 実装 | `work-checkpoint` スキル（言語に依存しない）                                                                 |
+| AGENT-* | 実装 | `stacks/claude-code/`（言語に依存しない）                                                                    |
 
 ## このスタックで特に注意すること
 
