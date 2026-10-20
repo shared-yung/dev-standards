@@ -41,7 +41,7 @@ description: Vue 3 + Quasar (SPA) + TypeScript + bun のリポジトリを、iss
 | `templates/typescript-vue/packages/eslint-config/*` | `packages/eslint-config/`        |
 | `templates/python/project/*`                        | `<project>/`（プロジェクトごと） |
 
-既存のリポジトリには、dev-standards の `bun run sync-repo <リポジトリ> --stack <スタック>` で配る（`bundles/`）。配るのは管理ファイルと雛形だけで、ここにあるテンプレートのすべてではない。sync-repo はプレースホルダを置換しないので、配った雛形（`.github/workflows/ci.yml`・`CLAUDE.md`）は上の表に従って手で置換し、置換漏れを確かめる。
+既存のリポジトリには、dev-standards の `bun run sync-repo <リポジトリ> --stack <スタック>` で配る（`bundles/`）。配るのは管理ファイルと雛形だけで、ここにあるテンプレートのすべてではない。sync-repo はプレースホルダを置換しないので、配った雛形（`.github/workflows/ci.yml`・`CLAUDE.md`・`packages/eslint-config/package.json`）は上の表に従って手で置換し、置換漏れを確かめる。管理ファイルは配るたびに上書きされるので、プレースホルダを置かない（`bun run check` で落ちる）。
 
 ---
 

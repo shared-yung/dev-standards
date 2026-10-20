@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { checkAgentFile, checkPlaceholders, checkSkillFile } from '../scripts/lib/rules';
+import {
+  checkAgentFile,
+  checkLeftoverPlaceholders,
+  checkPlaceholders,
+  checkSkillFile,
+} from '../scripts/lib/rules';
 import { diffTrees } from '../scripts/lib/tree';
 
 describe('checkPlaceholders', () => {
@@ -12,6 +17,25 @@ describe('checkPlaceholders', () => {
   it('Markdown の太字に書き換えられたプレースホルダを見つける（Prettier が __X__ を **X** にする）', () => {
     expect(checkPlaceholders('t/CLAUDE.md', '# **REPO**\n')).toEqual([
       't/CLAUDE.md:1: プレースホルダが崩れています: **REPO**（__REPO__ に戻す）',
+    ]);
+  });
+});
+
+describe('checkLeftoverPlaceholders', () => {
+  it('プレースホルダが無ければ通る', () => {
+    expect(
+      checkLeftoverPlaceholders('t/package.json', '{ "name": "@quiz/eslint-config" }\n'),
+    ).toEqual([]);
+  });
+
+  it('管理ファイルに残ったプレースホルダを4種とも見つける（sync-repo は置換しない）', () => {
+    const text = '__OWNER__\n__REPO__ __PROJECT__\n__PACKAGE__\n';
+
+    expect(checkLeftoverPlaceholders('t/x', text)).toEqual([
+      't/x:1: 管理ファイルにプレースホルダが残っています: __OWNER__（sync-repo は置換しない。雛形にするか、固定の値にする）',
+      't/x:2: 管理ファイルにプレースホルダが残っています: __REPO__（sync-repo は置換しない。雛形にするか、固定の値にする）',
+      't/x:2: 管理ファイルにプレースホルダが残っています: __PROJECT__（sync-repo は置換しない。雛形にするか、固定の値にする）',
+      't/x:3: 管理ファイルにプレースホルダが残っています: __PACKAGE__（sync-repo は置換しない。雛形にするか、固定の値にする）',
     ]);
   });
 });

@@ -5,6 +5,7 @@ import { join, relative } from 'node:path';
 import {
   checkAgentFile,
   checkCharBudget,
+  checkLeftoverPlaceholders,
   checkPlaceholders,
   checkPrincipleFile,
   checkPrincipleLength,
@@ -17,6 +18,7 @@ import {
   parseMappingTable,
 } from './lib/rules';
 import { bundlesForStack, loadDesired } from './lib/sync/bundle';
+import { FileKind } from './lib/sync/plan';
 
 /**
  * 常時読み込む principles/ の合計の上限（文字数）。
@@ -104,13 +106,28 @@ for (const dir of ['skills', 'bundles']) {
 }
 
 // bundles（sync-repo が配る内容）: スタックごとにバンドルを読み、参照しているファイルが揃っていて、
-// 同じターゲットを二重に扱っていないことを確かめる
+// 同じターゲットを二重に扱っていないことと、配るたびに上書きする内容（雛形以外）にプレースホルダが残っていないことを確かめる
 const stackNames = Object.keys(
   JSON.parse(read('bundles/stacks.json')) as Record<string, unknown>,
 ).filter((name) => !name.startsWith('$'));
 for (const stack of stackNames) {
   try {
-    loadDesired(root, bundlesForStack(root, stack));
+    const desired = loadDesired(root, bundlesForStack(root, stack));
+    const upstreamOwned: [string, string][] = [
+      ...[...desired.files]
+        .filter(([, file]) => file.kind === FileKind.Managed)
+        .map(([target, file]): [string, string] => [target, file.content]),
+      ...desired.blocks,
+      ...[...desired.keys, ...desired.items].map(([target, value]): [string, string] => [
+        target,
+        JSON.stringify(value, undefined, 2),
+      ]),
+    ];
+    for (const [target, text] of upstreamOwned) {
+      errors.push(
+        ...checkLeftoverPlaceholders(target, text).map((e) => `bundles（${stack}）: ${e}`),
+      );
+    }
   } catch (error) {
     errors.push(`bundles（${stack}）: ${error instanceof Error ? error.message : String(error)}`);
   }
