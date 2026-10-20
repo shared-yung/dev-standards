@@ -1,5 +1,5 @@
 {
-  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形の CLAUDE.md の __REPO__ は配布後に手で置換する",
+  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形（CLAUDE.md と packages/eslint-config/package.json）の __REPO__ は配布後に手で置換する。管理ファイルにプレースホルダを置くと配布先で置換できない（bun run check で落ちる）ので、名前や版のように配布先ごとに違う値を持つファイルは雛形にする",
   "files": [
     {
       "kind": "managed",
@@ -17,7 +17,7 @@
       "target": "packages/eslint-config/onion.js"
     },
     {
-      "kind": "managed",
+      "kind": "seed",
       "source": "skills/project-bootstrap/templates/typescript-vue/packages/eslint-config/package.json",
       "target": "packages/eslint-config/package.json"
     },

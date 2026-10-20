@@ -171,8 +171,9 @@ export function checkAgentFile(path: string, markdown: string): string[] {
   return errors;
 }
 
-const PLACEHOLDER_NAMES = ['REPO', 'PROJECT', 'OWNER'] as const;
+const PLACEHOLDER_NAMES = ['REPO', 'PROJECT', 'OWNER', 'PACKAGE'] as const;
 const mangledPlaceholder = new RegExp(`\\*\\*(${PLACEHOLDER_NAMES.join('|')})\\*\\*`, 'g');
+const placeholder = new RegExp(`__(?:${PLACEHOLDER_NAMES.join('|')})__`, 'g');
 
 /**
  * テンプレートのプレースホルダ（`__REPO__` など）が崩れていないかを検査する。
@@ -185,6 +186,21 @@ export function checkPlaceholders(path: string, text: string): string[] {
       [...line.matchAll(mangledPlaceholder)].map(
         (match) =>
           `${path}:${index + 1}: プレースホルダが崩れています: ${match[0]}（__${match[1] ?? ''}__ に戻す）`,
+      ),
+    );
+}
+
+/**
+ * sync-repo が配るたびに上書きする内容（管理ファイルなど）に、プレースホルダが残っていないかを検査する。
+ * sync-repo は置換しないので、配布先で置換しても次の sync で戻り、`--check` で差分になる。
+ */
+export function checkLeftoverPlaceholders(path: string, text: string): string[] {
+  return text
+    .split('\n')
+    .flatMap((line, index) =>
+      [...line.matchAll(placeholder)].map(
+        (match) =>
+          `${path}:${index + 1}: 管理ファイルにプレースホルダが残っています: ${match[0]}（sync-repo は置換しない。雛形にするか、固定の値にする）`,
       ),
     );
 }

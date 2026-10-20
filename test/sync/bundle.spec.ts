@@ -22,6 +22,13 @@ describe('スタックごとに配るファイル（bundles/stacks.json）', () 
     expect(files.get('scripts/check-branch-name.sh')).toBe(FileKind.Managed);
   });
 
+  it('typescript-vue は eslint-config の package.json を雛形として配る（名前と依存の版は配布先が持つ）', () => {
+    const files = filesFor('typescript-vue');
+
+    expect(files.get('packages/eslint-config/package.json')).toBe(FileKind.Seed);
+    expect(files.get('packages/eslint-config/onion.js')).toBe(FileKind.Managed);
+  });
+
   it('python は CI を雛形として配り、ESLint の設定は配らない', () => {
     const files = filesFor('python');
 
