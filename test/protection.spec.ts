@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
@@ -59,14 +59,20 @@ describe('setup-branch-protection.ts を実行したとき', () => {
     import.meta.dirname,
     '../skills/project-bootstrap/templates/github-workflow/scripts/setup-branch-protection.ts',
   );
-  // gh を PATH から外し、git リポジトリでない場所で実行する。API へ進めば gh が見つからず
-  // 例外で落ちる（終了コード 1）ので、使い方を出して止まったことと区別できる
-  const run = (...args: string[]) =>
-    spawnSync(process.execPath, [script, ...args], {
-      cwd: mkdtempSync(join(tmpdir(), 'protection-')),
-      env: { ...process.env, PATH: '' },
-      encoding: 'utf8',
-    });
+  // gh を PATH から外し、git リポジトリでない場所で実行する。API へ進めば gh の呼び出しが
+  // 失敗し、例外で落ちる（終了コード 1）ので、使い方を出して止まったこと（2）と区別できる
+  const run = (...args: string[]) => {
+    const cwd = mkdtempSync(join(tmpdir(), 'protection-'));
+    try {
+      return spawnSync(process.execPath, [script, ...args], {
+        cwd,
+        env: { ...process.env, PATH: '' },
+        encoding: 'utf8',
+      });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  };
 
   it('--help は使い方を出して正常終了する', () => {
     const result = run('--help');
