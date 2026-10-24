@@ -4,7 +4,8 @@
   （標準ライブラリと自パッケージは常に許す）
 - ARCH-07: 要素（feature・feature の層・shared のモジュール）の外からは
   入口（`__init__.py`）だけを import する。要素の中からは、自分を含む要素の
-  入口を import しない
+  入口を import しない。`cli.py` から import できるのは feature の入口だけで、
+  実装の組み立ては feature の `install.py` に置く（ARCH-10）
 """
 
 import sys
@@ -15,6 +16,7 @@ import pytest
 PACKAGE = "__PACKAGE__"
 LAYERS = frozenset({"domain", "use_case", "infrastructure"})
 # domain が import してよい外部パッケージ（最上位の名前）。足すときは理由を書く
+# 例: frozenset({"numpy"})  # 画像を配列で扱う計算が domain の関心だから
 DOMAIN_ALLOWED: frozenset[str] = frozenset()
 
 

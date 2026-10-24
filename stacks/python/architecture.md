@@ -16,7 +16,7 @@ paths:
       __init__.py          # feature の入口（ARCH-07）
       domain/  use_case/  infrastructure/
     shared/                # feature をまたぐ共有コード
-    cli.py                 # 合成ルート（ARCH-10）
+    cli.py                 # 起動処理。feature の組み立てを呼ぶだけ（ARCH-10）
   tests/                   # 層ごとにフォルダを分ける
   docs/{spec,architecture,adr}/
 ```
@@ -67,5 +67,6 @@ layers = ["infrastructure", "use_case", "domain"]
 
 ## 合成ルート（ARCH-10）
 
-- `cli.py`（または feature の `install.py`）だけが infrastructure の具体的な実装を生成し、use case に port（`typing.Protocol`）として渡す
+- feature ごとの組み立て（`features/<feature>/install.py`）だけが infrastructure の具体的な実装を生成し、use case に port（`typing.Protocol`）として渡す。組み立ては feature の入口から公開し、`cli.py` はそれを呼ぶだけにする（原則 ARCH-10。`cli.py` が層の入口を直接 import すると ARCH-07 のテストで落ちる）
+- `install.py` は feature の内側なので、各層の入口（`features.<feature>.infrastructure` など）を import できる。層の内部モジュールは import できない
 - port は use case 側に `Protocol` で定義する（構造的部分型なので、実装側は port を import しなくてよい）

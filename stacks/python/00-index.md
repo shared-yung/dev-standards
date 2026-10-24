@@ -39,7 +39,7 @@ paths:
 | ARCH-07 | 実装   | 各要素の `__init__.py` に `__all__` を明示。入口以外への import は pytest のテストで落とす（`tests/test_architecture.py`。architecture.md） |
 | ARCH-08 | 実装   | パッケージ名からの絶対 import。相対 import は同じパッケージ内だけ（ruff の TID252）                                                         |
 | ARCH-09 | 実装   | import-linter の `acyclic_siblings` 契約（architecture.md）                                                                                 |
-| ARCH-10 | 実装   | `cli.py` などの合成ルートで実装を選ぶ                                                                                                       |
+| ARCH-10 | 実装   | feature ごとの `install.py` で実装を選ぶ。`cli.py` は組み立てを呼ぶだけ（architecture.md）                                                  |
 | ARCH-11 | 対象外 | DI コンテナを使わない。合成ルートから引数で渡す（Python の慣習。キーが無いので漏れようがない）                                              |
 | ARCH-12 | 対象外 | UI を持たない CLI が対象                                                                                                                    |
 | CODE-01 | 実装   | `enum.StrEnum`（ネイティブの enum を使う。適合性の確認 1）                                                                                  |
