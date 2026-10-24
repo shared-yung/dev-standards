@@ -43,21 +43,22 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 
 1. 空のフォルダで `git init -b main`
 2. dev-standards で `bun run sync-repo <対象のパス> --stack <スタック>`
-3. 配った雛形のプレースホルダを置換する（`CLAUDE.md`・`.github/workflows/ci.yml`・`docs/`・typescript-vue の `.claude/launch.json` と `packages/eslint-config/package.json`）
-4. **typescript-vue だけ**: github-workflow が部分管理している4つのファイルに、`templates/typescript-vue/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）
-   - `package.json` ← `additions/package.json` のキーを足す（`type`・`prepare`・commitlint・lefthook は sync-repo が置いたものを残す）
+3. 配った雛形のプレースホルダを置換する。対象は下の git grep で出たファイル（`CLAUDE.md`・`.github/workflows/ci.yml`・`docs/workflow/` など。スタックで違う）
+4. ルートに `docs/adr/` を作る（`.gitkeep` を置く）。リポジトリ全体にまたがる判断と、対応表からの逸脱の理由はここに書く（REPO-05）
+5. **typescript-vue だけ**: github-workflow が部分管理している4つのファイルに、`templates/typescript-vue/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）
+   - `package.json` ← `additions/package.json` のキーを足す（`type`・`prepare`・commitlint・lefthook は sync-repo が置いたものを残す）。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
    - `.gitignore` ← `additions/gitignore.txt` を印付きブロックの**外**に足す
    - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す
    - `.claude/settings.json` ← `additions/claude-settings.json` の `PostToolUse` を足す
-5. `bun install`（`prepare` で lefthook の hook が登録される）
-6. 初回コミットを `main` に置く。**root commit のみ issue 参照が免除される**
+6. `bun install`（`prepare` で lefthook の hook が登録される）
+7. 初回コミットを `main` に置く（`bun.lock` も入れる）。**root commit のみ issue 参照が免除される**
 
 ### 検証ゲート
 
 - `bun run sync-repo <対象のパス> --check` が「最新です」
 - 置換漏れが無い（上の git grep が何も出さない）
-- `git ls-files --eol` が全て `i/lf w/lf`
-- `Refs: #N` 無しのコミットが `commit-msg` で**落ちる**（2つ目のコミットで確かめる。作ったコミットは消す）
+- `git ls-files --eol` に `i/lf w/lf` 以外が無い（空ファイルの `i/none w/none` は除く）
+- `Refs: #N` 無しのコミットが `commit-msg` で**拒否される**（2つ目のコミットで確かめる）
 
 ## フェーズ 2: GitHub 側の初期設定
 
@@ -125,7 +126,9 @@ bun create quasar@latest __PROJECT__ \
 - `pnpm-workspace.yaml` を削除（bun 方針と競合）
 - `.editorconfig` と `.vscode/` を削除（ルートに集約）
 - `tsconfig.json` を `["./.quasar/tsconfig.json", "../tsconfig.base.json"]` の**配列 extends** に
-- ルートの `package.json` の `workspaces` と `eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
+- ルートの `package.json` の `workspaces` にプロジェクトを足す。`eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
+- プロジェクトの `package.json` に `lint`・`typecheck`・`test` のスクリプトを足す（create-quasar は作らない。無いとルートの `--filter '*'` が素通りする）。プロジェクト側の `package.json`・`eslint.config.js`・`vitest.config.ts` の雛形はまだ無い。`docs/tooling/eslint-boundaries.md` の例と、TS-3・TS-4 の要件から書く
+- `__PROJECT__/docs/{spec,architecture,adr}/` を作る（`.gitkeep` を置く。REPO-05）
 - `lefthook.yml` の `lint-__PROJECT__` がこのプロジェクトを指していることを確かめる。**`git add {staged_files}` を直接書かない**（`git commit` 経由だとルート直下に二重にコミットされる。`references/pitfalls.md`）
 - `src/router/index.ts` の `import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history'` の直前に、理由つきの `// eslint-disable-next-line no-restricted-syntax -- 値の集合を持つのは Quasar 側` を付ける。**文字列との比較を禁じる共有ルールで、scaffold 直後から lint が落ちる**ため。取りうる値を決めているのは Quasar で、こちらで定数を定義しても何も保証しない
 - `src/stores/index.ts` の空の `declare module 'pinia' { interface PiniaCustomProperties {} }` を削除する。中身の無い拡張は効果が無く、`no-empty-object-type` で落ちる。scaffold は理由の無い disable で黙らせているが、disable には理由が必須なので、雛形のままだと lint が落ちる
@@ -133,10 +136,10 @@ bun create quasar@latest __PROJECT__ \
 
 ### 検証ゲート
 
-- ルートから `bun run lint` / `typecheck` / `test` がプロジェクトまで到達する
-- `bun run build` が通り Build mode が SPA
+- ルートから `bun run lint` / `typecheck` / `test` がプロジェクトまで到達する。scaffold のページ（`MainLayout.vue`・`ErrorNotFound.vue`）のベタ書き文言は `no-raw-text` で落ちる。TS-5 で直すので、ここではそれ以外が0件であることを見る
+- `__PROJECT__/` で `bun run build` が通り Build mode が SPA（ルートに `build` は無い）
 - **意図的に未使用変数を含むファイルを staged にして `pre-commit` が落ちる**（ルートからの lint はプロジェクトを素通りするため、ここを確認しないと気づけない）
-- **git worktree 上で**プロジェクト配下のファイルを `git commit` でコミットし、`git show --stat HEAD` にプロジェクトフォルダの prefix が無い重複が無い（`lefthook run` の単独実行と、worktree ではない通常のチェックアウトでは再現しない）
+- **git worktree 上で**（作った worktree でも `bun install` してから）プロジェクト配下のファイルを `git commit` でコミットし、`git show --stat HEAD` にプロジェクトフォルダの prefix が無い重複が無い（`lefthook run` の単独実行と、worktree ではない通常のチェックアウトでは再現しない）
 
 ## TS-3: オニオン境界
 
@@ -148,7 +151,7 @@ bun create quasar@latest __PROJECT__ \
 
 ### 検証ゲート
 
-意図的な違反で確認する。**通ることの確認だけでは不十分。**
+意図的な違反で確認する。**通ることの確認だけでは不十分。** 違反を置く `.vue` は2語以上の名前（`ZzAuditView.vue` など）にする（1語だと `vue/multi-word-component-names` が混ざる）。「公開 API 経由」は feature 直下の入口（`@/features/<f>`）のことで、`@/features/<f>/domain` のような層の入口は他の feature から使えない。
 
 | 検証                                                                                                | 期待   |
 | --------------------------------------------------------------------------------------------------- | ------ |
@@ -225,7 +228,8 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 1. `__PROJECT__/` を作り、`templates/python/project/` の `pyproject.toml` と `.gitignore` を置いて置換する
 2. `src/__PACKAGE__/`（`__init__.py`・合成ルートの `cli.py`）、`src/__PACKAGE__/shared/`、`tests/`、`docs/{spec,architecture,adr}/` を作る。最初の feature を `src/__PACKAGE__/features/<feature>/{domain,use_case,infrastructure}/` に作り、`pyproject.toml` の import-linter の契約（コメントになっている `layers`）を有効にして `containers` に足す
-3. `__PROJECT__/` で `uv sync`（`uv.lock` ができる）。`.github/workflows/ci.yml` の matrix にこのプロジェクトがあることを確かめる
+3. `__PROJECT__/` で `uv sync`（`uv.lock` ができる。初回は時間がかかる。uv のキャッシュと別のドライブだと hardlink の警告が出るので、そのときは `UV_LINK_MODE=copy`）。`.github/workflows/ci.yml` の matrix にこのプロジェクトがあることを確かめる
+4. Python の補助スクリプトは `uv run python` で動かす（Windows では素の `python` がストアのスタブのことがある）
 
 ### 検証ゲート
 
@@ -235,6 +239,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 - 意図的な違反が**落ちる**
   - domain から infrastructure を import する（`lint-imports` の `layers` 契約）
   - domain で `time.time()` / `random` を使う（ruff の TID251）。infrastructure では**落ちない**
+  - use_case で `from ..domain import x`（親パッケージへの相対 import。ruff の TID252）。`from .x import y` は**落ちない**
   - `StrEnum` の `match` で case を1つ漏らす（pyright の `assert_never`）
 - 落ちないものも確かめて、強制範囲を取り違えないこと（`rationale/standards-audit.md` の「dev-standards 側に残った問題」）
 
@@ -242,7 +247,11 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 ## 最後のゲート: 監査
 
-`standards-audit` スキルを流す。立ち上げ直後なので、前提のコードがまだ無い行は「該当なし」になる。**「不足」と「逸脱が未記録」が0件**であることを確かめ、残ったものは直すか、理由を対応表かプロジェクトの ADR に書く。
+`standards-audit` スキルを流す。立ち上げ直後なので、前提のコードがまだ無い行は「該当なし」になる。**「不足」と「逸脱が未記録」が0件**であることを確かめる。残ったものは次のどれかにする。
+
+- このリポジトリで直す（手順の漏れ）
+- 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・CODE-06・TEST-04・05 がこれにあたる（2026-10 時点）
 
 ## 全フェーズ共通の原則
 

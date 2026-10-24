@@ -20,15 +20,23 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# プロジェクト名（__PROJECT__）とパッケージ名（__PACKAGE__）が違っても wheel に入るように明示する
+[tool.hatch.build.targets.wheel]
+packages = ["src/__PACKAGE__"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "PT"]
-extend-select = ["TID251"]
+extend-select = ["TID251", "TID252"]
 # 文言・コメントは日本語で書くので、全角の括弧や読点を「紛らわしい文字」として扱わない
 ignore = ["RUF001", "RUF002", "RUF003"]
+
+# 親パッケージへの相対 import を禁じる。相対 import は同じパッケージの中だけ（ARCH-08）
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
 
 # 現在時刻・時間の経過・乱数は port で受け取る（CODE-07）
 [tool.ruff.lint.flake8-tidy-imports.banned-api]

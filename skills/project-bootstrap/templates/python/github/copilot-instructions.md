@@ -5,7 +5,7 @@
 要点だけ再掲する。
 
 - 作業は GitHub Issue 起点。issue のない変更は入れない
-- ブランチは `<type>/<issue番号>-<slug>`（例 `feat/42-line-extraction`）。`main` への直 push は禁止
+- ブランチは `<type>/<issue番号>-<slug>`（例 `feat/42-csv-export`）。`main` への直 push は禁止
 - コミットは Conventional Commits + フッターに `Refs: #<番号>`。scope は feature 名
 - domain / use_case はテストを先に書く（TDD）。バグ修正は層を問わず再現テストから
   - 実装の前に、テストが期待した理由で落ちた出力を示す。歩幅は明白な実装を基本にし、テストリストは1件ずつ進める

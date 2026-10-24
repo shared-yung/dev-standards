@@ -2,8 +2,7 @@
   "name": "__REPO__",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "__PROJECT__"
+    "packages/*"
   ],
   "scripts": {
     "lint": "eslint . && bun run --filter '*' lint",
