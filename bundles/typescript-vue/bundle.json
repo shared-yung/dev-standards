@@ -1,5 +1,5 @@
 {
-  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形（CLAUDE.md と packages/eslint-config/package.json）の __REPO__ は配布後に手で置換する。管理ファイルにプレースホルダを置くと配布先で置換できない（bun run check で落ちる）ので、名前や版のように配布先ごとに違う値を持つファイルは雛形にする",
+  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）。管理ファイルにプレースホルダを置くと配布先で置換できない（bun run check で落ちる）ので、名前や版のように配布先ごとに違う値を持つファイルは雛形にする。package.json・.gitignore・lefthook.yml・.claude/settings.json は github-workflow が扱うので、このスタックの分は手で書き足す",
   "files": [
     {
       "kind": "managed",
@@ -27,14 +27,149 @@
       "target": "packages/eslint-config/vue.js"
     },
     {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/scripts/lint-project.sh",
+      "target": "scripts/lint-project.sh"
+    },
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/github-workflow/claude/hooks/remind-test-edit.mjs",
+      "target": ".claude/hooks/remind-test-edit.mjs"
+    },
+    {
       "kind": "seed",
       "source": "skills/project-bootstrap/templates/typescript-vue/github/workflows/ci.yml",
       "target": ".github/workflows/ci.yml"
     },
     {
       "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/github/copilot-instructions.md",
+      "target": ".github/copilot-instructions.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/claude/launch.json",
+      "target": ".claude/launch.json"
+    },
+    {
+      "kind": "seed",
       "source": "skills/project-bootstrap/templates/typescript-vue/root/CLAUDE.md",
       "target": "CLAUDE.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/root/.editorconfig",
+      "target": ".editorconfig"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/root/.prettierrc.json",
+      "target": ".prettierrc.json"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/root/.prettierignore",
+      "target": ".prettierignore"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/root/eslint.config.js",
+      "target": "eslint.config.js"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/root/tsconfig.base.json",
+      "target": "tsconfig.base.json"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/branch-protection.md",
+      "target": "docs/workflow/branch-protection.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/commit-and-branch.md",
+      "target": "docs/workflow/commit-and-branch.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/issue-driven.md",
+      "target": "docs/workflow/issue-driven.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/remote-guardrails.md",
+      "target": "docs/workflow/remote-guardrails.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/tdd.md",
+      "target": "docs/workflow/tdd.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/README.md",
+      "target": "docs/README.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/api-client.md",
+      "target": "docs/architecture/api-client.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/factories-and-composables.md",
+      "target": "docs/architecture/factories-and-composables.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/i18n.md",
+      "target": "docs/architecture/i18n.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/module-entry.md",
+      "target": "docs/architecture/module-entry.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/nondeterministic-inputs.md",
+      "target": "docs/architecture/nondeterministic-inputs.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/onion-layers.md",
+      "target": "docs/architecture/onion-layers.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/pinia.md",
+      "target": "docs/architecture/pinia.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/typescript-conventions.md",
+      "target": "docs/architecture/typescript-conventions.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/architecture/vue-sfc.md",
+      "target": "docs/architecture/vue-sfc.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/tooling/eslint-boundaries.md",
+      "target": "docs/tooling/eslint-boundaries.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/tooling/setup.md",
+      "target": "docs/tooling/setup.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/typescript-vue/docs/tooling/testing.md",
+      "target": "docs/tooling/testing.md"
     }
   ]
 }

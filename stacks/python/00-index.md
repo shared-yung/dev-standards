@@ -37,7 +37,7 @@ paths:
 | ARCH-05 | 実装   | 外部の生成型は infrastructure だけ（今のところ該当なし）                                                                               |
 | ARCH-06 | 実装   | 境界だけで検証（dataclass / 必要なら pydantic を infrastructure に）                                                                   |
 | ARCH-07 | 実装   | 各要素の `__init__.py` に `__all__` を明示（architecture.md、**未検証**）                                                              |
-| ARCH-08 | 実装   | パッケージ名からの絶対 import。相対 import は同じパッケージ内だけ                                                                      |
+| ARCH-08 | 実装   | パッケージ名からの絶対 import。相対 import は同じパッケージ内だけ（ruff の TID252）                                                    |
 | ARCH-09 | 実装   | import-linter の `acyclic_siblings` 契約（**未検証**）                                                                                 |
 | ARCH-10 | 実装   | `cli.py` などの合成ルートで実装を選ぶ                                                                                                  |
 | ARCH-11 | 対象外 | DI コンテナを使わない。合成ルートから引数で渡す（Python の慣習。キーが無いので漏れようがない）                                         |

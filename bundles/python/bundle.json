@@ -1,10 +1,45 @@
 {
-  "$comment": "Python のスタック（stacks/python）。github-workflow と組み合わせて配る。pyproject.toml はプロジェクトのフォルダごとに置くので配らない（templates/python/project/ を手で置く）。sync-repo はプレースホルダを置換しないので、雛形の ci.yml の __PROJECT__ は配布後に手で置換する",
+  "$comment": "Python のスタック（stacks/python）。github-workflow と組み合わせて配る。pyproject.toml と .gitignore はプロジェクトのフォルダごとに置くので配らない（templates/python/project/ を手で置く）。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）",
   "files": [
     {
       "kind": "seed",
       "source": "skills/project-bootstrap/templates/python/github/workflows/ci.yml",
       "target": ".github/workflows/ci.yml"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/python/github/copilot-instructions.md",
+      "target": ".github/copilot-instructions.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/python/root/CLAUDE.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/root/.editorconfig",
+      "target": ".editorconfig"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/branch-protection.md",
+      "target": "docs/workflow/branch-protection.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/commit-and-branch.md",
+      "target": "docs/workflow/commit-and-branch.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/issue-driven.md",
+      "target": "docs/workflow/issue-driven.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/remote-guardrails.md",
+      "target": "docs/workflow/remote-guardrails.md"
     }
   ]
 }

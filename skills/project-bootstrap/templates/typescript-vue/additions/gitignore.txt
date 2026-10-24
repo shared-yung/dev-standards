@@ -1,12 +1,6 @@
-node_modules/
 dist/
 .quasar/
 coverage/
-*.log
-
-.env
-.env.*
-!.env.example
 
 .DS_Store
 Thumbs.db
@@ -17,5 +11,3 @@ Thumbs.db
 
 test-results/
 playwright-report/
-
-.claude/settings.local.json

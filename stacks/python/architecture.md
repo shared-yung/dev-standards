@@ -56,7 +56,7 @@ layers = ["infrastructure", "use_case", "domain"]
 
 ## import の書き方（ARCH-08）と循環（ARCH-09）
 
-- パッケージ名からの絶対 import（`from <pkg>.features.x.domain import ...`）。相対 import は同じパッケージ内だけ
+- パッケージ名からの絶対 import（`from <pkg>.features.x.domain import ...`）。相対 import は同じパッケージ内だけで、親パッケージへの相対 import（`from ..x`）は ruff の TID252（`ban-relative-imports = "parents"`）で落とす
 - 循環は `acyclic_siblings` 契約で検査する（**未検証**）
 
 ## 合成ルート（ARCH-10）

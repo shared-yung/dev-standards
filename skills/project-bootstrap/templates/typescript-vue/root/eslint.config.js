@@ -29,4 +29,9 @@ export default [
       },
     },
   },
+  {
+    // scripts/ は sync-repo が配る CLI のスクリプト（管理ファイル）で、結果を console に出す
+    files: ['scripts/**'],
+    rules: { 'no-console': 'off' },
+  },
 ];

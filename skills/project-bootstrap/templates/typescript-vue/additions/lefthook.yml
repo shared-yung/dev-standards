@@ -1,3 +1,4 @@
+# sync-repo が置いた lefthook.yml（extends だけ）の後ろに書き足す。
 # ESLint の flat config はサブディレクトリへカスケードしないため、
 # ルートと各プロジェクトで別々に eslint を起動する必要がある。
 # lefthook の `root:` を使うとその作業ディレクトリで {staged_files} が解決される。
@@ -18,23 +19,3 @@ pre-commit:
     format:
       glob: '*.{js,mjs,cjs,ts,vue,json,md,yml,yaml,scss,html}'
       run: bun x prettier --write {staged_files} && git add {staged_files}
-
-commit-msg:
-  commands:
-    commitlint:
-      run: sh scripts/commit-msg.sh {1}
-
-# git pull の後に、マージ済みのローカルブランチを消す（scripts/prune-merged-branches.sh）
-post-merge:
-  commands:
-    prune-merged-branches:
-      run: sh scripts/prune-merged-branches.sh
-
-pre-push:
-  commands:
-    branch-name:
-      run: sh scripts/check-branch-name.sh
-    # main への push と削除を拒否する（ブランチ保護が使えない無料プランの private でも効くように手元で止める）
-    push-target:
-      run: bun scripts/check-push-target.ts
-      use_stdin: true
