@@ -1,10 +1,54 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { rejectedPushes } from '../skills/project-bootstrap/templates/github-workflow/scripts/check-push-target';
 import {
+  Invocation,
   RulesetAction,
   decideRulesetAction,
+  parseInvocation,
   settingsDrift,
 } from '../skills/project-bootstrap/templates/github-workflow/scripts/setup-branch-protection';
+
+describe('parseInvocation', () => {
+  it('引数が無ければ origin のリポジトリに設定する', () => {
+    expect(parseInvocation([], () => 'me/repo')).toEqual({
+      type: Invocation.Run,
+      repo: 'me/repo',
+      checkOnly: false,
+    });
+  });
+
+  it('owner/repo と --check を受け付ける（順不同）', () => {
+    const currentRepo = vi.fn(() => 'me/repo');
+
+    expect(parseInvocation(['--check', 'other/repo'], currentRepo)).toEqual({
+      type: Invocation.Run,
+      repo: 'other/repo',
+      checkOnly: true,
+    });
+    expect(currentRepo).not.toHaveBeenCalled();
+  });
+
+  it('--help と -h は使い方を出す（リポジトリを調べない）', () => {
+    const currentRepo = vi.fn(() => 'me/repo');
+
+    expect(parseInvocation(['--help'], currentRepo)).toEqual({ type: Invocation.Help });
+    expect(parseInvocation(['-h', '--check'], currentRepo)).toEqual({ type: Invocation.Help });
+    expect(currentRepo).not.toHaveBeenCalled();
+  });
+
+  it('未知の引数・owner/repo でない引数・2つ目のリポジトリは止める（リポジトリを調べない）', () => {
+    const currentRepo = vi.fn(() => 'me/repo');
+
+    for (const args of [['--dry-run'], ['-c'], ['repo-only'], ['a/b', 'c/d'], ['a/b/c']]) {
+      expect(parseInvocation(args, currentRepo)).toMatchObject({ type: Invocation.Invalid });
+    }
+    expect(currentRepo).not.toHaveBeenCalled();
+  });
+
+  it('origin のリポジトリが決まらなければ止める', () => {
+    expect(parseInvocation(['--check'], () => '')).toMatchObject({ type: Invocation.Invalid });
+  });
+});
 
 describe('settingsDrift', () => {
   const expected = { delete_branch_on_merge: true, allow_merge_commit: false };
