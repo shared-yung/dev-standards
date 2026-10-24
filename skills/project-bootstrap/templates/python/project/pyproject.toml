@@ -10,7 +10,10 @@ __PROJECT__ = "__PACKAGE__.cli:main"
 
 [dependency-groups]
 dev = [
-  "import-linter>=2.5",
+  # tests/test_architecture.py が import する（ARCH-04・ARCH-07）。import-linter の依存でもある
+  "grimp>=3.17",
+  # acyclic_siblings 契約（ARCH-09）は 2.15 で確かめた
+  "import-linter>=2.15",
   "pyright>=1.1.406",
   "pytest>=8.4",
   "ruff>=0.13",
@@ -75,6 +78,15 @@ addopts = ["--import-mode=importlib"]
 [tool.importlinter]
 root_package = "__PACKAGE__"
 include_external_packages = true
+
+# 同じ親を持つモジュールどうしの循環を禁止する（ARCH-09）。layers 契約は層の中の循環を見ない
+[[tool.importlinter.contracts]]
+name = "循環: 同じ親を持つモジュールどうしが循環しない"
+type = "acyclic_siblings"
+ancestors = ["__PACKAGE__"]
+
+# domain の外部依存（ARCH-04）と入口（ARCH-07）は tests/test_architecture.py で確かめる
+# （import-linter の forbidden は禁止リストで、protected は要素ごとに契約を書くことになるため）
 
 # feature を作ったら、feature ごとに containers へ足す（ARCH-01, ARCH-03）
 # [[tool.importlinter.contracts]]
