@@ -213,12 +213,6 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 
 ## Git / GitHub
 
-### squash merge 後に git branch -d が効かない
-
-squash merge は別のコミットを作るため、git はブランチを未マージと判定する。内容は取り込まれているので `-D` で削除する。
-
-**手で `-D` を打たない。** `git pull` の後に `post-merge` が `scripts/prune-merged-branches.sh` を呼び、追跡先が `[gone]` でローカルの先端を head とするマージ済み PR があるものだけを `-D` で消す。前提はリポジトリ設定の `delete_branch_on_merge`（`setup-branch-protection.ts` が有効にする）。無いと追跡先が `[gone]` にならず、何も消えない。
-
 ### pull_request の closed イベントはどのワークフローで動くか
 
 **head 側のワークフローファイルが使われる。** そのためワークフローを追加した PR 自身のマージで発火する。
@@ -246,11 +240,3 @@ GitHub の仕様で変更不可。ただし `required_approving_review_count: 0`
 ruleset 作成時、GitHub が `require_extra_approval_for_unattributed_changes: true` を既定で付ける。**コミットの email が GitHub アカウントに紐づいていないと追加承認を要求される。**
 
 `git config user.email` が `<id>+<name>@users.noreply.github.com` 形式なら紐づく。作業前に確認する。
-
-### ヒアドキュメント内に JSON を埋め込まない
-
-Prettier の整形も構文チェックも効かず、実行するまで壊れていることに気づけない。別ファイルに置いて読み込む。送信前に node で構文検証を挟むとなお良い。
-
-### フックの誤検出（既知の副作用）
-
-リモート操作のガードレールはコマンド文字列全体を走査するため、**`gh api` などの文字列を含むファイルを書き出すコマンドも承認待ちになる**。`cd x && gh issue create` を拾うためのトレードオフとして許容する。

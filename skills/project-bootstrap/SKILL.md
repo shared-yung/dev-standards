@@ -62,7 +62,7 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 
 ## フェーズ 2: GitHub 側の初期設定
 
-1. `gh repo create __OWNER__/__REPO__ --private --source=. --push`（リモート操作。GR-04 のとおり承認を取る）
+1. `gh repo create <オーナー>/<リポジトリ> --private --source=. --push`（リモート操作。GR-04 のとおり承認を取る）
 2. `bun scripts/setup-branch-protection.ts` でリポジトリを保護する（`docs/workflow/branch-protection.md`）
    - リポジトリ設定（マージ後のブランチ削除・squash のみ）はどのプランでも設定される
    - ruleset は無料プランの private リポジトリでは使えない（403）。その場合は警告を出して続け、**最後の層なし**で運用する（main への push は pre-push で止め、CI の結果はマージする人が確かめる）
