@@ -10,6 +10,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # 検査の抑制に理由があるか（CODE-06）。リポジトリ全体の *.py を1回で調べる
+  suppressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun scripts/check-suppressions.ts
+
   check:
     runs-on: ubuntu-latest
     # プロジェクトを足したら、matrix に足す（REPO-04）

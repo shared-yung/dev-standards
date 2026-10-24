@@ -76,9 +76,16 @@ extend-select = ["TID251"]
 
 ## 検査の抑制（CODE-06）
 
-- pyright: `# pyright: ignore[<rule>] -- 理由`（ルール名を必ず指定する）
+- pyright: `# pyright: ignore[<rule>] -- 理由`（ルール名を必ず指定する）。`# type: ignore` は使わない
 - ruff: `# noqa: <code> -- 理由`。プロジェクト全体で外すルールは `pyproject.toml` の `ignore` / `per-file-ignores` に理由のコメントつきで書く
+- ファイル単位の抑制（`# ruff: noqa`、`# pyright: basic`、`# pyright: reportXxx=false`）は使わない
 - 型情報の無いライブラリ（例: scikit-image）は、使う行だけ `reportUnknown*` を理由つきで抑制する
+- 強制（2026-10-24 に ruff 0.13・pyright 1.1.406 で、意図的な違反を置いて確認）:
+  - 規則を指定しない抑制: ruff の PGH003（`# type: ignore` / `# pyright: ignore`）と PGH004（`# noqa`）
+  - 使われていない抑制: ruff の RUF100（`noqa`）と pyright の `reportUnnecessaryTypeIgnoreComment = "error"`
+  - `# type: ignore`: pyright の `enableTypeIgnoreComments = false` で効かなくなる（抑制したはずのエラーが出る）
+  - 理由の無い抑制・`# type: ignore`・ファイル単位の抑制: `scripts/check-suppressions.ts`（python のバンドルで配る。CI の `suppressions` ジョブ）。ruff・pyright には理由を求める規則が無い。`-- 理由` を付けても ruff・pyright の抑制はそのまま効く
+- 検出できないもの: 1行のコメントの中で、抑制の後に `--` を含む別の文を書いたもの（理由として扱う）
 
 ## 日本語を使うときの ruff 設定
 
