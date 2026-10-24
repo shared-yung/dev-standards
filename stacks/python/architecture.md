@@ -13,7 +13,8 @@ paths:
   pyproject.toml  uv.lock
   src/<pkg>/
     features/<feature>/
-      __init__.py          # feature の入口（ARCH-07）
+      __init__.py          # feature の入口（ARCH-07）。組み立てを再公開する
+      install.py           # 組み立て。実装を選んで use case に渡す（ARCH-10）
       domain/  use_case/  infrastructure/
     shared/                # feature をまたぐ共有コード
     cli.py                 # 起動処理。feature の組み立てを呼ぶだけ（ARCH-10）
