@@ -1,6 +1,7 @@
 // Python の検査の抑制に理由が書いてあるかを確かめる（CODE-06）。
 //
-//   bun scripts/check-suppressions.ts   git が追跡している *.py をすべて調べる
+//   bun scripts/check-suppressions.ts   カレントディレクトリ以下で git が追跡している *.py を調べる
+//                                       （CI はプロジェクトのフォルダから `bun ../scripts/check-suppressions.ts`）
 //
 // 規則の無い抑制は ruff の PGH003 / PGH004、使われていない抑制は ruff の RUF100 と pyright の
 // reportUnnecessaryTypeIgnoreComment が落とす。ここではそれらで落とせないものだけを見る。
@@ -38,8 +39,10 @@ function comments(source: string): { line: number; text: string }[] {
       while (i < source.length && !source.startsWith(quote, i)) {
         // 1文字の引用符の文字列は行をまたがない（閉じ忘れでも次の行から読み直す）
         if (quote.length === 1 && source[i] === '\n') break;
-        if (source[i] === '\n') line += 1;
-        i += source[i] === '\\' ? 2 : 1;
+        // エスケープは次の1文字ごと飛ばす。行継続（\ と改行）なら行も進める
+        const step = source[i] === '\\' ? 2 : 1;
+        if (source[i + step - 1] === '\n') line += 1;
+        i += step;
       }
       if (source.startsWith(quote, i)) i += quote.length;
     } else {
