@@ -1,3 +1,7 @@
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { rejectedPushes } from '../skills/project-bootstrap/templates/github-workflow/scripts/check-push-target';
 import {
@@ -47,6 +51,42 @@ describe('parseInvocation', () => {
 
   it('origin のリポジトリが決まらなければ止める', () => {
     expect(parseInvocation(['--check'], () => '')).toMatchObject({ type: Invocation.Invalid });
+  });
+});
+
+describe('setup-branch-protection.ts を実行したとき', () => {
+  const script = join(
+    import.meta.dirname,
+    '../skills/project-bootstrap/templates/github-workflow/scripts/setup-branch-protection.ts',
+  );
+  // gh を PATH から外し、git リポジトリでない場所で実行する。API へ進めば gh が見つからず
+  // 例外で落ちる（終了コード 1）ので、使い方を出して止まったことと区別できる
+  const run = (...args: string[]) =>
+    spawnSync(process.execPath, [script, ...args], {
+      cwd: mkdtempSync(join(tmpdir(), 'protection-')),
+      env: { ...process.env, PATH: '' },
+      encoding: 'utf8',
+    });
+
+  it('--help は使い方を出して正常終了する', () => {
+    const result = run('--help');
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('使い方:');
+  });
+
+  it('知らない引数では使い方を出して止まる', () => {
+    const result = run('--dry-run');
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain('知らない引数です: --dry-run');
+  });
+
+  it('対象のリポジトリが決まらなければ使い方を出して止まる', () => {
+    const result = run('--check');
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain('対象のリポジトリが決まりません');
   });
 });
 
