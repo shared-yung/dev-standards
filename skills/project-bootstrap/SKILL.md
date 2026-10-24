@@ -89,7 +89,7 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 - `gh issue list` がプロンプト無しで通る
 - `gh issue create` で承認プロンプトが出る。**理由に「GitHub リモートに影響します」と表示されればフック由来**
 - `gh pr merge` は deny で拒否される（プロンプトすら出ない）
-- typescript-vue: `remind-test-edit.mjs` は `docs/workflow/tdd.md` の「動作確認」のコマンドで確かめる（既存テストの書き換えでだけ `additionalContext` が出る）
+- typescript-vue・python: `.claude/settings.json` の `PostToolUse` に `remind-test-edit.mjs` が登録されている（フェーズ 1 の `additions` の書き足し漏れはここで分かる）。フック自体は `docs/workflow/tdd.md` の「動作確認」のコマンドで確かめる（既存テストの書き換えでだけ `additionalContext` が出る）
 
 ---
 
@@ -242,7 +242,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
   - use_case で `from ..domain import x`（親パッケージへの相対 import。ruff の TID252）。`from .x import y` は**落ちない**
   - `StrEnum` の `match` で case を1つ漏らす（pyright の `assert_never`）
   - domain にテストの無い分岐を置く（`pytest --cov` の閾値）。infrastructure では**落ちない**
-- 既存のテスト（`tests/**/test_*.py`）を Edit で書き換えると、`remind-test-edit.mjs` の注意が出る（`docs/workflow/tdd.md` の「動作確認」）
+- Claude Code で既存のテスト（`tests/**/test_*.py`）を Edit で書き換えると、`remind-test-edit.mjs` の注意が出る。フックを直接呼ぶ「動作確認」のコマンドでは `.claude/settings.json` への登録漏れが分からないので、実際の Edit で確かめる
 - 落ちないものも確かめて、強制範囲を取り違えないこと（`rationale/standards-audit.md` の「dev-standards 側に残った問題」）
 
 ---
