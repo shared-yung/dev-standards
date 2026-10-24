@@ -75,10 +75,10 @@
 
 ### 既存テストの書き換えへの注意（Claude Code のフック）
 
-`.claude/hooks/remind-test-edit.mjs`（`PostToolUse`、`Edit`）が、`test/**/*.spec.ts` の既存の記述を書き換えたときに、上のルールをエージェントの文脈に差し込む。エージェントがテストを書き換えて通してしまうのは作業の終盤でテストが落ちたときで、冒頭で読んだ規約はそこでは効きにくいため、書き換えた瞬間に思い出させる。
+`.claude/hooks/remind-test-edit.mjs`（`PostToolUse`、`Edit`）が、既存のテスト（TypeScript は `test/**/*.spec.ts`、Python は `tests/**/test_*.py`）の記述を書き換えたときに、上のルールをエージェントの文脈に差し込む。エージェントがテストを書き換えて通してしまうのは作業の終盤でテストが落ちたときで、冒頭で読んだ規約はそこでは効きにくいため、書き換えた瞬間に思い出させる。
 
 - **ブロックはしない。** 仕様変更では書き換えが正当な作業になる
-- テストの追加（`new_string` が `old_string` をそのまま含む編集）と、`*.fake.ts` などテスト以外のファイルでは出さない
+- テストの追加（`new_string` が `old_string` をそのまま含む編集）と、`*.fake.ts`・`conftest.py` などテスト以外のファイルでは出さない
 - Copilot には効かない。Copilot には上の再掲だけが届く
 
 動作確認:
@@ -88,6 +88,8 @@
 echo '{"tool_input":{"file_path":"__PROJECT__/test/a.spec.ts","old_string":"toBe(1)","new_string":"toBe(2)"}}' | node .claude/hooks/remind-test-edit.mjs
 # テストを足すだけ → 何も出ない
 echo '{"tool_input":{"file_path":"__PROJECT__/test/a.spec.ts","old_string":"});","new_string":"});\nit(\"x\", () => {});"}}' | node .claude/hooks/remind-test-edit.mjs
+# Python のテストも同じ（tests/**/test_*.py）
+echo '{"tool_input":{"file_path":"__PROJECT__/tests/test_a.py","old_string":"== 1","new_string":"== 2"}}' | node .claude/hooks/remind-test-edit.mjs
 ```
 
-関連: [テスト方針](../tooling/testing.md) / [issue-driven 開発](issue-driven.md)
+関連: [issue-driven 開発](issue-driven.md)。テストの書き方はスタックの文書（typescript-vue は `docs/tooling/testing.md`）

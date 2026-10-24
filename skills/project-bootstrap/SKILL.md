@@ -45,7 +45,7 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 2. dev-standards で `bun run sync-repo <対象のパス> --stack <スタック>`
 3. 配った雛形のプレースホルダを置換する。対象は下の git grep で出たファイル（`CLAUDE.md`・`.github/workflows/ci.yml`・`docs/workflow/` など。スタックで違う）
 4. ルートに `docs/adr/` を作る（`.gitkeep` を置く）。リポジトリ全体にまたがる判断と、対応表からの逸脱の理由はここに書く（REPO-05）
-5. **typescript-vue だけ**: github-workflow が部分管理している4つのファイルに、`templates/typescript-vue/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）
+5. **typescript-vue と python**: github-workflow が部分管理しているファイルに、`templates/<スタック>/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）。python は `.claude/settings.json` だけ。typescript-vue は次の4つ
    - `package.json` ← `additions/package.json` のキーを足す（`type`・`prepare`・commitlint・lefthook は sync-repo が置いたものを残す）。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
    - `.gitignore` ← `additions/gitignore.txt` を印付きブロックの**外**に足す
    - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す
@@ -235,12 +235,14 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 `__PROJECT__/` で確かめる。
 
-- `uv run ruff check`・`uv run ruff format --check`・`uv run pyright`・`uv run lint-imports`・`uv run pytest` が通る
+- `uv run ruff check`・`uv run ruff format --check`・`uv run pyright`・`uv run lint-imports`・`uv run pytest --cov` が通る
 - 意図的な違反が**落ちる**
   - domain から infrastructure を import する（`lint-imports` の `layers` 契約）
   - domain で `time.time()` / `random` を使う（ruff の TID251）。infrastructure では**落ちない**
   - use_case で `from ..domain import x`（親パッケージへの相対 import。ruff の TID252）。`from .x import y` は**落ちない**
   - `StrEnum` の `match` で case を1つ漏らす（pyright の `assert_never`）
+  - domain にテストの無い分岐を置く（`pytest --cov` の閾値）。infrastructure では**落ちない**
+- 既存のテスト（`tests/**/test_*.py`）を Edit で書き換えると、`remind-test-edit.mjs` の注意が出る（`docs/workflow/tdd.md` の「動作確認」）
 - 落ちないものも確かめて、強制範囲を取り違えないこと（`rationale/standards-audit.md` の「dev-standards 側に残った問題」）
 
 ---
@@ -251,7 +253,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 - このリポジトリで直す（手順の漏れ）
 - 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
-- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・CODE-06・TEST-04・05 がこれにあたる（2026-10 時点）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・CODE-06 がこれにあたる（2026-10 時点）
 
 ## 全フェーズ共通の原則
 

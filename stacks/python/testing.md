@@ -12,5 +12,7 @@ paths:
 - port（`Protocol`）の差し替えはフェイクのクラスを手書きする（モックライブラリより読みやすい）
 - `tmp_path` フィクスチャでファイル入出力を検査する
 - Windows のコンソールでは日本語のテスト名が文字化けするので、`PYTHONIOENCODING=utf-8` を付けて実行する
-- カバレッジ閾値（TEST-05）は pytest-cov で domain / use_case にだけ課す（**未検証**）
-- TEST-04 のフック（既存テストの書き換えで注意を出す）は、TS 版の `remind-test-edit.mjs` のパターンを `tests/**/test_*.py` に広げれば使える（**未検証**）
+- カバレッジ閾値（TEST-05）は pytest-cov で domain / use_case にだけ課す。`[tool.coverage.run]` の `source_pkgs = ["<pkg>.features"]` で測り、`omit` で infrastructure と組み立て（`install.py`）を外す。`fail_under = 90`・`branch = true`。CI は `uv run pytest --cov`
+  - `source_pkgs`（`source` も同じ）なら、どのテストも import していないモジュールも 0% として数える。`include` だけで絞ると、テストの無いモジュールが黙って抜ける
+  - 2026-10-24 に pytest-cov 7.1・coverage 7.17 で確かめた: どのテストも import していない分岐だらけのモジュールを domain に置くと閾値割れで落ち（終了コード 1）、テストの無い infrastructure は数えない
+- TEST-04 のフック（既存テストの書き換えで注意を出す）は `.claude/hooks/remind-test-edit.mjs`（typescript-vue と同じファイル。`tests/**/test_*.py` も対象）。python のバンドルで配り、`.claude/settings.json` への登録は project-bootstrap の手順で書き足す。dev-standards の `test/remind-test-edit.spec.ts` で、Python のテストの書き換えで注意が出て、追加と `conftest.py` では出ないことを確かめている

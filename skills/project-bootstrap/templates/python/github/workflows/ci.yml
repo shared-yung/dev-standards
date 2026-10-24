@@ -40,5 +40,6 @@ jobs:
       - name: Imports
         run: uv run lint-imports
 
+      # domain / use_case のカバレッジ閾値を割ると落ちる（TEST-05）
       - name: Test
-        run: uv run pytest
+        run: uv run pytest --cov

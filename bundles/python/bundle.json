@@ -1,6 +1,11 @@
 {
-  "$comment": "Python のスタック（stacks/python）。github-workflow と組み合わせて配る。pyproject.toml と .gitignore はプロジェクトのフォルダごとに置くので配らない（templates/python/project/ を手で置く）。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）",
+  "$comment": "Python のスタック（stacks/python）。github-workflow と組み合わせて配る。pyproject.toml と .gitignore はプロジェクトのフォルダごとに置くので配らない（templates/python/project/ を手で置く）。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）。.claude/settings.json は github-workflow が扱うので、remind-test-edit.mjs の登録は templates/python/additions/claude-settings.json を手で書き足す",
   "files": [
+    {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/github-workflow/claude/hooks/remind-test-edit.mjs",
+      "target": ".claude/hooks/remind-test-edit.mjs"
+    },
     {
       "kind": "seed",
       "source": "skills/project-bootstrap/templates/python/github/workflows/ci.yml",
@@ -40,6 +45,11 @@
       "kind": "seed",
       "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/remote-guardrails.md",
       "target": "docs/workflow/remote-guardrails.md"
+    },
+    {
+      "kind": "seed",
+      "source": "skills/project-bootstrap/templates/github-workflow/docs/workflow/tdd.md",
+      "target": "docs/workflow/tdd.md"
     }
   ]
 }

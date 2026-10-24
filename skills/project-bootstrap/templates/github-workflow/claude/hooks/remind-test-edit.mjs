@@ -18,7 +18,10 @@ process.stdin.on('end', () => {
   }
 
   const path = String(input.file_path ?? '').replaceAll('\\', '/');
-  const isSpec = /(^|\/)test\/.*\.spec\.[cm]?[jt]sx?$/.test(path);
+  // TS は test/**/*.spec.ts（typescript-vue）、Python は tests/**/test_*.py（python）
+  const isSpec =
+    /(^|\/)test\/.*\.spec\.[cm]?[jt]sx?$/.test(path) ||
+    /(^|\/)tests\/(.*\/)?test_[^/]*\.py$/.test(path);
   const oldString = String(input.old_string ?? '');
   const newString = String(input.new_string ?? '');
   const isAddition = oldString !== '' && newString.includes(oldString);
