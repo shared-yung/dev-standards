@@ -2,6 +2,11 @@
   "$comment": "Python のスタック（stacks/python）。github-workflow と組み合わせて配る。pyproject.toml と .gitignore はプロジェクトのフォルダごとに置くので配らない（templates/python/project/ を手で置く）。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）",
   "files": [
     {
+      "kind": "managed",
+      "source": "skills/project-bootstrap/templates/python/scripts/check-suppressions.ts",
+      "target": "scripts/check-suppressions.ts"
+    },
+    {
       "kind": "seed",
       "source": "skills/project-bootstrap/templates/python/github/workflows/ci.yml",
       "target": ".github/workflows/ci.yml"
