@@ -24,9 +24,10 @@ paths:
 ## undefined / null（CODE-03）
 
 - **`undefined` との比較は `==`/`!=` を使う。** `===`/`!==` は使わない
-- **`null` は使わない。** 「値が無い」ことは常に `undefined` で表す。`null` との比較（`===`/`!==`/`==`/`!=` のいずれも）も禁止
-- 外部ライブラリの型が `null` を返す場合だけ、理由つきの `eslint-disable` で許可する
-- 強制は ESLint の `no-restricted-syntax`。`BinaryExpression[operator=/^[!=]==$/] > Identifier[name='undefined']`（`===`/`!==` のみを対象）と `BinaryExpression[operator=/^[!=]=?=$/] > Literal[value=null]`（4種の演算子すべてを対象）の2本
+- **`null` は使わない。** 「値が無い」ことは常に `undefined` で表す。型（`string | null`）にも値（比較・代入・戻り値・引数）にも書かない
+- 外部ライブラリが返す `null` は `x == undefined` で `undefined` と一緒に判定する（`==` は両方に一致する）。`JSON.stringify(v, undefined, 2)` のように `undefined` で代わりが効く引数も多い。`null` を書かないと外部の型や API に合わない箇所（`Object.create(null)`、外部の型に合わせたシグネチャなど）だけ、理由つきの `eslint-disable` で許可する
+- 強制は ESLint の `no-restricted-syntax`。`BinaryExpression[operator=/^[!=]==$/] > Identifier[name='undefined']`（`===`/`!==` のみを対象）、`TSNullKeyword`（型の `null`）、`Literal[raw='null']`（値の `null`。比較も含む）の3本
+- 検出できないもの: `.vue` の `<template>` の式（`no-restricted-syntax` は `<script>` だけを見る）、外部の型から推論されて `null` を含む型（`document.querySelector` の戻り値など。書いていないので落ちない。判定は `== undefined` で行う）
 
 ## 省略可能なプロパティ（CODE-04）
 
