@@ -1,5 +1,5 @@
 {
-  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）。管理ファイルにプレースホルダを置くと配布先で置換できない（bun run check で落ちる）ので、名前や版のように配布先ごとに違う値を持つファイルは雛形にする。package.json・.gitignore・lefthook.yml・.claude/settings.json は github-workflow が扱うので、このスタックの分は手で書き足す",
+  "$comment": "TypeScript / Vue のスタック（stacks/typescript-vue）。github-workflow と組み合わせて配る。source は dev-standards のルートからのパス。sync-repo はプレースホルダを置換しないので、雛形の __REPO__・__PROJECT__ は配布後に手で置換する（project-bootstrap の手順）。管理ファイルにプレースホルダを置くと配布先で置換できない（bun run check で落ちる）ので、名前や版のように配布先ごとに違う値を持つファイルは雛形にする。package.json のキー・.gitignore のブロック・.claude/settings.json の項目は、github-workflow と範囲が重ならない分をこのバンドルでも扱う（1つのブロックに連結される）。プレースホルダを含む package.json の name・workspaces・@__REPO__/eslint-config と、プロジェクト名を持つ lefthook.yml は templates/typescript-vue/additions/ を手で書き足す",
   "files": [
     {
       "kind": "managed",
@@ -170,6 +170,24 @@
       "kind": "seed",
       "source": "skills/project-bootstrap/templates/typescript-vue/docs/tooling/testing.md",
       "target": "docs/tooling/testing.md"
+    }
+  ],
+  "blocks": [
+    {
+      "source": "bundles/typescript-vue/gitignore.txt",
+      "target": ".gitignore"
+    }
+  ],
+  "keys": [
+    {
+      "source": "bundles/typescript-vue/package-keys.json",
+      "target": "package.json"
+    }
+  ],
+  "items": [
+    {
+      "source": "bundles/typescript-vue/claude-settings-items.json",
+      "target": ".claude/settings.json"
     }
   ]
 }

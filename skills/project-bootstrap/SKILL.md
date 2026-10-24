@@ -45,11 +45,9 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 2. dev-standards で `bun run sync-repo <対象のパス> --stack <スタック>`
 3. 配った雛形のプレースホルダを置換する。対象は下の git grep で出たファイル（`CLAUDE.md`・`.github/workflows/ci.yml`・`docs/workflow/` など。スタックで違う）
 4. ルートに `docs/adr/` を作る（`.gitkeep` を置く）。リポジトリ全体にまたがる判断と、対応表からの逸脱の理由はここに書く（REPO-05）
-5. **typescript-vue だけ**: github-workflow が部分管理している4つのファイルに、`templates/typescript-vue/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）
-   - `package.json` ← `additions/package.json` のキーを足す（`type`・`prepare`・commitlint・lefthook は sync-repo が置いたものを残す）。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
-   - `.gitignore` ← `additions/gitignore.txt` を印付きブロックの**外**に足す
-   - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す
-   - `.claude/settings.json` ← `additions/claude-settings.json` の `PostToolUse` を足す
+5. **typescript-vue だけ**: `package.json` のキー・`.gitignore` のブロック・`.claude/settings.json` の `PostToolUse` は sync-repo が配ってある（github-workflow の分と合流する）。プレースホルダやプロジェクト名を含むものだけ、`templates/typescript-vue/additions/` の内容を書き足して置換する（管理するとプレースホルダを配布先で置換できないため）
+   - `package.json` ← `additions/package.json` の `name`・`workspaces`・`@__REPO__/eslint-config` を足す。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
+   - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す（プロジェクトの名前とフォルダを持つので雛形のまま。lefthook の `extends` で別の管理ファイルに分けても、名前の置換が残る）
 6. `bun install`（`prepare` で lefthook の hook が登録される）
 7. 初回コミットを `main` に置く（`bun.lock` も入れる）。**root commit のみ issue 参照が免除される**
 
