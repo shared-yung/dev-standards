@@ -27,3 +27,18 @@
 | 管理ファイルの `scripts/*.ts` がルートの lint で `no-console` の警告を出す             | ルートの `eslint.config.js` の雛形で `scripts/` の `no-console` を外す   |
 | `__PROJECT__` と `__PACKAGE__` が違うと hatchling が wheel を作れない（未検証）        | `pyproject.toml` の雛形で `packages` を明示する                          |
 | python の最後のゲート（不足0件）は、対応表に手段が無い行があり届かない                 | dev-standards の issue で追われていることを確かめる、とゲートに書く      |
+
+## プロジェクト側の雛形を足した後の追試（#38）
+
+2026-10-25 に、`templates/typescript-vue/project/` の雛形（`package.json` に足す分・`eslint.config.js`・`vitest.config.ts`・`tsconfig.json`）を置くだけで TS-2〜TS-4 のゲートが通るかを、空のリポジトリ（フェーズ 1 の後に create-quasar の TS-2 のコマンド）で確かめた。
+
+| ゲート | 結果                                                                                                                                                                                                                      |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TS-2   | lint は scaffold のベタ書き文言（`no-raw-text`）だけ、typecheck・SPA のビルドが通る。staged の未使用変数で pre-commit が落ち、worktree からのコミットに prefix の無い重複が出ない。テストが無い間は `No test files found` |
+| TS-3   | 代表の13件（層の向き・domain の外部依存・entry-point・他 feature の内部・時刻の直接利用・`.vue` の比較と並び順・3ファイルの循環・`test/` の層の分類・fake の外部依存・テストからの内部 import）が期待どおり落ちる／通る   |
+| TS-4   | 両環境でテストが通り、presentation の spec で Quasar のコンポーネントを `mount` できる。domain にテストの無い分岐を置くと閾値割れ、テストの無い infrastructure では落ちない                                               |
+
+- TEST-05 の DOM 環境は、`docs/tooling/testing.md` のとおり Quasar の app-extension（3.0.0。vitest 5 に対応）にした。`quasarViteTestingConfig()` で quasar.config から Vite 設定を組み立て、同梱の happy-dom を使う。前の試しの `@vitejs/plugin-vue` を直接入れる形は使わない
+- 当初の「node 環境は domain / use-case / infrastructure、Quasar を通さず alias を自前で持つ」構成は、他 feature の入口を import する use-case のテストで落ちた。入口が `.vue` を再公開する（ARCH-10）ので、Quasar を通さないと `.vue` を読めず、通しても node では Quasar が `window` を要る。domain だけを node にし（boundaries で画面の部品に届かない）、残りを happy-dom にした
+- app-extension のヘルパーは生の TypeScript で配布されていて `verbatimModuleSyntax` で `TS1484` になるので、プロジェクトの `tsconfig.json` の雛形で外した（`docs/tooling/testing.md` の「tsconfig の例外」に既にあった）
+- 試しの環境の罠: scratchpad の長いパスでは `sass-embedded` の `dart.exe` のパスが 260 文字を超え、Node の `spawn` が `ENOENT` を返してビルドが落ちた（bash からは実行できる）。短いパスへ移して通した。中断した `bun install` の後に `acorn` のファイルが欠けたまま残り、`node_modules` を消して入れ直した

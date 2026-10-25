@@ -1,0 +1,9 @@
+{
+  "extends": ["./.quasar/tsconfig.json", "../tsconfig.base.json"],
+  "compilerOptions": {
+    // app-extension のヘルパー（installQuasarPlugin）は生の TypeScript で配布され、型だけの import を
+    // import type で書いていないので TS1484 で落ちる。型 import は ESLint の consistent-type-imports が担う
+    // （docs/tooling/testing.md の「tsconfig の例外」）
+    "verbatimModuleSyntax": false
+  }
+}

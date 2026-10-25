@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@quasar/quasar-app-extension-testing-unit-vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^5.0.5",
+    "@vue/test-utils": "^2.5.1",
+    "vitest": "^5.0.5"
+  }
+}

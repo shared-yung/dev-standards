@@ -49,7 +49,7 @@ paths:
 | CODE-07 | 実装 | `Date.now` / `setTimeout` / `Math.random` などは infrastructure と `shared/platform` だけ（ESLint。code.md） |
 | CODE-08 | 実装 | shared の `createLifetime()`（code.md）                                                                      |
 | I18N-*  | 実装 | vue-i18n と `no-raw-text`（i18n.md）                                                                         |
-| TEST-*  | 実装 | Vitest projects、MSW（testing.md）                                                                           |
+| TEST-*  | 実装 | Vitest projects（domain は node、それ以外は Quasar の app-extension の happy-dom）、MSW（testing.md）        |
 | SES-01  | 実装 | `work-checkpoint` スキル（言語に依存しない）                                                                 |
 | AGENT-* | 実装 | `stacks/claude-code/`（言語に依存しない）                                                                    |
 

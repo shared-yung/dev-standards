@@ -7,7 +7,7 @@
 | 依存       | Vue に依存しない                         | Vue の setup コンテキストに依存する                                 |
 | 呼べる場所 | どこでも（テスト・use-case・合成ルート） | `setup()` / `<script setup>` の同期実行中か、他のコンポーザブルの中 |
 | 意図       | 新しいインスタンスを1つ作る              | コンポーネントの寿命に結びついた状態とふるまいを取り出す            |
-| テスト     | node 環境で、依存に fake を注入する      | happy-dom で `@vue/test-utils` を使う                               |
+| テスト     | 依存に fake を注入する                   | happy-dom で `@vue/test-utils` を使う                               |
 
 何も作らない純粋な計算は、どちらでもない普通の関数にする。名前は動詞で始める（`toBuzzRejection`、`isFullyRevealed`）。生成に `make` / `build` / `new` / `get` は使わない。
 
