@@ -2,6 +2,10 @@
 //
 //   bun scripts/setup-branch-protection.ts [owner/repo]           設定する
 //   bun scripts/setup-branch-protection.ts [owner/repo] --check   設定が想定どおりかだけを確かめる
+//   bun scripts/setup-branch-protection.ts --help                 使い方を出す
+//
+// owner/repo を省くと origin のリポジトリが対象。知らない引数があるときや対象が決まらないときは、
+// API を呼ぶ前に止める（リモートの設定を書き換えるので、意図しない引数で書き込みへ進まない）
 //
 // 1. リポジトリ設定（scripts/repo-settings.json）: マージ後のブランチ削除・squash のみ。どのプランでも効く
 // 2. ruleset（scripts/branch-protection-ruleset.json）: main への直 push 禁止・必須チェックなど
@@ -13,6 +17,60 @@
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+const USAGE = `使い方: bun scripts/setup-branch-protection.ts [owner/repo] [--check]
+  owner/repo  対象のリポジトリ（省くと origin のリポジトリ）
+  --check     設定せず、設定が想定どおりかだけを確かめる
+  --help, -h  この使い方を出す`;
+
+const REPO = /^[\w.-]+\/[\w.-]+$/;
+
+export const Invocation = {
+  Run: 'run',
+  Help: 'help',
+  Invalid: 'invalid',
+} as const;
+export type Invocation = (typeof Invocation)[keyof typeof Invocation];
+
+export type ParsedInvocation =
+  | { type: typeof Invocation.Run; repo: string; checkOnly: boolean }
+  | { type: typeof Invocation.Help }
+  | { type: typeof Invocation.Invalid; reason: string };
+
+/**
+ * 引数を解釈する。currentRepo（origin のリポジトリ）は引数がすべて正しく、
+ * owner/repo が省かれたときだけ呼ぶ。決まらなければ空文字を返す。
+ */
+export function parseInvocation(
+  args: readonly string[],
+  currentRepo: () => string,
+): ParsedInvocation {
+  if (args.includes('--help') || args.includes('-h')) return { type: Invocation.Help };
+  const unknown = args.filter((a) => a.startsWith('-') && a !== '--check');
+  if (unknown.length > 0) {
+    return { type: Invocation.Invalid, reason: `知らない引数です: ${unknown.join(' ')}` };
+  }
+  const repos = args.filter((a) => !a.startsWith('-'));
+  if (repos.length > 1) {
+    return {
+      type: Invocation.Invalid,
+      reason: `リポジトリは1つだけ指定できます: ${repos.join(' ')}`,
+    };
+  }
+  const [explicit] = repos;
+  if (explicit != undefined && !REPO.test(explicit)) {
+    return { type: Invocation.Invalid, reason: `owner/repo の形ではありません: ${explicit}` };
+  }
+  const repo = explicit ?? currentRepo();
+  if (!REPO.test(repo)) {
+    return {
+      type: Invocation.Invalid,
+      reason:
+        '対象のリポジトリが決まりません（origin が無いか、gh が使えません）。owner/repo を指定してください',
+    };
+  }
+  return { type: Invocation.Run, repo, checkOnly: args.includes('--check') };
+}
 
 export const RulesetAction = {
   Create: 'create',
@@ -146,18 +204,35 @@ function apply(repo: string, settingsFile: string, rulesetFile: string, rulesetN
   }
 }
 
-if (import.meta.main) {
-  const args = process.argv.slice(2);
-  const checkOnly = args.includes('--check');
-  const repo =
-    args.find((a) => !a.startsWith('--')) ??
-    gh(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner']).stdout.trim();
-  const settingsFile = join(import.meta.dirname, 'repo-settings.json');
-  const rulesetFile = join(import.meta.dirname, 'branch-protection-ruleset.json');
-  const settings = readJson(settingsFile);
-  const rulesetName = String(readJson(rulesetFile)['name']);
+function originRepo(): string {
+  const result = gh(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner']);
+  return result.ok ? result.stdout.trim() : '';
+}
 
-  console.log(`対象リポジトリ: ${repo}`);
-  if (!checkOnly) apply(repo, settingsFile, rulesetFile, rulesetName);
-  process.exit(check(repo, settings, rulesetName) ? 0 : 1);
+if (import.meta.main) {
+  const invocation = parseInvocation(process.argv.slice(2), originRepo);
+  switch (invocation.type) {
+    case Invocation.Help:
+      console.log(USAGE);
+      process.exit(0);
+      break;
+    case Invocation.Invalid:
+      console.error(`${invocation.reason}\n\n${USAGE}`);
+      process.exit(2);
+      break;
+    case Invocation.Run: {
+      const { repo, checkOnly } = invocation;
+      const settingsFile = join(import.meta.dirname, 'repo-settings.json');
+      const rulesetFile = join(import.meta.dirname, 'branch-protection-ruleset.json');
+      const settings = readJson(settingsFile);
+      const rulesetName = String(readJson(rulesetFile)['name']);
+
+      console.log(`対象リポジトリ: ${repo}`);
+      if (!checkOnly) apply(repo, settingsFile, rulesetFile, rulesetName);
+      process.exit(check(repo, settings, rulesetName) ? 0 : 1);
+      break;
+    }
+    default:
+      throw new Error(`未知の引数の解釈: ${JSON.stringify(invocation satisfies never)}`);
+  }
 }
