@@ -138,12 +138,14 @@ export const restrictedSyntax = [
     selector: "BinaryExpression[operator=/^[!=]==$/] > Identifier[name='undefined']",
     message: 'undefined との比較は == / != を使ってください（=== / !== は使いません）',
   },
-  {
-    // このコードベースは null を使わない。外部定義由来の値なら理由付き disable で許可する
-    selector: 'BinaryExpression[operator=/^[!=]=?=$/] > Literal[value=null]',
+  // このコードベースは null を使わない（docs/architecture/typescript-conventions.md）。
+  // 型の `T | null` と、値の null（比較・代入・戻り値・引数）を落とす。外部ライブラリが返す null は
+  // `== undefined` で一緒に判定できるので、disable が要るのは null を書かないと型や API が合わない箇所だけ
+  ...['TSNullKeyword', "Literal[raw='null']"].map((selector) => ({
+    selector,
     message:
-      'null とは比較しないでください（このコードベースは undefined のみを使います）。外部ライブラリの定義由来なら理由付きの eslint-disable で許可してください',
-  },
+      'null は使わず undefined で表してください。外部ライブラリが返す null は `== undefined` で判定できます。null を書かないと外部の型や API に合わないときだけ、理由付きの eslint-disable で許可してください',
+  })),
   // InjectionKey は定義したファイルに閉じ、同じファイルの provideXxx / useXxx だけを export する
   // （docs/architecture/factories-and-composables.md）。後置の `export { key }` は検出できない
   ...[
