@@ -16,6 +16,7 @@ dev = [
   "import-linter>=2.15",
   "pyright>=1.1.406",
   "pytest>=8.4",
+  "pytest-cov>=7.1",
   "ruff>=0.13",
 ]
 
@@ -79,6 +80,19 @@ reportUnnecessaryTypeIgnoreComment = "error"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--import-mode=importlib"]
+
+# カバレッジ閾値は domain / use_case にだけ課す（TEST-05）。`uv run pytest --cov` で測る。
+# source_pkgs で features を測り、infrastructure と組み立て（install.py）を外す。
+# source_pkgs を使うと、どのテストも import していないモジュールも 0% として数える
+[tool.coverage.run]
+source_pkgs = ["__PACKAGE__.features"]
+omit = ["*/infrastructure/*", "*/install.py"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
 
 [tool.importlinter]
 root_package = "__PACKAGE__"

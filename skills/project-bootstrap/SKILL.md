@@ -89,7 +89,7 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 - `gh issue list` がプロンプト無しで通る
 - `gh issue create` で承認プロンプトが出る。**理由に「GitHub リモートに影響します」と表示されればフック由来**
 - `gh pr merge` は deny で拒否される（プロンプトすら出ない）
-- typescript-vue: `remind-test-edit.mjs` は `docs/workflow/tdd.md` の「動作確認」のコマンドで確かめる（既存テストの書き換えでだけ `additionalContext` が出る）
+- typescript-vue・python: `.claude/settings.json` の `PostToolUse` に `remind-test-edit.mjs` が登録されている（sync-repo が項目として配る。消されていないことを確かめる）。フック自体は `docs/workflow/tdd.md` の「動作確認」のコマンドで確かめる（既存テストの書き換えでだけ `additionalContext` が出る）
 
 ---
 
@@ -237,12 +237,14 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 `__PROJECT__/` で確かめる。
 
-- `uv run ruff check`・`uv run ruff format --check`・`uv run pyright`・`uv run lint-imports`・`uv run pytest` が通る
+- `uv run ruff check`・`uv run ruff format --check`・`uv run pyright`・`uv run lint-imports`・`uv run pytest --cov` が通る
 - 意図的な違反が**落ちる**
   - domain から infrastructure を import する（`lint-imports` の `layers` 契約）
   - domain で `time.time()` / `random` を使う（ruff の TID251）。infrastructure では**落ちない**
   - use_case で `from ..domain import x`（親パッケージへの相対 import。ruff の TID252）。`from .x import y` は**落ちない**
   - `StrEnum` の `match` で case を1つ漏らす（pyright の `assert_never`）
+  - domain にテストの無い分岐を置く（`pytest --cov` の閾値）。infrastructure では**落ちない**
+- Claude Code で既存のテスト（`tests/**/test_*.py`）を Edit で書き換えると、`remind-test-edit.mjs` の注意が出る。フックを直接呼ぶ「動作確認」のコマンドでは `.claude/settings.json` への登録が効いているかが分からないので、実際の Edit で確かめる
 - 落ちないものも確かめて、強制範囲を取り違えないこと（`rationale/standards-audit.md` の「dev-standards 側に残った問題」）
 
 ---
@@ -253,7 +255,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 - このリポジトリで直す（手順の漏れ）
 - 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
-- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、TEST-04・05 がこれにあたる（2026-10 時点）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）で、これにあたるものは今は無い（2026-10-25 時点。ARCH-04・07・09・CODE-06・TEST-04・05 は手段を足した）
 
 ## 全フェーズ共通の原則
 

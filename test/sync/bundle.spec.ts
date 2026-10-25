@@ -72,6 +72,16 @@ describe('typescript-vue は github-workflow と同じファイルを部分管�
   });
 });
 
+describe('python は .claude/settings.json の項目を github-workflow と合わせて配る', () => {
+  it('ガードレールの PreToolUse と、テストの書き換えへの注意の PostToolUse の両方を配る', () => {
+    const desired = loadDesired(root, bundlesForStack(root, 'python'));
+
+    expect(desired.items.get('.claude/settings.json')).toMatchObject({
+      hooks: { PreToolUse: [expect.anything()], PostToolUse: [expect.anything()] },
+    });
+  });
+});
+
 describe('1つのファイルの部分管理を複数のバンドルから行う', () => {
   let fixture = '';
   afterEach(() => rmSync(fixture, { recursive: true, force: true }));

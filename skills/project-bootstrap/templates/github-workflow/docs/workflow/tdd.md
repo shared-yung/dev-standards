@@ -1,8 +1,8 @@
 # テスト駆動開発（TDD）
 
-**domain / use-case の実装はテストを先に書く。** t_wada（和田卓人）が日本に広めた TDD の進め方に従う。
+**domain / use-case（Python では `use_case`）の実装はテストを先に書く。** t_wada（和田卓人）が日本に広めた TDD の進め方に従う。
 
-テストの置き場所と層ごとの書き分けは [テスト方針](../tooling/testing.md)。この文書は**どの順序で書くか**を扱う。
+テストの置き場所と層ごとの書き分けは、スタックのテスト方針（typescript-vue は `docs/tooling/testing.md`、python は各プロジェクトの `tests/` の構成）。この文書は**どの順序で書くか**を扱う。
 
 ## 対象
 
@@ -12,9 +12,9 @@
 | `infrastructure` / `presentation` | 任意。スパイクで動きを確かめてからテストを書いてもよい    |
 | バグ修正（層を問わない）          | **再現テストを先に書く。** 書けない場合は PR に理由を書く |
 
-外側の層を任意にしているのは、WebRTC や Quasar のように「動くかどうか」をまず確かめたい場面が多いため。ただしバグは、テストが薄い外側の層で起きやすい。だからバグ修正だけは層を問わず再現テストを必須にしている。
+外側の層を任意にしているのは、通信・画面・外部ライブラリのように「動くかどうか」をまず確かめたい場面が多いため。ただしバグは、テストが薄い外側の層で起きやすい。だからバグ修正だけは層を問わず再現テストを必須にしている。
 
-再現テストを書こうとして、ロジックが外側の層に漏れていると分かることがある。そのときはロジックを内側の層へ移し、そこでテストする（[オニオンの層構成](../architecture/onion-layers.md)）。
+再現テストを書こうとして、ロジックが外側の層に漏れていると分かることがある。そのときはロジックを内側の層へ移し、そこでテストする（層の構成はスタックの文書。typescript-vue は `docs/architecture/onion-layers.md`）。
 
 ## サイクル
 
@@ -75,10 +75,10 @@
 
 ### 既存テストの書き換えへの注意（Claude Code のフック）
 
-`.claude/hooks/remind-test-edit.mjs`（`PostToolUse`、`Edit`）が、`test/**/*.spec.ts` の既存の記述を書き換えたときに、上のルールをエージェントの文脈に差し込む。エージェントがテストを書き換えて通してしまうのは作業の終盤でテストが落ちたときで、冒頭で読んだ規約はそこでは効きにくいため、書き換えた瞬間に思い出させる。
+`.claude/hooks/remind-test-edit.mjs`（`PostToolUse`、`Edit`）が、既存のテスト（TypeScript は `test/**/*.spec.ts`、Python は `tests/**/test_*.py`）の記述を書き換えたときに、上のルールをエージェントの文脈に差し込む。エージェントがテストを書き換えて通してしまうのは作業の終盤でテストが落ちたときで、冒頭で読んだ規約はそこでは効きにくいため、書き換えた瞬間に思い出させる。
 
 - **ブロックはしない。** 仕様変更では書き換えが正当な作業になる
-- テストの追加（`new_string` が `old_string` をそのまま含む編集）と、`*.fake.ts` などテスト以外のファイルでは出さない
+- テストの追加（`new_string` が `old_string` をそのまま含む編集）と、`*.fake.ts`・`conftest.py` などテスト以外のファイルでは出さない
 - Copilot には効かない。Copilot には上の再掲だけが届く
 
 動作確認:
@@ -88,6 +88,8 @@
 echo '{"tool_input":{"file_path":"__PROJECT__/test/a.spec.ts","old_string":"toBe(1)","new_string":"toBe(2)"}}' | node .claude/hooks/remind-test-edit.mjs
 # テストを足すだけ → 何も出ない
 echo '{"tool_input":{"file_path":"__PROJECT__/test/a.spec.ts","old_string":"});","new_string":"});\nit(\"x\", () => {});"}}' | node .claude/hooks/remind-test-edit.mjs
+# Python のテストも同じ（tests/**/test_*.py）
+echo '{"tool_input":{"file_path":"__PROJECT__/tests/test_a.py","old_string":"== 1","new_string":"== 2"}}' | node .claude/hooks/remind-test-edit.mjs
 ```
 
-関連: [テスト方針](../tooling/testing.md) / [issue-driven 開発](issue-driven.md)
+関連: [issue-driven 開発](issue-driven.md)。テストの書き方はスタックの文書（typescript-vue は `docs/tooling/testing.md`）

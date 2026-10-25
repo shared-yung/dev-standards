@@ -11,7 +11,7 @@
 - **コミットは Conventional Commits + フッターに `Refs: #<番号>`。** scope は feature 名
 - **domain / use_case はテストを先に書く（TDD）。** バグ修正は層を問わず再現テストから
   - 実装の前に、テストが期待した理由で落ちた出力を示す。歩幅は明白な実装を基本にし、テストリストは1件ずつ進める
-  - **テストを変えてよいのは実装の前だけ。** 実装の後でテストや期待値を変えたくなったら、手を止めて理由を述べる
+  - **テストを変えてよいのは実装の前だけ。** 実装の後でテストや期待値を変えたくなったら、手を止めて理由を述べる → [docs/workflow/tdd.md](docs/workflow/tdd.md)
 - **Python の依存と実行は uv。** pip を直接使わない。hook のツールは bun（npm / yarn / pnpm は使わない）
 
 ## 進め方（AI エージェント）
@@ -23,7 +23,7 @@
 
 ## スタック
 
-Python / uv / ruff / pyright（strict）/ pytest / import-linter。各プロジェクトで `uv run ruff check`・`uv run ruff format --check`・`uv run pyright`・`uv run lint-imports`・`uv run pytest` が通ること。
+Python / uv / ruff / pyright（strict）/ pytest / import-linter。各プロジェクトで `uv run ruff check`・`uv run ruff format --check`・`uv run pyright`・`uv run lint-imports`・`uv run pytest --cov`（domain / use_case のカバレッジ閾値つき）が通ること。
 
 ## ディレクトリ
 
