@@ -30,7 +30,8 @@ line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "PT"]
+# PGH003 / PGH004: 規則を指定しない抑制、RUF100: 使われていない noqa を落とす（CODE-06）
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF", "PT", "PGH"]
 extend-select = ["TID251", "TID252"]
 # 文言・コメントは日本語で書くので、全角の括弧や読点を「紛らわしい文字」として扱わない
 ignore = ["RUF001", "RUF002", "RUF003"]
@@ -68,6 +69,10 @@ ban-relative-imports = "parents"
 include = ["src", "tests"]
 typeCheckingMode = "strict"
 pythonVersion = "3.13"
+# 抑制は `# pyright: ignore[<rule>] -- 理由` だけにし、使われていないものを落とす（CODE-06）。
+# 理由の有無は scripts/check-suppressions.ts で確かめる
+enableTypeIgnoreComments = false
+reportUnnecessaryTypeIgnoreComment = "error"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

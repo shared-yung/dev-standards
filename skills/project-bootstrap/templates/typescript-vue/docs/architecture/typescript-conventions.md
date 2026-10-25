@@ -132,7 +132,15 @@ choice == undefined ? { correct } : { correct, choice } // 条件分岐
 
 **`undefined` との比較は `==`/`!=` を使う。** `===`/`!==` は使わない。`no-restricted-syntax` で強制している。
 
-**`null` は使わない。** このコードベースは「値が無い」ことを常に `undefined` で表す。`null` との比較（`===`/`!==`/`==`/`!=` のいずれも）は `no-restricted-syntax` で落ちる。外部ライブラリの型が `null` を返す場合だけ、理由付きの `eslint-disable` で許可する。
+**`null` は使わない。** このコードベースは「値が無い」ことを常に `undefined` で表す。型の `T | null` も、値の `null`（比較・代入・戻り値・引数）も `no-restricted-syntax` で落ちる。外部ライブラリが返す `null` は `x == undefined` で一緒に判定できる（`==` は `null` と `undefined` の両方に一致する）ので、`null` を書かずに済む。`null` を書かないと外部の型や API に合わない箇所だけ、理由付きの `eslint-disable` で許可する。
+
+```ts
+const el = document.querySelector('#app'); // Element | null（推論された型は落ちない）
+if (el == undefined) return; // null も undefined も弾く
+JSON.stringify(value, undefined, 2); // replacer も undefined で足りる
+// eslint-disable-next-line no-restricted-syntax -- プロトタイプの無い辞書を作るには null が要る
+const table = Object.create(null) as Record<string, number>;
+```
 
 **各宣言に `| undefined` の理由をコメントしない。** 規約として決まっているので、書けば後続が毎回同じ説明を書くようになる。
 
@@ -187,6 +195,7 @@ import { ConnectionState } from '@/features/net/domain'; // presentation/composa
 | `x === 'x'` / `x !== 'x'`                               | ✅     | `no-restricted-syntax`                         |
 | `x === undefined` / `x !== undefined`                   | ✅     | `no-restricted-syntax`                         |
 | `x === null` / `x !== null` / `x == null` / `x != null` | ✅     | `no-restricted-syntax`                         |
+| `string \| null`（型の null）/ `x = null` / `return null` | ✅     | `no-restricted-syntax`                         |
 | `foo?: T`（`\| undefined` が無い省略可能なプロパティ）  | ✅     | `no-restricted-syntax`                         |
 | `import … from '../x'` / `export … from '../x'`         | ✅     | `no-restricted-imports`                        |
 | `import … from '.'` / `'./'` / `'./index'`              | ✅     | `no-restricted-imports`                        |
@@ -198,6 +207,7 @@ import { ConnectionState } from '@/features/net/domain'; // presentation/composa
 | default はあるが `ExhaustiveError` を投げていない       | ❌     | 規約のみ                                       |
 | 動的 `import('../x')` と `vi.mock('../x')`              | ❌     | 規約のみ                                       |
 | `@/` で自分の要素の入口を import する                   | ❌     | 規約のみ                                       |
+| `.vue` の `<template>` の式に書いた `null`              | ❌     | 規約のみ                                       |
 
 **意図して対象外にしているもの:** `typeof x === 'string'`（型の判定であって値の集合ではない）、`import type` だけの循環（実行時に消える）、空文字との比較（`x === ''`）、`.vue` の省略可能なプロパティ（props の型。上の「例外」）。
 

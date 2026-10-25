@@ -45,11 +45,9 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 2. dev-standards で `bun run sync-repo <対象のパス> --stack <スタック>`
 3. 配った雛形のプレースホルダを置換する。対象は下の git grep で出たファイル（`CLAUDE.md`・`.github/workflows/ci.yml`・`docs/workflow/` など。スタックで違う）
 4. ルートに `docs/adr/` を作る（`.gitkeep` を置く）。リポジトリ全体にまたがる判断と、対応表からの逸脱の理由はここに書く（REPO-05）
-5. **typescript-vue と python**: github-workflow が部分管理しているファイルに、`templates/<スタック>/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）。python は `.claude/settings.json` だけ。typescript-vue は次の4つ
-   - `package.json` ← `additions/package.json` のキーを足す（`type`・`prepare`・commitlint・lefthook は sync-repo が置いたものを残す）。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
-   - `.gitignore` ← `additions/gitignore.txt` を印付きブロックの**外**に足す
-   - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す
-   - `.claude/settings.json` ← `additions/claude-settings.json` の `PostToolUse` を足す
+5. **typescript-vue だけ**: `package.json` のキー・`.gitignore` のブロック・`.claude/settings.json` の `PostToolUse` は sync-repo が配ってある（github-workflow の分と合流する）。プレースホルダやプロジェクト名を含むものだけ、`templates/typescript-vue/additions/` の内容を書き足して置換する（管理するとプレースホルダを配布先で置換できないため）
+   - `package.json` ← `additions/package.json` の `name`・`workspaces`・`@__REPO__/eslint-config` を足す。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
+   - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す（プロジェクトの名前とフォルダを持つので雛形のまま。lefthook の `extends` で別の管理ファイルに分けても、名前の置換が残る）
 6. `bun install`（`prepare` で lefthook の hook が登録される）
 7. 初回コミットを `main` に置く（`bun.lock` も入れる）。**root commit のみ issue 参照が免除される**
 
@@ -89,7 +87,7 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 - `gh issue list` がプロンプト無しで通る
 - `gh issue create` で承認プロンプトが出る。**理由に「GitHub リモートに影響します」と表示されればフック由来**
 - `gh pr merge` は deny で拒否される（プロンプトすら出ない）
-- typescript-vue・python: `.claude/settings.json` の `PostToolUse` に `remind-test-edit.mjs` が登録されている（フェーズ 1 の `additions` の書き足し漏れはここで分かる）。フック自体は `docs/workflow/tdd.md` の「動作確認」のコマンドで確かめる（既存テストの書き換えでだけ `additionalContext` が出る）
+- typescript-vue・python: `.claude/settings.json` の `PostToolUse` に `remind-test-edit.mjs` が登録されている（sync-repo が項目として配る。消されていないことを確かめる）。フック自体は `docs/workflow/tdd.md` の「動作確認」のコマンドで確かめる（既存テストの書き換えでだけ `additionalContext` が出る）
 
 ---
 
@@ -242,7 +240,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
   - use_case で `from ..domain import x`（親パッケージへの相対 import。ruff の TID252）。`from .x import y` は**落ちない**
   - `StrEnum` の `match` で case を1つ漏らす（pyright の `assert_never`）
   - domain にテストの無い分岐を置く（`pytest --cov` の閾値）。infrastructure では**落ちない**
-- Claude Code で既存のテスト（`tests/**/test_*.py`）を Edit で書き換えると、`remind-test-edit.mjs` の注意が出る。フックを直接呼ぶ「動作確認」のコマンドでは `.claude/settings.json` への登録漏れが分からないので、実際の Edit で確かめる
+- Claude Code で既存のテスト（`tests/**/test_*.py`）を Edit で書き換えると、`remind-test-edit.mjs` の注意が出る。フックを直接呼ぶ「動作確認」のコマンドでは `.claude/settings.json` への登録が効いているかが分からないので、実際の Edit で確かめる
 - 落ちないものも確かめて、強制範囲を取り違えないこと（`rationale/standards-audit.md` の「dev-standards 側に残った問題」）
 
 ---
@@ -253,7 +251,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 - このリポジトリで直す（手順の漏れ）
 - 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
-- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・CODE-06 がこれにあたる（2026-10 時点）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09 がこれにあたる（2026-10 時点）
 
 ## 全フェーズ共通の原則
 
