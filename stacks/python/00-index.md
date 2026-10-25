@@ -16,7 +16,7 @@ paths:
 - テスト: pytest（`--import-mode=importlib`）
 - 依存の向き: import-linter
 - レイアウト: src レイアウト（テストがインストール済みのパッケージを対象にするため）
-- git hook と CI は `stacks/github-workflow/`。**Python だけのリポジトリでも lefthook / commitlint は bun で入れる**（リポジトリのルートにツール用の `package.json` を置く）。スタックが違っても仕組みを揃えるための決定（2026-10-11）。Python だけのリポジトリでの動作は**未検証**（clip-studio-tools #8 で確かめる）
+- git hook と CI は `stacks/github-workflow/`。**Python だけのリポジトリでも lefthook / commitlint は bun で入れる**（リポジトリのルートにツール用の `package.json` を置く）。スタックが違っても仕組みを揃えるための決定（2026-10-11）。Python だけのリポジトリでも `sync-repo --check` がルートの bun 用 `package.json` を含めて計画を出すことは確かめた（2026-10-24、standards-audit で clip-studio-tools）。実際の配布と hook の動作は**未検証**（clip-studio-tools #8 で確かめる）
 
 ## 原則との対応
 
@@ -33,13 +33,13 @@ paths:
 | ARCH-01 | 実装   | import-linter の `layers` 契約（architecture.md）                                                                                                                               |
 | ARCH-02 | 実装   | `src/<pkg>/features/<feature>/{domain,use_case,infrastructure}/`（architecture.md、**未検証**）                                                                                 |
 | ARCH-03 | 実装   | import-linter（静的解析）。Python に言語の仕組みでの強制は無い                                                                                                                  |
-| ARCH-04 | 実装   | 許可リストを検査する pytest のテスト（architecture.md、**未検証**）                                                                                                             |
+| ARCH-04 | 実装   | 許可リストを検査する pytest のテスト（`tests/test_architecture.py`。architecture.md）                                                                                           |
 | ARCH-05 | 実装   | 外部の生成型は infrastructure だけ（今のところ該当なし）                                                                                                                        |
 | ARCH-06 | 実装   | 境界だけで検証（dataclass / 必要なら pydantic を infrastructure に）                                                                                                            |
-| ARCH-07 | 実装   | 各要素の `__init__.py` に `__all__` を明示（architecture.md、**未検証**）                                                                                                       |
+| ARCH-07 | 実装   | 各要素の `__init__.py` に `__all__` を明示。入口以外への import は pytest のテストで落とす（`tests/test_architecture.py`。architecture.md）                                     |
 | ARCH-08 | 実装   | パッケージ名からの絶対 import。相対 import は同じパッケージ内だけ（ruff の TID252）                                                                                             |
-| ARCH-09 | 実装   | import-linter の `acyclic_siblings` 契約（**未検証**）                                                                                                                          |
-| ARCH-10 | 実装   | `cli.py` などの合成ルートで実装を選ぶ                                                                                                                                           |
+| ARCH-09 | 実装   | import-linter の `acyclic_siblings` 契約（architecture.md）                                                                                                                     |
+| ARCH-10 | 実装   | feature ごとの `install.py` で実装を選ぶ。`cli.py` は組み立てを呼ぶだけ（architecture.md）                                                                                      |
 | ARCH-11 | 対象外 | DI コンテナを使わない。合成ルートから引数で渡す（Python の慣習。キーが無いので漏れようがない）                                                                                  |
 | ARCH-12 | 対象外 | UI を持たない CLI が対象                                                                                                                                                        |
 | CODE-01 | 実装   | `enum.StrEnum`（ネイティブの enum を使う。適合性の確認 1）                                                                                                                      |

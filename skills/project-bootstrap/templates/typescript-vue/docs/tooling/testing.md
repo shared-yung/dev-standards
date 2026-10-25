@@ -30,7 +30,7 @@ __PROJECT__/
 import { defaultRuleSet } from '@/features/room/domain/rule-set';
 ```
 
-`../../../../src/...` は書かない。**unit project は Quasar の Vite 設定を継承しないため、`vitest.config.ts` で `resolve.alias` を自前で定義している。** これが無いと `@/` は解決できない。
+`../../../../src/...` は書かない。`@/` は、両方の project が使う quasar.config 由来の Vite 設定（`quasarViteTestingConfig()`）が解決する。
 
 ### テストダブル
 
@@ -43,8 +43,8 @@ in-memory の fake は **`test/features/<feature>/<layer>/*.fake.ts`** に置く
 | 層               | 環境       | 何を書くか                                                                         |
 | ---------------- | ---------- | ---------------------------------------------------------------------------------- |
 | `domain`         | node       | 純粋関数、値オブジェクト、zod スキーマのユニットテスト。**一番厚く書く**           |
-| `use-case`       | node       | リポジトリ interface を in-memory の fake に差し替えて検証。業務的な回帰を最も拾う |
-| `infrastructure` | node       | MSW で HTTP をスタブした統合テスト。薄くてよい                                     |
+| `use-case`       | happy-dom  | リポジトリ interface を in-memory の fake に差し替えて検証。業務的な回帰を最も拾う |
+| `infrastructure` | happy-dom  | MSW で HTTP をスタブした統合テスト。薄くてよい                                     |
 | `presentation`   | happy-dom  | `@vue/test-utils`。分岐の多いものと共通 UI に限定し、全コンポーネントには書かない  |
 | E2E              | Playwright | 主要フローのハッピーパスのみ、少数に絞る                                           |
 
@@ -52,8 +52,9 @@ use-case ではモックライブラリより **fake 実装**を優先する。f
 
 ## 構成
 
-- Vitest の projects 機能で 2 つに分ける。`unit`（node 環境: domain / use-case / infrastructure）と `component`（happy-dom 環境: presentation）。node 側は Quasar を通さないので高速
-- `unit` は Quasar の Vite 設定を継承しないので `resolve.alias` を自前で持つ
+- 設定は `vitest.config.ts`（project-bootstrap の `templates/typescript-vue/project/` の雛形）。Vitest の projects 機能で 2 つに分ける。`domain`（node 環境: `test/features/*/domain/`）と `dom`（happy-dom 環境: それ以外）
+- 線を引いた場所は boundaries の規則に合わせている。domain は zod と自 feature の domain しか import できないので画面の部品に届かず、node で動く。use-case と infrastructure は他 feature の入口を import でき、入口は画面の部品（`.vue`）も再公開する（[モジュールの入口](../architecture/module-entry.md)）。それを import すると Quasar が `window` を要るので、node では落ちる
+- 両方の project が quasar.config 由来の Vite 設定を使う。`.vue` と `@/` をどちらでも同じように解決するため
 - Quasar コンポーネントの解決には `@quasar/quasar-app-extension-testing-unit-vitest` が必要。`quasarViteTestingConfig()` が quasar.config から Vite 設定を組み立て、`installQuasarPlugin()` がテストに Quasar を注入する
 - DOM 環境は jsdom ではなく **happy-dom**。上記 app-extension が同梱しており、追加の依存が要らず高速なため
 - カバレッジの対象は `src` のみ。テストが `src` の外にあるため、除外指定に頼らずプロダクションコードだけが計測される

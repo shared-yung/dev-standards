@@ -45,9 +45,11 @@ sync-repo はプレースホルダを置換しない。配った雛形と `templ
 2. dev-standards で `bun run sync-repo <対象のパス> --stack <スタック>`
 3. 配った雛形のプレースホルダを置換する。対象は下の git grep で出たファイル（`CLAUDE.md`・`.github/workflows/ci.yml`・`docs/workflow/` など。スタックで違う）
 4. ルートに `docs/adr/` を作る（`.gitkeep` を置く）。リポジトリ全体にまたがる判断と、対応表からの逸脱の理由はここに書く（REPO-05）
-5. **typescript-vue だけ**: `package.json` のキー・`.gitignore` のブロック・`.claude/settings.json` の `PostToolUse` は sync-repo が配ってある（github-workflow の分と合流する）。プレースホルダやプロジェクト名を含むものだけ、`templates/typescript-vue/additions/` の内容を書き足して置換する（管理するとプレースホルダを配布先で置換できないため）
-   - `package.json` ← `additions/package.json` の `name`・`workspaces`・`@__REPO__/eslint-config` を足す。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
-   - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す（プロジェクトの名前とフォルダを持つので雛形のまま。lefthook の `extends` で別の管理ファイルに分けても、名前の置換が残る）
+5. **typescript-vue だけ**: github-workflow が部分管理している4つのファイルに、`templates/typescript-vue/additions/` の内容を書き足して置換する（sync-repo は1つのファイルを1つのバンドルからしか扱えないため）
+   - `package.json` ← `additions/package.json` のキーを足す（`type`・`prepare`・commitlint・lefthook は sync-repo が置いたものを残す）。`workspaces` にプロジェクトはまだ足さない（無いフォルダを指すと `bun install` が落ちる。TS-2 で足す）
+   - `.gitignore` ← `additions/gitignore.txt` を印付きブロックの**外**に足す
+   - `lefthook.yml` ← `additions/lefthook.yml` の `pre-commit` を `extends` の後ろに足す
+   - `.claude/settings.json` ← `additions/claude-settings.json` の `PostToolUse` を足す
 6. `bun install`（`prepare` で lefthook の hook が登録される）
 7. 初回コミットを `main` に置く（`bun.lock` も入れる）。**root commit のみ issue 参照が免除される**
 
@@ -123,9 +125,12 @@ bun create quasar@latest __PROJECT__ \
 - `node_modules` と `bun.lock` を削除 → workspaces 登録後にルートで `bun install`
 - `pnpm-workspace.yaml` を削除（bun 方針と競合）
 - `.editorconfig` と `.vscode/` を削除（ルートに集約）
-- `tsconfig.json` を `["./.quasar/tsconfig.json", "../tsconfig.base.json"]` の**配列 extends** に
+- `templates/typescript-vue/project/` の雛形を置いて置換する（create-quasar は lint とテストの設定を作らない。無いとルートの `--filter '*'` が素通りする）
+  - `tsconfig.json`: ルートの `tsconfig.base.json` との**配列 extends**。app-extension のために `verbatimModuleSyntax` を外す（`docs/tooling/testing.md` の「tsconfig の例外」）
+  - `eslint.config.js`: `base` + `vue` + `...onionBoundaries()`
+  - `vitest.config.ts`: domain（node）とそれ以外（happy-dom）の projects、domain / use-case だけのカバレッジ閾値
+  - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage` など）と `devDependencies`（雛形のとおり。vitest・`@vitest/coverage-v8`・Quasar の app-extension・`@vue/test-utils`）を、create-quasar が作ったものに足す。版は雛形で TS-2〜TS-4 を通した組み合わせ（sync-repo の管理外なので、上げるときは試してから雛形を直す）
 - ルートの `package.json` の `workspaces` にプロジェクトを足す。`eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
-- プロジェクトの `package.json` に `lint`・`typecheck`・`test` のスクリプトを足す（create-quasar は作らない。無いとルートの `--filter '*'` が素通りする）。プロジェクト側の `package.json`・`eslint.config.js`・`vitest.config.ts` の雛形はまだ無い。`docs/tooling/eslint-boundaries.md` の例と、TS-3・TS-4 の要件から書く
 - `__PROJECT__/docs/{spec,architecture,adr}/` を作る（`.gitkeep` を置く。REPO-05）
 - `lefthook.yml` の `lint-__PROJECT__` がこのプロジェクトを指していることを確かめる。**`git add {staged_files}` を直接書かない**（`git commit` 経由だとルート直下に二重にコミットされる。`references/pitfalls.md`）
 - `src/router/index.ts` の `import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history'` の直前に、理由つきの `// eslint-disable-next-line no-restricted-syntax -- 値の集合を持つのは Quasar 側` を付ける。**文字列との比較を禁じる共有ルールで、scaffold 直後から lint が落ちる**ため。取りうる値を決めているのは Quasar で、こちらで定数を定義しても何も保証しない
@@ -134,7 +139,7 @@ bun create quasar@latest __PROJECT__ \
 
 ### 検証ゲート
 
-- ルートから `bun run lint` / `typecheck` / `test` がプロジェクトまで到達する。scaffold のページ（`MainLayout.vue`・`ErrorNotFound.vue`）のベタ書き文言は `no-raw-text` で落ちる。TS-5 で直すので、ここではそれ以外が0件であることを見る
+- ルートから `bun run lint` / `typecheck` / `test` がプロジェクトまで到達する。scaffold のページ（`MainLayout.vue`・`ErrorNotFound.vue`）のベタ書き文言は `no-raw-text` で落ちる。TS-5 で直すので、ここではそれ以外が0件であることを見る。`test` はテストがまだ無いので `No test files found` で止まる（プロジェクトまで届いた印。最初のテストは TS-3 の `lifetime.spec.ts`。`passWithNoTests` は足さない。include の取り違えに気づけなくなる）
 - `__PROJECT__/` で `bun run build` が通り Build mode が SPA（ルートに `build` は無い）
 - **意図的に未使用変数を含むファイルを staged にして `pre-commit` が落ちる**（ルートからの lint はプロジェクトを素通りするため、ここを確認しないと気づけない）
 - **git worktree 上で**（作った worktree でも `bun install` してから）プロジェクト配下のファイルを `git commit` でコミットし、`git show --stat HEAD` にプロジェクトフォルダの prefix が無い重複が無い（`lefthook run` の単独実行と、worktree ではない通常のチェックアウトでは再現しない）
@@ -192,13 +197,12 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 ## TS-4: Vitest
 
-テストは `src` の隣の `test/` に置き `src` の木をミラーする。**`unit` project は Quasar の Vite 設定を継承しないので `resolve.alias` を自前で定義する**（無いと `@/` が解決できない）。
-
-`projects` で node 環境（domain / use-case / infrastructure）と DOM 環境（presentation）を分ける。カバレッジ閾値は domain / use-case にのみ課す。
+テストは `src` の隣の `test/` に置き `src` の木をミラーする。設定は TS-2 で置いた `vitest.config.ts`。`projects` で domain（node 環境）とそれ以外（happy-dom 環境）を分ける。use-case と infrastructure は他 feature の入口（画面の部品も再公開する）を import でき、node では Quasar が `window` を要って落ちるため（`docs/tooling/testing.md`）。カバレッジ閾値は domain / use-case にのみ課す。
 
 ### 検証ゲート
 
-- 両環境でテストが通る
+- 両環境でテストが通る（`--reporter=verbose` で `|domain|` と `|dom|` の両方が出る。presentation の spec で Quasar のコンポーネントを `mount` できる）
+- 他 feature の入口を import する use-case の spec が通る（入口が `.vue` を再公開していても）
 - **テストのない分岐を domain に置いて `--coverage` が閾値割れで落ちる**。対象外のディレクトリが集計に入らないことも確認する
 - **`test/` のテストにも層の強制が効く**。src と同じ import を test 側に置き、同じように落ちることを確かめる（test 側で通るだけでは、分類されずに素通りしているのと区別できない）
   - `test/features/<f>/domain` の spec → 自 feature の use-case、他 feature の domain: 落ちる
@@ -224,8 +228,8 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 詳細は `stacks/python/`（architecture.md・code.md・testing.md）。
 
-1. `__PROJECT__/` を作り、`templates/python/project/` の `pyproject.toml` と `.gitignore` を置いて置換する
-2. `src/__PACKAGE__/`（`__init__.py`・合成ルートの `cli.py`）、`src/__PACKAGE__/shared/`、`tests/`、`docs/{spec,architecture,adr}/` を作る。最初の feature を `src/__PACKAGE__/features/<feature>/{domain,use_case,infrastructure}/` に作り、`pyproject.toml` の import-linter の契約（コメントになっている `layers`）を有効にして `containers` に足す
+1. `__PROJECT__/` を作り、`templates/python/project/` の `pyproject.toml`・`.gitignore`・`tests/test_architecture.py`（ARCH-04・07 の検査）を置いて置換する
+2. `src/__PACKAGE__/`（`__init__.py`・起動処理の `cli.py`）、`src/__PACKAGE__/shared/`、`tests/`、`docs/{spec,architecture,adr}/` を作る。最初の feature を `src/__PACKAGE__/features/<feature>/{domain,use_case,infrastructure}/` に作り（実装の組み立ては `features/<feature>/install.py` に置き、feature の `__init__.py` から再公開する。`cli.py` は feature の入口だけを import する。ARCH-10）、`pyproject.toml` の import-linter の契約（コメントになっている `layers`）を有効にして `containers` に足す
 3. `__PROJECT__/` で `uv sync`（`uv.lock` ができる。初回は時間がかかる。uv のキャッシュと別のドライブだと hardlink の警告が出るので、そのときは `UV_LINK_MODE=copy`）。`.github/workflows/ci.yml` の matrix にこのプロジェクトがあることを確かめる
 4. Python の補助スクリプトは `uv run python` で動かす（Windows では素の `python` がストアのスタブのことがある）
 
@@ -251,7 +255,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 - このリポジトリで直す（手順の漏れ）
 - 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
-- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09 がこれにあたる（2026-10 時点）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）で、これにあたるものは今は無い（2026-10-25 時点。ARCH-04・07・09・CODE-06・TEST-04・05 は手段を足した）
 
 ## 全フェーズ共通の原則
 
