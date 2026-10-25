@@ -7,10 +7,10 @@ import { Decision, decide, type DecideResult, type Entry, type Resolution } from
 export const BLOCK_BEGIN = '# >>> dev-standards';
 export const BLOCK_END = '# <<< dev-standards';
 
-type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
-type JsonObject = { [key: string]: Json };
+export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+export type JsonObject = { [key: string]: Json };
 
-const isObject = (value: unknown): value is JsonObject =>
+export const isObject = (value: unknown): value is JsonObject =>
   typeof value === 'object' && value != undefined && !Array.isArray(value);
 
 // ---- テキストのブロック ----
@@ -73,7 +73,7 @@ function locateBlock(text: string | undefined) {
 // ---- JSON のキー ----
 
 /** 葉（オブジェクト以外の値）までのパスと値。パスは JSON 配列の文字列にする（キーに . を含む名前があるため） */
-function leaves(value: Json, path: string[] = []): [string, Json][] {
+export function leaves(value: Json, path: string[] = []): [string, Json][] {
   if (!isObject(value)) return [[JSON.stringify(path), value]];
   return Object.entries(value).flatMap(([key, child]) => leaves(child, [...path, key]));
 }
@@ -153,7 +153,7 @@ export function canonical(value: unknown): string {
   return JSON.stringify(value);
 }
 
-function arrays(value: Json, path: string[] = []): [string, Json[]][] {
+export function arrays(value: Json, path: string[] = []): [string, Json[]][] {
   if (Array.isArray(value)) return [[JSON.stringify(path), value]];
   if (!isObject(value)) return [];
   return Object.entries(value).flatMap(([key, child]) => arrays(child, [...path, key]));
