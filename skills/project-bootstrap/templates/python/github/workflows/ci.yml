@@ -10,7 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  # プロジェクトごとの検査。matrix のジョブは「project (<プロジェクト>)」の名前で報告される
+  project:
     runs-on: ubuntu-latest
     # プロジェクトを足したら、matrix に足す（REPO-04）
     strategy:
@@ -51,3 +52,14 @@ jobs:
       # domain / use_case のカバレッジ閾値を割ると落ちる（TEST-05）
       - name: Test
         run: uv run pytest --cov
+
+  # ruleset の必須チェックは名前「check」で照合する（branch-protection-ruleset.json）。matrix のジョブは
+  # 名前にプロジェクトが付いて一致しないので、全プロジェクトの結果をこのジョブにまとめる。
+  # プロジェクトが落ちても（always）実行し、結果が success でなければ落ちる
+  check:
+    needs: project
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: すべてのプロジェクトの検査が通ったか
+        run: test "${{ needs.project.result }}" = success
