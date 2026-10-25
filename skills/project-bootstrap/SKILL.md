@@ -228,8 +228,8 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 詳細は `stacks/python/`（architecture.md・code.md・testing.md）。
 
-1. `__PROJECT__/` を作り、`templates/python/project/` の `pyproject.toml` と `.gitignore` を置いて置換する
-2. `src/__PACKAGE__/`（`__init__.py`・合成ルートの `cli.py`）、`src/__PACKAGE__/shared/`、`tests/`、`docs/{spec,architecture,adr}/` を作る。最初の feature を `src/__PACKAGE__/features/<feature>/{domain,use_case,infrastructure}/` に作り、`pyproject.toml` の import-linter の契約（コメントになっている `layers`）を有効にして `containers` に足す
+1. `__PROJECT__/` を作り、`templates/python/project/` の `pyproject.toml`・`.gitignore`・`tests/test_architecture.py`（ARCH-04・07 の検査）を置いて置換する
+2. `src/__PACKAGE__/`（`__init__.py`・起動処理の `cli.py`）、`src/__PACKAGE__/shared/`、`tests/`、`docs/{spec,architecture,adr}/` を作る。最初の feature を `src/__PACKAGE__/features/<feature>/{domain,use_case,infrastructure}/` に作り（実装の組み立ては `features/<feature>/install.py` に置き、feature の `__init__.py` から再公開する。`cli.py` は feature の入口だけを import する。ARCH-10）、`pyproject.toml` の import-linter の契約（コメントになっている `layers`）を有効にして `containers` に足す
 3. `__PROJECT__/` で `uv sync`（`uv.lock` ができる。初回は時間がかかる。uv のキャッシュと別のドライブだと hardlink の警告が出るので、そのときは `UV_LINK_MODE=copy`）。`.github/workflows/ci.yml` の matrix にこのプロジェクトがあることを確かめる
 4. Python の補助スクリプトは `uv run python` で動かす（Windows では素の `python` がストアのスタブのことがある）
 
@@ -253,7 +253,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 - このリポジトリで直す（手順の漏れ）
 - 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
-- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・CODE-06・TEST-04・05 がこれにあたる（2026-10 時点）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、TEST-04・05 がこれにあたる（2026-10 時点）
 
 ## 全フェーズ共通の原則
 

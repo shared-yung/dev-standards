@@ -1,6 +1,6 @@
 {
   "source": "shared-yung/dev-standards",
-  "commit": "5d5f506d6901e36a0a7aa95b64d9c82502a0be72",
+  "commit": "df45e7042844617216fb451bbda4ca8204df9fe4",
   "stack": "github-workflow",
   "bundles": ["github-workflow"],
   "files": {
@@ -91,8 +91,8 @@
     },
     "scripts/setup-branch-protection.ts": {
       "kind": "managed",
-      "local": "198effb0916784cdd70cbd8ef5c9e3cc96855f5ca0a694c0ed9b66a26c05feca",
-      "upstream": "198effb0916784cdd70cbd8ef5c9e3cc96855f5ca0a694c0ed9b66a26c05feca"
+      "local": "27432553d9ece3b3a8b97ec71bc51de152cef4614cbb5065f06c39fff4cce014",
+      "upstream": "27432553d9ece3b3a8b97ec71bc51de152cef4614cbb5065f06c39fff4cce014"
     }
   },
   "blocks": {
