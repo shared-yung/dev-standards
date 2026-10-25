@@ -125,9 +125,12 @@ bun create quasar@latest __PROJECT__ \
 - `node_modules` と `bun.lock` を削除 → workspaces 登録後にルートで `bun install`
 - `pnpm-workspace.yaml` を削除（bun 方針と競合）
 - `.editorconfig` と `.vscode/` を削除（ルートに集約）
-- `tsconfig.json` を `["./.quasar/tsconfig.json", "../tsconfig.base.json"]` の**配列 extends** に
+- `templates/typescript-vue/project/` の雛形を置いて置換する（create-quasar は lint とテストの設定を作らない。無いとルートの `--filter '*'` が素通りする）
+  - `tsconfig.json`: ルートの `tsconfig.base.json` との**配列 extends**。app-extension のために `verbatimModuleSyntax` を外す（`docs/tooling/testing.md` の「tsconfig の例外」）
+  - `eslint.config.js`: `base` + `vue` + `...onionBoundaries()`
+  - `vitest.config.ts`: domain（node）とそれ以外（happy-dom）の projects、domain / use-case だけのカバレッジ閾値
+  - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage` など）と `devDependencies`（vitest・Quasar の app-extension・`@vue/test-utils`）を、create-quasar が作ったものに足す
 - ルートの `package.json` の `workspaces` にプロジェクトを足す。`eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
-- プロジェクトの `package.json` に `lint`・`typecheck`・`test` のスクリプトを足す（create-quasar は作らない。無いとルートの `--filter '*'` が素通りする）。プロジェクト側の `package.json`・`eslint.config.js`・`vitest.config.ts` の雛形はまだ無い。`docs/tooling/eslint-boundaries.md` の例と、TS-3・TS-4 の要件から書く
 - `__PROJECT__/docs/{spec,architecture,adr}/` を作る（`.gitkeep` を置く。REPO-05）
 - `lefthook.yml` の `lint-__PROJECT__` がこのプロジェクトを指していることを確かめる。**`git add {staged_files}` を直接書かない**（`git commit` 経由だとルート直下に二重にコミットされる。`references/pitfalls.md`）
 - `src/router/index.ts` の `import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history'` の直前に、理由つきの `// eslint-disable-next-line no-restricted-syntax -- 値の集合を持つのは Quasar 側` を付ける。**文字列との比較を禁じる共有ルールで、scaffold 直後から lint が落ちる**ため。取りうる値を決めているのは Quasar で、こちらで定数を定義しても何も保証しない
@@ -136,7 +139,7 @@ bun create quasar@latest __PROJECT__ \
 
 ### 検証ゲート
 
-- ルートから `bun run lint` / `typecheck` / `test` がプロジェクトまで到達する。scaffold のページ（`MainLayout.vue`・`ErrorNotFound.vue`）のベタ書き文言は `no-raw-text` で落ちる。TS-5 で直すので、ここではそれ以外が0件であることを見る
+- ルートから `bun run lint` / `typecheck` / `test` がプロジェクトまで到達する。scaffold のページ（`MainLayout.vue`・`ErrorNotFound.vue`）のベタ書き文言は `no-raw-text` で落ちる。TS-5 で直すので、ここではそれ以外が0件であることを見る。`test` はテストがまだ無いので `No test files found` で止まる（プロジェクトまで届いた印。最初のテストは TS-3 の `lifetime.spec.ts`。`passWithNoTests` は足さない。include の取り違えに気づけなくなる）
 - `__PROJECT__/` で `bun run build` が通り Build mode が SPA（ルートに `build` は無い）
 - **意図的に未使用変数を含むファイルを staged にして `pre-commit` が落ちる**（ルートからの lint はプロジェクトを素通りするため、ここを確認しないと気づけない）
 - **git worktree 上で**（作った worktree でも `bun install` してから）プロジェクト配下のファイルを `git commit` でコミットし、`git show --stat HEAD` にプロジェクトフォルダの prefix が無い重複が無い（`lefthook run` の単独実行と、worktree ではない通常のチェックアウトでは再現しない）
@@ -194,13 +197,12 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 ## TS-4: Vitest
 
-テストは `src` の隣の `test/` に置き `src` の木をミラーする。**`unit` project は Quasar の Vite 設定を継承しないので `resolve.alias` を自前で定義する**（無いと `@/` が解決できない）。
-
-`projects` で node 環境（domain / use-case / infrastructure）と DOM 環境（presentation）を分ける。カバレッジ閾値は domain / use-case にのみ課す。
+テストは `src` の隣の `test/` に置き `src` の木をミラーする。設定は TS-2 で置いた `vitest.config.ts`。`projects` で domain（node 環境）とそれ以外（happy-dom 環境）を分ける。use-case と infrastructure は他 feature の入口（画面の部品も再公開する）を import でき、node では Quasar が `window` を要って落ちるため（`docs/tooling/testing.md`）。カバレッジ閾値は domain / use-case にのみ課す。
 
 ### 検証ゲート
 
-- 両環境でテストが通る
+- 両環境でテストが通る（`--reporter=verbose` で `|domain|` と `|dom|` の両方が出る。presentation の spec で Quasar のコンポーネントを `mount` できる）
+- 他 feature の入口を import する use-case の spec が通る（入口が `.vue` を再公開していても）
 - **テストのない分岐を domain に置いて `--coverage` が閾値割れで落ちる**。対象外のディレクトリが集計に入らないことも確認する
 - **`test/` のテストにも層の強制が効く**。src と同じ import を test 側に置き、同じように落ちることを確かめる（test 側で通るだけでは、分類されずに素通りしているのと区別できない）
   - `test/features/<f>/domain` の spec → 自 feature の use-case、他 feature の domain: 落ちる
