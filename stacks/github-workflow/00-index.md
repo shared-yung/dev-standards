@@ -56,6 +56,7 @@ WF・GR・REPO の一部を、git と GitHub の仕組みで実装する。言�
 - **lefthook の `root:` 付きコマンドで素の `git add` をしない。** git worktree 上の `git commit` から起動されたフックには `GIT_WORK_TREE` が渡らず、ルート直下に prefix 無しで二重にコミットされる。`scripts/lint-project.sh` のように `GIT_WORK_TREE` を明示する。確認は `lefthook run` ではなく、worktree 上の実際の `git commit` で
 - **順序**: 初回コミットを `main` に置いてからブランチ保護を掛ける（先に掛けると置けない）
 - **無料プランの private リポジトリにはブランチ保護（ruleset）を掛けられない**（`Upgrade to GitHub Pro or make this repository public` で 403）。`setup-branch-protection.ts` は止まらずに警告し、リポジトリ設定だけを反映する（以前の `.sh` は `set -e` で止まり、`delete_branch_on_merge` も設定されなかった）
+- **ruleset の必須チェックは、GitHub に報告されるチェック名で照合する。** `name` の無い matrix のジョブは `<ジョブ ID> (<matrix の値>)` で報告され、素のジョブ ID は出ない（psf/requests の `build (3.10, macOS-latest)` などで確かめた）。matrix を使う CI では、結果をまとめる非 matrix のジョブ（`needs` と `if: always()`、python の CI の雛形の `check`）を必須チェックの名前にする。`test/required-checks.spec.ts` が、各スタックの CI の雛形で必須チェックの名前が報告されることを確かめる
 - **linked issue の検査には `issues: read` が要る**: `conventions.yml` の `permissions` に無いと、private リポジトリでは `closingIssuesReferences` が 0 件になり、本文に `Closes #N` があっても CI が落ちる（public では誰でも issue を読めるので表に出ない。2026-10-11 に dev-standards #2 で発覚）
 - **permission は前方一致**: `cd x && gh issue create` や `gh api -f a=b`（フラグで暗黙に POST）を取りこぼす。フックで補う
 - **設定後にセッションの再起動が必要**: `.claude/` がセッション開始時に無かった場合、フックが発火しない
