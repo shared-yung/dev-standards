@@ -31,6 +31,14 @@ jobs:
       - name: Lint
         run: uv run ruff check
 
+      # 検査の抑制に理由があるか（CODE-06）。プロジェクトのフォルダで実行するので、その中の *.py だけを見る
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Suppressions
+        run: bun ../scripts/check-suppressions.ts
+
       - name: Format
         run: uv run ruff format --check
 

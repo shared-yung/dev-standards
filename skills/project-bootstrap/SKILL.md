@@ -249,7 +249,7 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
 
 - このリポジトリで直す（手順の漏れ）
 - 理由をプロジェクトの ADR（`docs/adr/`）に書く（このリポジトリの事情による逸脱）
-- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・CODE-06・TEST-04・05 がこれにあたる（2026-10 時点）
+- 対応表の手段がまだ無い・効かないもの（監査の「dev-standards の問題」）は、dev-standards の issue で追われていることを確かめ、無ければ立てる。python（Trial）では、ARCH-04・07・09・TEST-04・05 がこれにあたる（2026-10 時点）
 
 ## 全フェーズ共通の原則
 
