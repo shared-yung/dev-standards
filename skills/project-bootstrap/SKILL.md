@@ -129,7 +129,7 @@ bun create quasar@latest __PROJECT__ \
   - `tsconfig.json`: ルートの `tsconfig.base.json` との**配列 extends**。app-extension のために `verbatimModuleSyntax` を外す（`docs/tooling/testing.md` の「tsconfig の例外」）
   - `eslint.config.js`: `base` + `vue` + `...onionBoundaries()`
   - `vitest.config.ts`: domain（node）とそれ以外（happy-dom）の projects、domain / use-case だけのカバレッジ閾値
-  - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage` など）と `devDependencies`（vitest・Quasar の app-extension・`@vue/test-utils`）を、create-quasar が作ったものに足す
+  - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage` など）と `devDependencies`（雛形のとおり。vitest・`@vitest/coverage-v8`・Quasar の app-extension・`@vue/test-utils`）を、create-quasar が作ったものに足す。版は雛形で TS-2〜TS-4 を通した組み合わせ（sync-repo の管理外なので、上げるときは試してから雛形を直す）
 - ルートの `package.json` の `workspaces` にプロジェクトを足す。`eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
 - `__PROJECT__/docs/{spec,architecture,adr}/` を作る（`.gitkeep` を置く。REPO-05）
 - `lefthook.yml` の `lint-__PROJECT__` がこのプロジェクトを指していることを確かめる。**`git add {staged_files}` を直接書かない**（`git commit` 経由だとルート直下に二重にコミットされる。`references/pitfalls.md`）
