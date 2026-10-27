@@ -7,6 +7,7 @@ import { type Desired, emptyManifest, planRepo } from '../../scripts/lib/sync/pl
 // - 雛形は無いときだけ作り、あるときは触らない
 // - 記録にある雛形を利用者が消していたら作り直さない
 // - 上流で消えた管理ファイルは、未変更なら削除する
+// - 管理ファイルから管理ブロックに移ったファイルは、未変更ならブロックだけにする（変えていたら残して足す）
 // - 部分管理（ブロック・キー・項目）の結果もまとめて返す
 // - 解決の指定はファイル単位で効く
 // - 何も変わらなければ書き込みは無い
@@ -95,6 +96,43 @@ describe('planRepo', () => {
 
     expect([...plan.writes.keys()].sort()).toEqual(['.gitignore', 'package.json', 'settings.json']);
     expect(plan.manifest.items['settings.json']).toEqual({ '["deny"]': ['"A"'] });
+  });
+
+  it('管理ファイルから管理ブロックに移ったファイルは、未変更なら中身をブロックだけにする', () => {
+    const manifest = {
+      ...emptyManifest(),
+      files: {
+        '.gitattributes': { kind: 'managed', local: hashOf('old\n'), upstream: hashOf('old\n') },
+      },
+    } as const;
+    const plan = planRepo({
+      desired: desired({ blocks: new Map([['.gitattributes', 'new\n']]) }),
+      read: reader({ '.gitattributes': 'old\n' }),
+      manifest,
+    });
+
+    expect(plan.writes.get('.gitattributes')).toBe(
+      '# >>> dev-standards\nnew\n# <<< dev-standards\n',
+    );
+    expect(plan.manifest.files['.gitattributes']).toBeUndefined();
+  });
+
+  it('管理ファイルから管理ブロックに移ったファイルを利用者が変えていたら、その内容の後にブロックを足す', () => {
+    const manifest = {
+      ...emptyManifest(),
+      files: {
+        '.gitattributes': { kind: 'managed', local: hashOf('old\n'), upstream: hashOf('old\n') },
+      },
+    } as const;
+    const plan = planRepo({
+      desired: desired({ blocks: new Map([['.gitattributes', 'new\n']]) }),
+      read: reader({ '.gitattributes': 'old\nmine\n' }),
+      manifest,
+    });
+
+    expect(plan.writes.get('.gitattributes')).toBe(
+      'old\nmine\n\n# >>> dev-standards\nnew\n# <<< dev-standards\n',
+    );
   });
 
   it('解決の指定はファイル単位で効く', () => {

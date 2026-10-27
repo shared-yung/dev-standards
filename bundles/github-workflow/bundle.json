@@ -3,11 +3,6 @@
   "files": [
     {
       "kind": "managed",
-      "source": "skills/project-bootstrap/templates/github-workflow/root/.gitattributes",
-      "target": ".gitattributes"
-    },
-    {
-      "kind": "managed",
       "source": "skills/project-bootstrap/templates/github-workflow/root/commitlint.config.js",
       "target": "commitlint.config.js"
     },
@@ -76,7 +71,11 @@
       "source": "bundles/github-workflow/lefthook-dev-standards.yml",
       "target": "lefthook-dev-standards.yml"
     },
-    { "kind": "seed", "source": "bundles/github-workflow/lefthook.yml", "target": "lefthook.yml" },
+    {
+      "kind": "seed",
+      "source": "bundles/github-workflow/lefthook.yml",
+      "target": "lefthook.yml"
+    },
     {
       "kind": "seed",
       "source": "bundles/github-workflow/pull_request_template.md",
@@ -98,8 +97,22 @@
       "target": ".github/ISSUE_TEMPLATE/config.yml"
     }
   ],
-  "blocks": [{ "source": "bundles/github-workflow/gitignore.txt", "target": ".gitignore" }],
-  "keys": [{ "source": "bundles/github-workflow/package-keys.json", "target": "package.json" }],
+  "blocks": [
+    {
+      "source": "bundles/github-workflow/gitattributes.txt",
+      "target": ".gitattributes"
+    },
+    {
+      "source": "bundles/github-workflow/gitignore.txt",
+      "target": ".gitignore"
+    }
+  ],
+  "keys": [
+    {
+      "source": "bundles/github-workflow/package-keys.json",
+      "target": "package.json"
+    }
+  ],
   "items": [
     {
       "source": "bundles/github-workflow/claude-settings-items.json",

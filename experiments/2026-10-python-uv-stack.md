@@ -28,6 +28,12 @@ review-by: 2027-01-31
 - 2026-10-11: `cv2.imread` が Windows の日本語パスを読めない。`np.fromfile` ＋ `cv2.imdecode` で回避
 - 2026-10-11: git hook と commitlint は、Python だけのリポジトリでも bun で入れると決めた（Python 向けの pre-commit などに分けない）。同期スクリプト（dev-standards #3）で全リポジトリに同じ一式を配るため。動作は clip-studio-tools #8 で確かめる
 
+- 2026-10-25: clip-studio-tools #8 で、既存リポジトリに初めて適用した。Python だけのリポジトリでもルートの bun 用 `package.json` で lefthook・commitlint が動いた。layer-first を feature-first に直し、ARCH-04・07・09・01/03・08、CODE-02・06・07 が意図的な違反で落ちることを確かめた
+- 2026-10-25: `layers` 契約に `install` を最上位の層として足すと、use_case → install も落とせた
+- 2026-10-25: 入口で再公開する名前とモジュール名の衝突（`simplify.py` の `simplify`）が既存コードで普通に起きた。モジュールを改名して避けた
+- 2026-10-25: `reportUnnecessaryTypeIgnoreComment` で、既存コードの使われていない `# pyright: ignore` が1件見つかった
+- 2026-10-25: 適用で使いにくかった点（sync-repo の再実行、`.gitattributes` に固有の行を足せない、未追跡のファイルで抑制の検査が落ちない）を dev-standards #51 で直した
+
 ## 振り返り
 
 <!-- 2027-01-31 までに書く -->

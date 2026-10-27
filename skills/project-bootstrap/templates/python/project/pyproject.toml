@@ -107,9 +107,10 @@ ancestors = ["__PACKAGE__"]
 # domain の外部依存（ARCH-04）と入口（ARCH-07）は tests/test_architecture.py で確かめる
 # （import-linter の forbidden は禁止リストで、protected は要素ごとに契約を書くことになるため）
 
-# feature を作ったら、feature ごとに containers へ足す（ARCH-01, ARCH-03）
+# feature を作ったら、feature ごとに containers へ足す（ARCH-01, ARCH-03）。組み立て（install）を
+# 最上位の層にして、use_case や infrastructure から組み立てを import したものも落とす
 # [[tool.importlinter.contracts]]
 # name = "オニオン: 依存は外側から内側の一方向"
 # type = "layers"
 # containers = ["__PACKAGE__.features.<feature>"]
-# layers = ["infrastructure", "use_case", "domain"]
+# layers = ["install", "infrastructure", "use_case", "domain"]

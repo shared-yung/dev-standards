@@ -16,7 +16,7 @@ paths:
 - テスト: pytest（`--import-mode=importlib`）
 - 依存の向き: import-linter
 - レイアウト: src レイアウト（テストがインストール済みのパッケージを対象にするため）
-- git hook と CI は `stacks/github-workflow/`。**Python だけのリポジトリでも lefthook / commitlint は bun で入れる**（リポジトリのルートにツール用の `package.json` を置く）。スタックが違っても仕組みを揃えるための決定（2026-10-11）。Python だけのリポジトリでも `sync-repo --check` がルートの bun 用 `package.json` を含めて計画を出すことは確かめた（2026-10-24、standards-audit で clip-studio-tools）。実際の配布と hook の動作は**未検証**（clip-studio-tools #8 で確かめる）
+- git hook と CI は `stacks/github-workflow/`。**Python だけのリポジトリでも lefthook / commitlint は bun で入れる**（リポジトリのルートにツール用の `package.json` を置く）。スタックが違っても仕組みを揃えるための決定（2026-10-11）。Python だけのリポジトリでも `sync-repo --check` がルートの bun 用 `package.json` を含めて計画を出すことは確かめた（2026-10-24、standards-audit で clip-studio-tools）。2026-10-25 に clip-studio-tools #8 で配り、commit-msg が不正なメッセージを落とすことを確かめた
 
 ## 原則との対応
 
@@ -31,7 +31,7 @@ paths:
 | WF-*    | 実装   | `stacks/github-workflow/`                                                                                                                                                       |
 | GR-*    | 実装   | `stacks/github-workflow/`                                                                                                                                                       |
 | ARCH-01 | 実装   | import-linter の `layers` 契約（architecture.md）                                                                                                                               |
-| ARCH-02 | 実装   | `src/<pkg>/features/<feature>/{domain,use_case,infrastructure}/`（architecture.md、**未検証**）                                                                                 |
+| ARCH-02 | 実装   | `src/<pkg>/features/<feature>/{domain,use_case,infrastructure}/`（architecture.md）                                                                                             |
 | ARCH-03 | 実装   | import-linter（静的解析）。Python に言語の仕組みでの強制は無い                                                                                                                  |
 | ARCH-04 | 実装   | 許可リストを検査する pytest のテスト（`tests/test_architecture.py`。architecture.md）                                                                                           |
 | ARCH-05 | 実装   | 外部の生成型は infrastructure だけ（今のところ該当なし）                                                                                                                        |

@@ -82,7 +82,7 @@ extend-select = ["TID251"]
 - 型情報の無いライブラリ（例: scikit-image）は、使う行だけ `reportUnknown*` を理由つきで抑制する
 - 強制（2026-10-24 に ruff 0.13・pyright 1.1.406 で、意図的な違反を置いて確認）:
   - 規則を指定しない抑制: ruff の PGH003（`# type: ignore` / `# pyright: ignore`）と PGH004（`# noqa`）
-  - 使われていない抑制: ruff の RUF100（`noqa`）と pyright の `reportUnnecessaryTypeIgnoreComment = "error"`
+  - 使われていない抑制: ruff の RUF100（`noqa`）と pyright の `reportUnnecessaryTypeIgnoreComment = "error"`。clip-studio-tools #8 で、既存コードの使われていない `# pyright: ignore` が1件見つかった（2026-10-25）
   - `# type: ignore`: pyright の `enableTypeIgnoreComments = false` で効かなくなる（抑制したはずのエラーが出る）
   - 理由の無い抑制・`# type: ignore`・ファイル単位の抑制: `scripts/check-suppressions.ts`（python のバンドルで配る。CI の `check` ジョブの手順なので必須チェックに含まれる）。ruff・pyright には理由を求める規則が無い。`-- 理由` を付けても ruff・pyright の抑制はそのまま効く
 - 検出できないもの: 1行のコメントの中で、抑制の後に `--` を含む別の文を書いたもの（理由として扱う）。スクリプトは文字列を簡易に読み飛ばすだけなので、f-string の中に同じ引用符を入れ子にした形（3.12 以降の `f"{d["#"]}"`）では文字列の範囲を誤ることがある

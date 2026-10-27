@@ -119,7 +119,10 @@ export function planRepo({ desired, read, manifest, resolutions }: PlanInput): P
   // テキストのブロック
   const blockTargets = new Set([...desired.blocks.keys(), ...Object.keys(previous.blocks)]);
   for (const target of [...blockTargets].sort()) {
-    const current = read(target);
+    // 管理ファイルから管理ブロックに移ったファイルは、上で削除と決まっていれば空から作る
+    // （古い全体の内容の後にブロックを足すと、同じ行が二重になる）
+    const removed = writes.has(target) && writes.get(target) == undefined;
+    const current = removed ? undefined : read(target);
     const result = syncBlock({
       current,
       desired: desired.blocks.get(target),
