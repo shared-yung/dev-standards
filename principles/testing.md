@@ -22,4 +22,4 @@ t_wada 流の TDD（テストリスト → Red → Green → Refactor）。infra
 
 ### TEST-05 テストの厚さと実行のタイミング〔標準〕
 
-domain / use-case を厚く、presentation は分岐の多いものだけ、infrastructure は通信を模擬して薄く。カバレッジ閾値は domain / use-case だけ。PR で型検査・lint・単体テスト、main へのマージ時に E2E。テストランナーは1つに絞る（E2E は別でよい）。
+domain / use-case を厚く、presentation は分岐の多いものだけ、infrastructure は通信を模擬して薄く。カバレッジ閾値は domain / use-case だけ。PR で型検査・lint・単体テストを通し、E2E も main に入る前に必須チェックとして通す。E2E は主要フローに絞って速さを保つ。テストランナーは1つに絞る（E2E は別でよい）。

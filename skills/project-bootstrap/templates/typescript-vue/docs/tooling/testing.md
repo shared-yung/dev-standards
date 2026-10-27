@@ -75,13 +75,24 @@ presentation にカバレッジ閾値を課すと、数字を満たすためだ�
 | `bun run test`          | 全 project を1回実行（CI と同じ）  |
 | `bun run test:watch`    | 監視モード                         |
 | `bun run test:coverage` | カバレッジ付き。閾値を割ると落ちる |
+| `bun run test:e2e`      | E2E（Playwright）                  |
 
 カバレッジは毎回走らせると遅いので `test` からは外している。閾値の確認は `test:coverage` で行う。
 
+## E2E
+
+- 設定は `playwright.config.ts`。テストは `e2e/` に `*.e2e.ts` で置く（`test/` の `*.spec.ts` は Vitest が拾うので混ぜない）
+- 対象は**主要フローのハッピーパスだけ**。分岐や異常系は内側の層の単体テストで確かめる。PR のたびに全件を流すので、数分で終わる規模を保つ
+- dev サーバーは Playwright の `webServer` が起動する。ローカルでは起動済みのものを使う
+- ローカルでは触った機能に関係する spec だけ流せばよい（`bun run test:e2e -- e2e/<spec>.e2e.ts`）。流さなくてもよく、全件は CI に任せる
+- 差分で E2E を選ぶ方式は関門にしない。共有部品の変更による回帰を取りこぼすため
+- 遅くなったら、まず shard で並列化する。それでも足りなければ `@smoke` タグを付けたものだけを PR の必須チェックにし、全件は main に対して夜間に流す
+
 ## CI
 
-- PR: typecheck + lint + ユニットテスト（`CI` ワークフロー）
-- main へのマージ時: E2E
+- PR: typecheck + lint + ユニットテスト（`unit` ジョブ）と E2E（`e2e` ジョブ）を並列に流す
+- 必須チェックは `check` ジョブ。`unit` と `e2e` の両方が通ったときだけ通る。E2E も main に入る前に通す（TEST-05）
+- E2E が落ちたら、`test-results/` の trace を artifact から取れる
 
 ## 判断の目安
 
