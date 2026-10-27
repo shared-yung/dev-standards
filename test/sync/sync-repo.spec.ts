@@ -46,5 +46,6 @@ describe('sync-repo.ts を実行したとき', () => {
     expect(second.status).toBe(0);
     expect(readFileSync(join(repo, 'scripts', 'check-branch-name.sh'), 'utf8')).not.toBe('mine\n');
     expect(existsSync(join(repo, '.dev-standards.json'))).toBe(true);
-  });
+    // bun を2回起動するので、既定の 5 秒では足りないことがある
+  }, 30_000);
 });

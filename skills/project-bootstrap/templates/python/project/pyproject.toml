@@ -109,6 +109,7 @@ ancestors = ["__PACKAGE__"]
 
 # feature を作ったら、feature ごとに containers へ足す（ARCH-01, ARCH-03）。組み立て（install）を
 # 最上位の層にして、use_case や infrastructure から組み立てを import したものも落とす
+# （install.py は feature ごとに置く。ARCH-10）
 # [[tool.importlinter.contracts]]
 # name = "オニオン: 依存は外側から内側の一方向"
 # type = "layers"
