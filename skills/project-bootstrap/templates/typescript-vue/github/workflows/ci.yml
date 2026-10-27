@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,3 +32,40 @@ jobs:
 
       - name: Test
         run: bun run test
+
+  # E2E も main に入る前に通す（TEST-05）。単体テストと並列に流す
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Install browsers
+        run: bun x playwright install --with-deps chromium
+        working-directory: __PROJECT__
+
+      - name: E2E
+        run: bun run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: __PROJECT__/test-results/
+          retention-days: 7
+
+  # ruleset の必須チェックは名前「check」で照合する（branch-protection-ruleset.json）。
+  # 単体テストと E2E の結果をこのジョブにまとめる。どちらかが落ちても（always）実行し、
+  # 両方が success でなければ落ちる
+  check:
+    needs: [unit, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 単体テストと E2E が通ったか
+        run: test "${{ needs.unit.result }}" = success && test "${{ needs.e2e.result }}" = success

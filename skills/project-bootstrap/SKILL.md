@@ -129,7 +129,8 @@ bun create quasar@latest __PROJECT__ \
   - `tsconfig.json`: ルートの `tsconfig.base.json` との**配列 extends**。app-extension のために `verbatimModuleSyntax` を外す（`docs/tooling/testing.md` の「tsconfig の例外」）
   - `eslint.config.js`: `base` + `vue` + `...onionBoundaries()`
   - `vitest.config.ts`: domain（node）とそれ以外（happy-dom）の projects、domain / use-case だけのカバレッジ閾値
-  - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage` など）と `devDependencies`（雛形のとおり。vitest・`@vitest/coverage-v8`・Quasar の app-extension・`@vue/test-utils`）を、create-quasar が作ったものに足す。版は雛形で TS-2〜TS-4 を通した組み合わせ（sync-repo の管理外なので、上げるときは試してから雛形を直す）
+  - `playwright.config.ts` と `e2e/app.e2e.ts`: E2E の設定と最小の E2E（TS-4 で確かめる）
+  - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage`・`test:e2e` など）と `devDependencies`（雛形のとおり。vitest・`@vitest/coverage-v8`・Quasar の app-extension・`@vue/test-utils`・`@playwright/test`）を、create-quasar が作ったものに足す。版は雛形で TS-2〜TS-4 を通した組み合わせ（sync-repo の管理外なので、上げるときは試してから雛形を直す）
 - ルートの `package.json` の `workspaces` にプロジェクトを足す。`eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
 - `__PROJECT__/docs/{spec,architecture,adr}/` を作る（`.gitkeep` を置く。REPO-05）
 - `lefthook.yml` の `lint-__PROJECT__` がこのプロジェクトを指していることを確かめる。**`git add {staged_files}` を直接書かない**（`git commit` 経由だとルート直下に二重にコミットされる。`references/pitfalls.md`）
@@ -195,7 +196,7 @@ bun create quasar@latest __PROJECT__ \
 
 Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 `shared-ui`）に置く。`create～` と `use～` の書き分けは `docs/architecture/factories-and-composables.md`。
 
-## TS-4: Vitest
+## TS-4: Vitest と Playwright
 
 テストは `src` の隣の `test/` に置き `src` の木をミラーする。設定は TS-2 で置いた `vitest.config.ts`。`projects` で domain（node 環境）とそれ以外（happy-dom 環境）を分ける。use-case と infrastructure は他 feature の入口（画面の部品も再公開する）を import でき、node では Quasar が `window` を要って落ちるため（`docs/tooling/testing.md`）。カバレッジ閾値は domain / use-case にのみ課す。
 
@@ -209,6 +210,12 @@ Vue に依存する共有コードは `src/shared/{i18n,composables}/`（要素 
   - domain / use-case の spec → `@/shared/i18n`: 落ちる
   - `test/features/<f>/use-case/*.fake.ts` → `vue`: 落ちる（fake は spec ではないので external が効く）
   - `boundaries/include` に `test/` を足すだけでは効かない。各要素の `pattern` にも test 側が要る（`references/pitfalls.md`）
+
+E2E は `e2e/` に `*.e2e.ts` で置き、Playwright で流す（TS-2 で置いた `playwright.config.ts`）。CI では PR の必須チェックに入る（TEST-05）。
+
+- ルートで `bun x playwright install chromium` の後、`CI=1 bun run test:e2e` が通る（`webServer` が dev サーバーを起動する）
+- `e2e/app.e2e.ts` の locator を存在しないものに変えると落ちる（exit 1）。戻して通ることも確かめる
+- `bun run test` の対象に `*.e2e.ts` が入らない（Vitest の include は `test/**/*.spec.ts`）
 
 ## TS-5: i18n
 

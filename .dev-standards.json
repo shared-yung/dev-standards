@@ -1,6 +1,6 @@
 {
   "source": "shared-yung/dev-standards",
-  "commit": "df45e7042844617216fb451bbda4ca8204df9fe4",
+  "commit": "aae7d0748b104c59c749e6df26bcd6bd31b48001",
   "stack": "github-workflow",
   "bundles": ["github-workflow"],
   "files": {
