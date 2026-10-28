@@ -128,8 +128,8 @@ bun create quasar@latest __PROJECT__ \
 - `templates/typescript-vue/project/` の雛形を置いて置換する（create-quasar は lint とテストの設定を作らない。無いとルートの `--filter '*'` が素通りする）
   - `tsconfig.json`: ルートの `tsconfig.base.json` との**配列 extends**。app-extension のために `verbatimModuleSyntax` を外す（`docs/tooling/testing.md` の「tsconfig の例外」）
   - `eslint.config.js`: `base` + `vue` + `...onionBoundaries()`
-  - `vitest.config.ts`: domain（node）とそれ以外（happy-dom）の projects、domain / use-case だけのカバレッジ閾値
-  - `playwright.config.ts` と `e2e/app.e2e.ts`: E2E の設定と最小の E2E（TS-4 で確かめる）
+  - `vitest.config.ts` と `test/setup/block-network.ts`: domain（node）とそれ以外（happy-dom）の projects、domain / use-case だけのカバレッジ閾値、模擬していない通信で落とす setupFiles（TEST-06）
+  - `playwright.config.ts` と `e2e/fixtures.ts`・`e2e/app.e2e.ts`: E2E の設定、`baseURL` の外へのリクエストで落とすフィクスチャ（TEST-06）、最小の E2E（TS-4 で確かめる）
   - `package.json`: 雛形の `scripts`（`lint`・`typecheck`・`test`・`test:coverage`・`test:e2e` など）と `devDependencies`（雛形のとおり。vitest・`@vitest/coverage-v8`・Quasar の app-extension・`@vue/test-utils`・`@playwright/test`）を、create-quasar が作ったものに足す。版は雛形で TS-2〜TS-4 を通した組み合わせ（sync-repo の管理外なので、上げるときは試してから雛形を直す）
 - ルートの `package.json` の `workspaces` にプロジェクトを足す。`eslint.config.js` の `ignores` にあることを確かめる（フェーズ 1 で置換済み）
 - `__PROJECT__/docs/{spec,architecture,adr}/` を作る（`.gitkeep` を置く。REPO-05）
