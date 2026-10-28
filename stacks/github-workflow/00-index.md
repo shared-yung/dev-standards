@@ -57,8 +57,8 @@ Dependabot の `github-actions` は使わない。雛形は `.github/workflows/`
 
 1. dev-standards で issue を立てる
 2. 上げる版のリリースノートと差分を読み、タグから SHA を引く: `gh api repos/<owner>/<repo>/commits/<タグ> --jq .sha`
-3. 雛形と `.github/workflows/`（`sync-repo .` で揃う管理ファイル以外は手で）の `uses:` と `# vX.Y.Z` を書き換える。bun は `bundles/github-workflow/package-keys.json` の `packageManager`
-4. 管理ファイル（`conventions.yml`・`pr-merged.yml`・`packageManager`）は `sync-repo` で配布先に届く。`ci.yml` は雛形なので届かない。既存のリポジトリでは standards-audit が REPO-07 の不足として見つけ、各リポジトリの issue で直す
+3. 雛形の `uses:` と `# vX.Y.Z` を書き換える。bun は `bundles/github-workflow/package-keys.json` の `packageManager`。dev-standards 自身の `.github/workflows/` は、管理ファイル（`conventions.yml`・`pr-merged.yml`）を `bun run sync-repo .` で揃え、`ci.yml` は手で書き換える
+4. 管理ファイル（`conventions.yml`・`pr-merged.yml`・`packageManager`）は `sync-repo` で配布先に届く。`ci.yml` は雛形なので届かない。既存のリポジトリでは standards-audit が REPO-07 の不足として見つけ、各リポジトリの issue で直す。`packageManager` は管理キーなので、配布先で bun の版を変えても次の `sync-repo` で戻る（上げるときは dev-standards で上げる）
 
 外への通信の制限（harden-runner など）は Hold（`rationale/ci-supply-chain.md`）。
 

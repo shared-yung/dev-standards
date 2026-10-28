@@ -37,7 +37,9 @@ describe('配るワークフローがサプライチェーン攻撃に対して�
   });
 
   it.each(workflows)('%s: トップレベルで permissions を明示する', (path) => {
-    expect((parse(read(path)) as Workflow).permissions).toBeDefined();
+    const { permissions } = parse(read(path)) as Workflow;
+    expect(permissions).toBeDefined();
+    expect(permissions).not.toBe('write-all');
   });
 
   it.each(workflows)('%s: checkout は認証情報を残さない', (path) => {
