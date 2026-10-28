@@ -22,3 +22,21 @@ E2E は主要フローのハッピーパスに絞り、PR で全件を流して�
 2. **smoke と全件に分ける**: `@smoke` のタグを付けたものだけを PR の必須チェックにし、全件は main に対して夜間（schedule）に流す。夜間に落ちたら issue を自動で立て、main の回帰として直す
 
 2 は main に入る前の保証が smoke の範囲に狭まるので、1 で足りないときだけ使う。
+
+## GitHub Actions 上での確認（2026-10-28）
+
+雛形の `ci.yml` を、shared-yung/quiz-match#113 で初めて GitHub Actions 上で動かした。
+
+- 1回目は e2e が落ちた。WebRTC の E2E で、ホストの offer の作成が待ち時間（5秒）に間に合わなかった。offer は ICE の候補集めを待ってから出す作りで、外部の STUN への問い合わせに引きずられた。失敗時の artifact（`test-results/` の trace と `error-context.md`）はこの1回目で動き、原因の特定に使えた
+- E2E のビルドだけ STUN を外したら、2回目で全部通った。e2e ジョブは30秒で、うちブラウザのインストール（`bun x playwright install --with-deps chromium`）が17秒、E2E 本体が4.7秒。`unit` と並列なので、PR の待ち時間はほとんど伸びない
+- ここから TEST-06（マージの関門になるテストを外部サービスに依存させない）を足した。E2E を必須チェックにすると、外部の遅延がそのままマージを止める
+
+雛形の `webServer` は dev サーバー（`bun run dev`）で、Quasar の既定は `devServer.open: true`。`@quasar/app-vite` 3.8.1 は `ci-info` の `isCI` か `process.stdout.isTTY` が偽ならブラウザを開かない（`lib/quasar-config-file.js`）。Actions は `CI=true` で、Playwright の `webServer` は標準出力をパイプでつなぐので、どちらでも開かない。雛形は変えない。dev サーバーでの Actions 上の実行はまだ無い。
+
+### quiz-match が雛形から変えた点と、雛形に入れなかった理由
+
+| quiz-match の変更                                                         | 扱い                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `webServer` で本番と同じビルドを静的サーバー（`e2e/serve-dist.ts`）で配る | 記録だけ。本番のビルドで確かめたいプロジェクトの選択。dev サーバーがブラウザを開く心配は、上のとおり Playwright の下では起きない                                                                                                     |
+| CI で `retries: 1`                                                        | 雛形に入れない。再試行で通ると必須チェックは緑のままで、flaky が埋もれる。外部を外しても非決定的な接続（WebRTC など）に依存する E2E に限り、CI だけ・1回まで・理由をコメントに書いて入れてよい（`stacks/typescript-vue/testing.md`） |
+| Chromium を `--disable-features=WebRtcHideLocalIpsWithMdns` で起動する    | 雛形に入れない。WebRTC を使うプロジェクトだけの落とし穴なので、project-bootstrap の `references/pitfalls.md` に書いた                                                                                                                |
