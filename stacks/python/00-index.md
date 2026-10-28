@@ -28,6 +28,7 @@ paths:
 | REPO-03 | 実装   | `stacks/github-workflow/`                                                                                                                                                       |
 | REPO-05 | 実装   | `<project>/docs/{spec,architecture,adr}/`                                                                                                                                       |
 | REPO-06 | 実装   | `stacks/github-workflow/`                                                                                                                                                       |
+| REPO-07 | 実装   | 雛形の `ci.yml`（`stacks/github-workflow/`）。uv の版は `setup-uv` の `version` で固定する                                                                                      |
 | WF-*    | 実装   | `stacks/github-workflow/`                                                                                                                                                       |
 | GR-*    | 実装   | `stacks/github-workflow/`                                                                                                                                                       |
 | ARCH-01 | 実装   | import-linter の `layers` 契約（architecture.md）                                                                                                                               |
