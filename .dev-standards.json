@@ -1,6 +1,6 @@
 {
   "source": "shared-yung/dev-standards",
-  "commit": "6dd13a870600d871e91590c4716b4bea7e7b49ca",
+  "commit": "54da6ea0b7690361e842cc90a64c6ebe46dbe9dc",
   "stack": "github-workflow",
   "bundles": ["github-workflow"],
   "files": {
@@ -23,13 +23,13 @@
     },
     ".github/workflows/conventions.yml": {
       "kind": "managed",
-      "local": "5355768e2e66b8a288375bd58631ce9023d59c437fafbdefb5dce2113706c32b",
-      "upstream": "5355768e2e66b8a288375bd58631ce9023d59c437fafbdefb5dce2113706c32b"
+      "local": "3bf28b27d21755ae4846cc6f752c161e685003aba7554bb536f2d2e84a64203a",
+      "upstream": "3bf28b27d21755ae4846cc6f752c161e685003aba7554bb536f2d2e84a64203a"
     },
     ".github/workflows/pr-merged.yml": {
       "kind": "managed",
-      "local": "55f6105452c7db7872c8f1e92485377f53dc5304a917f43486609e6c37692019",
-      "upstream": "55f6105452c7db7872c8f1e92485377f53dc5304a917f43486609e6c37692019"
+      "local": "59bb6dd8499664a778a587ffb53c7e18522014e121fa5ca628e4621664cc2f77",
+      "upstream": "59bb6dd8499664a778a587ffb53c7e18522014e121fa5ca628e4621664cc2f77"
     },
     "commitlint.config.js": {
       "kind": "managed",
@@ -105,6 +105,10 @@
       "[\"type\"]": {
         "local": "51b03279c071bc2e55a377745fdd442c9eedc700152b19366572fa8f76d76017",
         "upstream": "51b03279c071bc2e55a377745fdd442c9eedc700152b19366572fa8f76d76017"
+      },
+      "[\"packageManager\"]": {
+        "local": "5d6d6dc7630bffcd11ea47a8c99be5ebd9f17f066e48fd624d665d83ec856d1d",
+        "upstream": "5d6d6dc7630bffcd11ea47a8c99be5ebd9f17f066e48fd624d665d83ec856d1d"
       },
       "[\"scripts\",\"prepare\"]": {
         "local": "099ad089a1363a7826bee1d37715a9fb9466f26d5bbed334f96534faa986c87d",
