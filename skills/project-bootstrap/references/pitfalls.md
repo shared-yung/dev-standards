@@ -177,6 +177,24 @@ export function useAppI18n() {
 
 `.ts` を選ぶか JSON を選ぶかは、型の保証と未使用キー検出のトレードオフ。
 
+## Playwright / E2E
+
+### 外部の STUN を待って、CI でだけ WebRTC の offer が間に合わない
+
+**症状**: ホストとプレイヤーを同じブラウザの別コンテキストで動かす WebRTC の E2E が、ローカルでは通るのに GitHub Actions でだけ、ホストの offer の作成が Playwright の既定の待ち時間（5秒）に間に合わずに落ちる（shared-yung/quiz-match#113、2026-10-28）。
+
+**原因**: offer を ICE の候補集め（non-trickle）が終わってから出す作りで、ICE サーバーに外部の STUN（`stun.l.google.com:19302`）を指定していた。Actions のランナーからは STUN への問い合わせが終わるのを待たされる。
+
+**対処**: STUN の URL をビルド時の設定（`quasar.config.ts` の `build.defineEnv`）にし、Playwright の `webServer` の `env` で空にしたビルドを E2E に使う。同じマシンの中でつなぐので STUN は要らない（TEST-06）。待ち時間を延ばして通すのは対処にしない。
+
+### 同じマシンの別コンテキストどうしで WebRTC がつながらない
+
+**症状**: 上の E2E で、候補集めは終わるのに接続が確立しないことがある。
+
+**原因**: Chromium は既定でローカルの ICE 候補の IP を mDNS 名（`xxx.local`）に隠す。名前を解決できない環境では、相手の候補にたどり着けない。
+
+**対処**: Playwright の project の `launchOptions.args` に `--disable-features=WebRtcHideLocalIpsWithMdns` を渡す。WebRTC を使うプロジェクトだけの設定なので、雛形には入れない。
+
 ## bun / 環境
 
 ### bunx が見つからない
