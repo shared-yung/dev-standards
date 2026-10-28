@@ -10,7 +10,7 @@ paths:
 - ランナーは pytest。`tests/` を層ごとに分ける（`tests/domain/` `tests/use_case/` `tests/infrastructure/`）
 - テスト名は日本語でよい（`def test_空のマスクからは線が出ない() -> None:`）。ruff の N802 を `tests/**` で外す
 - port（`Protocol`）の差し替えはフェイクのクラスを手書きする（モックライブラリより読みやすい）
-- 外部のネットワークサービスには infrastructure の port の後ろからだけ触り、必須チェックで流すテストではフェイクに差し替える（TEST-06）
+- 外部のネットワークサービスには port の実装（infrastructure）からだけ触り、必須チェックで流すテストではフェイクに差し替える（TEST-06）
 - `tmp_path` フィクスチャでファイル入出力を検査する
 - Windows のコンソールでは日本語のテスト名が文字化けするので、`PYTHONIOENCODING=utf-8` を付けて実行する
 - カバレッジ閾値（TEST-05）は pytest-cov で domain / use_case にだけ課す。`[tool.coverage.run]` の `source_pkgs = ["<pkg>.features"]` で測り、`omit` で infrastructure と組み立て（`install.py`）を外す。`fail_under = 90`・`branch = true`。CI は `uv run pytest --cov`
