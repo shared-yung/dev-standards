@@ -1,6 +1,6 @@
 {
   "source": "shared-yung/dev-standards",
-  "commit": "aae7d0748b104c59c749e6df26bcd6bd31b48001",
+  "commit": "6dd13a870600d871e91590c4716b4bea7e7b49ca",
   "stack": "github-workflow",
   "bundles": ["github-workflow"],
   "files": {
@@ -8,11 +8,6 @@
       "kind": "managed",
       "local": "51816ef528381135118b3a8afee9056e0254f42c38f96ed309e3fbe7e2506f7d",
       "upstream": "51816ef528381135118b3a8afee9056e0254f42c38f96ed309e3fbe7e2506f7d"
-    },
-    ".gitattributes": {
-      "kind": "managed",
-      "local": "f2346d645fc535eff70b0bcdbde6b7983e7b666c7d552aae8bc9fab56f0fce18",
-      "upstream": "f2346d645fc535eff70b0bcdbde6b7983e7b666c7d552aae8bc9fab56f0fce18"
     },
     ".github/ISSUE_TEMPLATE/bug.yml": {
       "kind": "seed"
@@ -96,6 +91,10 @@
     }
   },
   "blocks": {
+    ".gitattributes": {
+      "local": "e0dd31cb101ef1058bba2a0dafa53032a2d71361576f184c0dac774fa1b203d2",
+      "upstream": "e0dd31cb101ef1058bba2a0dafa53032a2d71361576f184c0dac774fa1b203d2"
+    },
     ".gitignore": {
       "local": "fea29ac1c87f6293e054308cdc02540c68306c58f0c7a65575c76221b2c17f4c",
       "upstream": "fea29ac1c87f6293e054308cdc02540c68306c58f0c7a65575c76221b2c17f4c"

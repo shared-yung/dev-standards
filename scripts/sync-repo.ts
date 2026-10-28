@@ -5,6 +5,7 @@
 //   bun run sync-repo --all --check                    consumers.json のすべてを確かめる
 //
 // 衝突の解決: --overwrite <パス> で上流の内容にする／--keep <パス> でローカルを採る（何度でも指定できる）。
+// 衝突が残るうちは何も書かない（解決を指定して再実行する）。
 // 配った内容と判定の記録は、対象リポジトリの .dev-standards.json に残す。
 // 対象の作業ツリーに未コミットの変更があるときは配らない（差分の出所を分けるため）。
 import { spawnSync } from 'node:child_process';
@@ -84,6 +85,14 @@ function syncOne({ target, stack: stackArg, check, resolutions }: SyncOptions): 
     return pending.length === 0;
   }
 
+  // 衝突が残るなら何も書かない。一部だけ書くと、解決を指定した再実行が未コミットの変更で止まる
+  if (conflicts.length > 0) {
+    console.log(
+      `  衝突が ${conflicts.length} 件あるので、何も書き換えていません。内容を確かめ、--overwrite <パス> か --keep <パス> を付けて再実行してください`,
+    );
+    return false;
+  }
+
   if (git(target, ['status', '--porcelain']) !== '') {
     throw new Error(
       `${target} に未コミットの変更があります。コミットするか退避してから実行してください`,
@@ -108,15 +117,10 @@ function syncOne({ target, stack: stackArg, check, resolutions }: SyncOptions): 
   writeFileSync(join(target, MANIFEST), `${JSON.stringify(manifest, undefined, 2)}\n`);
 
   console.log(`  ${plan.writes.size} ファイルを書き換え、${MANIFEST} を更新しました`);
-  if (conflicts.length > 0) {
-    console.log(
-      '  衝突は書き換えていません。内容を確かめ、--overwrite <パス> か --keep <パス> を付けて再実行してください',
-    );
-  }
   if (plan.writes.has('package.json'))
     console.log('  次に: bun install（package.json を変えたため）');
   console.log('  次に: git diff で確かめ、issue 起点のブランチでコミットする');
-  return conflicts.length === 0;
+  return true;
 }
 
 const consumersSchema = z.object({

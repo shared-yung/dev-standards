@@ -44,7 +44,13 @@ describe('スタックごとに配るファイル（bundles/stacks.json）', () 
 
     expect(files.has('.github/workflows/ci.yml')).toBe(false);
     expect(files.has('CLAUDE.md')).toBe(false);
-    expect(files.get('.gitattributes')).toBe(FileKind.Managed);
+  });
+
+  it('.gitattributes は管理ブロックで配り、プロジェクト固有の行を足せるようにする', () => {
+    const desired = loadDesired(root, bundlesForStack(root, 'github-workflow'));
+
+    expect(desired.files.has('.gitattributes')).toBe(false);
+    expect(desired.blocks.get('.gitattributes')).toContain('* text=auto eol=lf');
   });
 });
 

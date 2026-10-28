@@ -1,7 +1,11 @@
+# >>> dev-standards
 # 改行コードは「リポジトリ内も作業ツリーも LF」で統一する。
 #
 # .gitattributes は各開発者の core.autocrlf / core.eol 設定より優先されるため、
 # 誰がどの OS でクローンしても同じ改行コードになる。設定を各自に依存させない。
+#
+# このブロックは dev-standards の sync-repo が管理する。プロジェクト固有の行（独自の拡張子の
+# binary など）は、ブロックの後に書く。後に書いた行が優先される。
 * text=auto eol=lf
 
 # ---------------------------------------------------------------------------
@@ -88,3 +92,4 @@ bun.lock linguist-generated=true
 *.pptx binary
 *.pfx binary
 *.p12 binary
+# <<< dev-standards
