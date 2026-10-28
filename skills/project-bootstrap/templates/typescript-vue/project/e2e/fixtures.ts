@@ -4,7 +4,8 @@ import { test as base, expect } from '@playwright/test';
 // baseURL の外へのリクエストを止め、止めたものがあればテストを落とす（TEST-06、docs/tooling/testing.md）。
 // アプリが通信の失敗を握りつぶしても気づけるよう、止めるだけで終わらせず最後に確かめる。
 // 止められるのはブラウザの HTTP と WebSocket だけ。WebRTC の STUN/TURN（UDP）と、
-// webServer などの Node 側の通信は対象外で、接続先を設定で外す
+// webServer などの Node 側の通信は対象外で、接続先を設定で外す。テストの中で browser.newContext() で
+// 作ったコンテキストと request フィクスチャ（APIRequestContext）も対象外
 export const test = base.extend<{ blockExternalRequests: undefined }>({
   blockExternalRequests: [
     async ({ context, baseURL }, use) => {

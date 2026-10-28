@@ -17,8 +17,10 @@ function hostOf(args: unknown[]): string | undefined {
     const options = first as { host?: string | undefined; path?: string | undefined };
     return options.path == undefined ? (options.host ?? 'localhost') : undefined;
   }
-  if (typeof first === 'number') return typeof second === 'string' ? second : 'localhost';
-  return undefined;
+  // connect(port, host)。port は数字の文字列でもよく、数字でない文字列はパイプのパス
+  const isPort = typeof first === 'number' || (typeof first === 'string' && /^\d+$/.test(first));
+  if (!isPort) return undefined;
+  return typeof second === 'string' ? second : 'localhost';
 }
 
 beforeAll(() => {

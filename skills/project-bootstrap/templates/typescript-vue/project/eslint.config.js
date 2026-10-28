@@ -12,10 +12,11 @@ export default [
   ...vue,
   ...onionBoundaries(),
   {
-    // E2E の spec は e2e/fixtures.ts の test を使う。baseURL の外へのリクエストを止めるフィクスチャを
+    // E2E は e2e/fixtures.ts の test を使う（補助ファイルも）。baseURL の外へのリクエストを止めるフィクスチャを
     // 素通りさせない（TEST-06、docs/tooling/testing.md）。flat config は options を丸ごと置き換えるので、
     // base の禁止を展開して合流させる
-    files: ['e2e/**/*.e2e.ts'],
+    files: ['e2e/**/*.ts'],
+    ignores: ['e2e/fixtures.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
