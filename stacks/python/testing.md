@@ -11,6 +11,10 @@ paths:
 - テスト名は日本語でよい（`def test_空のマスクからは線が出ない() -> None:`）。ruff の N802 を `tests/**` で外す
 - port（`Protocol`）の差し替えはフェイクのクラスを手書きする（モックライブラリより読みやすい）
 - 外部のネットワークサービスには port の実装（infrastructure）からだけ触り、必須チェックで流すテストではフェイクに差し替える（TEST-06）
+  - 強制: `pytest-socket` の `--allow-hosts=127.0.0.1,::1`（雛形の `pyproject.toml` の `addopts`）。ループバック以外への `connect` が `SocketConnectBlockedError` で落ちる。`--disable-socket` はソケットの作成ごと止め、ループバックのサーバーと Windows の asyncio（イベントループが内部でソケットを作る）まで落とすので使わない
+  - 2026-10-28 に pytest-socket 0.8.1・Python 3.13（Windows）で確かめた: `urllib` で外部へ出ると落ち、ループバックのサーバーと `asyncio.run` は通る
+  - 捕まえられないもの: 接続しない UDP の送信（`sendto`。STUN など）。例外（`RuntimeError` の派生）を `except Exception` で握りつぶすとテストは通ってしまう（警告の要約には出る）
+  - 範囲: 依存の取得（uv）は対象外。テストの実行ではないので、キャッシュと版の固定で扱う
 - `tmp_path` フィクスチャでファイル入出力を検査する
 - Windows のコンソールでは日本語のテスト名が文字化けするので、`PYTHONIOENCODING=utf-8` を付けて実行する
 - カバレッジ閾値（TEST-05）は pytest-cov で domain / use_case にだけ課す。`[tool.coverage.run]` の `source_pkgs = ["<pkg>.features"]` で測り、`omit` で infrastructure と組み立て（`install.py`）を外す。`fail_under = 90`・`branch = true`。CI は `uv run pytest --cov`

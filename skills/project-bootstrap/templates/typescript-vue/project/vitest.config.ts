@@ -7,21 +7,26 @@ import { defineConfig, mergeConfig } from 'vitest/config';
 // - dom: happy-dom 環境。use-case / infrastructure / presentation / shared。他 feature の入口は
 //   画面の部品（.vue）も再公開する（ARCH-10）ので、それを import すると Quasar が window を要る
 // どちらも quasar.config から組み立てた Vite 設定（app-extension の quasarViteTestingConfig()）で
-// `@/` と .vue を解決する
+// `@/` と .vue を解決する。
+// setupFiles の block-network.ts は、模擬していない通信でテストを落とす（TEST-06）
 const domain = 'test/features/*/domain/**/*.spec.ts';
+const setupFiles = ['test/setup/block-network.ts'];
 
 export default defineConfig(async () => {
   const quasar = await quasarViteTestingConfig();
   return {
     test: {
       projects: [
-        mergeConfig(quasar, { test: { name: 'domain', environment: 'node', include: [domain] } }),
+        mergeConfig(quasar, {
+          test: { name: 'domain', environment: 'node', include: [domain], setupFiles },
+        }),
         mergeConfig(quasar, {
           test: {
             name: 'dom',
             environment: 'happy-dom',
             include: ['test/**/*.spec.ts'],
             exclude: [domain],
+            setupFiles,
           },
         }),
       ],

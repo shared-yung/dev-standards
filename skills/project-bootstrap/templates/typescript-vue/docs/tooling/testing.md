@@ -59,6 +59,7 @@ use-case ではモックライブラリより **fake 実装**を優先する。f
 - DOM 環境は jsdom ではなく **happy-dom**。上記 app-extension が同梱しており、追加の依存が要らず高速なため
 - カバレッジの対象は `src` のみ。テストが `src` の外にあるため、除外指定に頼らずプロダクションコードだけが計測される
 - カバレッジ閾値は **domain / use-case にのみ課す**（v8 provider）。presentation と infrastructure には課さない
+- 両方の project の `setupFiles` に `test/setup/block-network.ts` を入れ、**模擬していない通信でテストを落とす**（TEST-06）。ループバック以外への TCP 接続を止め、止めたものがあればそのテストを落とす。アプリが通信の失敗を握りつぶしても落ちる。HTTP は MSW で模擬すればここまで来ないので、そのまま併用できる。UDP（`node:dgram`）は見ない
 
 presentation にカバレッジ閾値を課すと、数字を満たすためだけの意味のないテストが増える。ロジックは内側の層にあるはずなので、そちらで担保する。
 
@@ -85,6 +86,7 @@ presentation にカバレッジ閾値を課すと、数字を満たすためだ�
 - 対象は**主要フローのハッピーパスだけ**。分岐や異常系は内側の層の単体テストで確かめる。PR のたびに全件を流すので、数分で終わる規模を保つ
 - dev サーバーは Playwright の `webServer` が起動する。ローカルでは起動済みのものを使う
 - 外部のネットワークサービス（STUN・外部 API など）に頼らない（TEST-06）。接続先は `quasar.config.ts` の `build.defineEnv` で `process.env` から読み、`webServer` の `env` で外す（`defineEnv` は dev サーバーにもビルドにも効く）。外部の遅延で CI だけ落ちるのを防ぐ
+- spec は `@playwright/test` ではなく `./fixtures` から `test` を import する（lint で強制）。`e2e/fixtures.ts` の自動フィクスチャが `baseURL` と別のホストへの HTTP と WebSocket を止め、止めたものがあればテストを落とす。WebRTC の STUN/TURN（UDP）と、`webServer` など Node 側の通信は止められないので、上の「設定で外す」に頼る
 - `retries` は入れない。再試行で通ると必須チェックが緑のままになり、flaky が埋もれる
 - ローカルでは触った機能に関係する spec だけ流せばよい（`bun run test:e2e -- e2e/<spec>.e2e.ts`）。流さなくてもよく、全件は CI に任せる
 - 差分で E2E を選ぶ方式は関門にしない。共有部品の変更による回帰を取りこぼすため

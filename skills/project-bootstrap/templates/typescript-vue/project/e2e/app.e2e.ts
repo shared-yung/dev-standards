@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // 雛形の最小の E2E。主要フローができたら置き換える
 test('トップページが表示される', async ({ page }) => {
