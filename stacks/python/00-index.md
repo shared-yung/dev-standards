@@ -52,7 +52,7 @@ paths:
 | CODE-07 | 実装   | ruff の `banned-api`（TID251）で `time.time` / `datetime.datetime.now` / `random` などを禁止し、infrastructure だけ外す（code.md）                                              |
 | CODE-08 | 実装   | コンテキストマネージャ（`with`）と `contextlib.ExitStack`（言語の仕組み。適合性の確認 1。code.md、**未検証**）                                                                  |
 | I18N-*  | 対象外 | 今は日本語のメッセージだけの CLI。多言語化するときに具体化する                                                                                                                  |
-| TEST-*  | 実装   | pytest、pytest-cov（domain / use_case の閾値）、port のフェイク、`remind-test-edit.mjs`（testing.md）                                                                           |
+| TEST-*  | 実装   | pytest、pytest-cov（domain / use_case の閾値）、port のフェイク、pytest-socket（外部への接続を落とす）、`remind-test-edit.mjs`（testing.md）                                    |
 | SES-01  | 実装   | `work-checkpoint` スキル                                                                                                                                                        |
 | AGENT-* | 実装   | `stacks/claude-code/`                                                                                                                                                           |
 

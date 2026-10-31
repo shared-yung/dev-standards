@@ -17,6 +17,8 @@ dev = [
   "pyright>=1.1.406",
   "pytest>=8.4",
   "pytest-cov>=7.1",
+  # ループバック以外への接続でテストを落とす（TEST-06）。0.8.1 で確かめた
+  "pytest-socket>=0.8",
   "ruff>=0.13",
 ]
 
@@ -79,7 +81,9 @@ reportUnnecessaryTypeIgnoreComment = "error"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["--import-mode=importlib"]
+# --allow-hosts: ループバック以外への接続を pytest-socket で落とす（TEST-06）。--disable-socket は
+# ソケットの作成ごと止め、Windows の asyncio（イベントループが内部でソケットを作る）まで落とすので使わない
+addopts = ["--import-mode=importlib", "--allow-hosts=127.0.0.1,::1"]
 
 # カバレッジ閾値は domain / use_case にだけ課す（TEST-05）。`uv run pytest --cov` で測る。
 # source_pkgs で features を測り、infrastructure と組み立て（install.py）を外す。
