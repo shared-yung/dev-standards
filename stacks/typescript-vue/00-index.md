@@ -25,7 +25,7 @@ paths:
 
 | ID      | 区分 | 手段（詳細）                                                                                                                                                                                           |
 | ------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| REPO-*  | 実装 | `.gitattributes`、Prettier の `endOfLine`、bun workspaces（`stacks/github-workflow/` も参照）                                                                                                          |
+| REPO-*  | 実装 | `.gitattributes`、Prettier の `endOfLine`、bun workspaces、雛形の `ci.yml`（REPO-07）（`stacks/github-workflow/` も参照）                                                                              |
 | WF-*    | 実装 | `stacks/github-workflow/`                                                                                                                                                                              |
 | GR-*    | 実装 | `stacks/github-workflow/`                                                                                                                                                                              |
 | ARCH-01 | 実装 | `eslint-plugin-boundaries`（architecture.md）                                                                                                                                                          |
