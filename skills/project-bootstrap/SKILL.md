@@ -137,6 +137,8 @@ bun create quasar@latest __PROJECT__ \
 - `src/router/index.ts` の `import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history'` の直前に、理由つきの `// eslint-disable-next-line no-restricted-syntax -- 値の集合を持つのは Quasar 側` を付ける。**文字列との比較を禁じる共有ルールで、scaffold 直後から lint が落ちる**ため。取りうる値を決めているのは Quasar で、こちらで定数を定義しても何も保証しない
 - `src/stores/index.ts` の空の `declare module 'pinia' { interface PiniaCustomProperties {} }` を削除する。中身の無い拡張は効果が無く、`no-empty-object-type` で落ちる。scaffold は理由の無い disable で黙らせているが、disable には理由が必須なので、雛形のままだと lint が落ちる
 - `.vue` のブロックを `<script>` → `<template>` → `<style>` の順に並べ替える（`bun x eslint --fix 'src/**/*.vue'`）。scaffold は `<template>` を先頭にして生成し、共有ルールの `vue/block-order` で落ちる（`docs/architecture/vue-sfc.md`）
+- scaffold のページ（`ErrorNotFound.vue`・`IndexPage.vue`）の `style="…"` を、`<style scoped lang="scss">` のクラスに移す。共有ルールの `vue/no-static-inline-styles` で落ちる（UI-03。2026-11-16 に create-quasar の `vite-3/ts` の雛形で `style` 属性があることを確認）
+- `templates/typescript-vue/project/DESIGN.md` を `__PROJECT__/DESIGN.md` に置く。**最初の画面を作る前に**、用途・利用者・トークンを埋め、色と余白を `src/css/quasar.variables.scss` に写す（UI-03。`stacks/typescript-vue/ui.md`）。埋めるのはユーザーと相談して行い、推測で埋めない
 
 ### 検証ゲート
 
