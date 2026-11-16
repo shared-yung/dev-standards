@@ -39,7 +39,7 @@ paths:
 | 足りない値（角丸・影など） | `quasar.variables.scss` に変数を足す                                                                   | `<style scoped lang="scss">` で `$` の変数を参照する           |
 
 - 色の値（`#…`・`rgb(…)`）と px の余白を `.vue` に直接書かない。`<style>` の中でも変数を使う
-- **強制**: `style="…"` と、`:style` の固定値は共有設定の `vue/no-static-inline-styles` で落ちる（2026-11-16 に eslint-plugin-vue 9.33 で確認。`:style` の動的な値と、クラスは落ちない）。`<style>` の中の直書きは ESLint では検査できず、規約と `ui-review` で見る
+- **強制**: `style="…"` と、`:style` の固定値は共有設定の `vue/no-static-inline-styles` で落ちる（2026-11-16 に、雛形の `^9.30.0` で入る eslint-plugin-vue 9.33.0 と共有設定の `vue.js` で確認。`:style` の動的な値と、クラスは落ちない）。`<style>` の中の直書きは ESLint では検査できず、規約と `ui-review` で見る
 - Quasar CLI は `<style lang="scss">` の中に `$` が1つでもあれば変数を読み込む。読み込まれないときは `// $` のコメントを足す（Quasar の文書のとおり）
 
 ## UI-04 描画して確かめる

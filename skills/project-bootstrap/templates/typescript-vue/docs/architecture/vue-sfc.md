@@ -53,5 +53,5 @@ const { t } = useAppI18n();
 | `<style>` が `<template>` より前               | ✅     | 同上                                                                                  |
 | `style="color: #f00"`                          | ✅     | eslint-plugin-vue の `vue/no-static-inline-styles`（`packages/eslint-config/vue.js`） |
 | `:style="{ color: '#f00' }"`                   | ✅     | 同上                                                                                  |
-| `:style="{ width: widthPx }"`（動的な値） | —      | 落とさない                                                                            |
+| `:style="{ width: widthPx }"`（動的な値）      | —      | 落とさない                                                                            |
 | `<style>` の中の `color: #f00`                 | ❌     | ESLint では検査できない（レビューで見る）                                             |
