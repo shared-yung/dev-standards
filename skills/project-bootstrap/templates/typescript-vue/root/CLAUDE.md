@@ -54,7 +54,8 @@ scripts/          hook と CI から呼ぶシェルスクリプト
 | enum 相当の値、import のパスの書き方           | [docs/architecture/typescript-conventions.md](docs/architecture/typescript-conventions.md)       |
 | `create～` と `use～` の書き分け               | [docs/architecture/factories-and-composables.md](docs/architecture/factories-and-composables.md) |
 | 現在時刻・時間の経過・乱数を port で受け取る形 | [docs/architecture/nondeterministic-inputs.md](docs/architecture/nondeterministic-inputs.md)     |
-| `.vue` のブロックの順序                        | [docs/architecture/vue-sfc.md](docs/architecture/vue-sfc.md)                                     |
+| `.vue` のブロックの順序、見た目の値の書き方    | [docs/architecture/vue-sfc.md](docs/architecture/vue-sfc.md)                                     |
+| 画面の見た目の決定（色・余白・文字・部品）     | `<project-name>/DESIGN.md`。画面を作る前に読む                                                   |
 | 入口（index.ts）の置き場所と中身               | [docs/architecture/module-entry.md](docs/architecture/module-entry.md)                           |
 | セットアップ、プロジェクト追加手順             | [docs/tooling/setup.md](docs/tooling/setup.md)                                                   |
 | ESLint の層強制、違反時の直し方                | [docs/tooling/eslint-boundaries.md](docs/tooling/eslint-boundaries.md)                           |

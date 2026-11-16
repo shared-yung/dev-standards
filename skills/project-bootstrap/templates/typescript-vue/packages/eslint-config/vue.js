@@ -45,6 +45,10 @@ export const vue = [
 
       // template が参照する識別子の宣言を先に読めるようにする（docs/architecture/vue-sfc.md）
       'vue/block-order': ['error', { order: ['script', 'template', 'style'] }],
+
+      // 見た目の値は DESIGN.md の役割の名前（Quasar のクラスと変数）で参照する（UI-03）。
+      // style 属性と :style の固定値を落とす。:style の動的な値（計算した寸法など）は通る
+      'vue/no-static-inline-styles': ['error', { allowBinding: false }],
     },
   },
   prettier,

@@ -49,6 +49,10 @@ paths:
 | CODE-07 | 実装 | `Date.now` / `setTimeout` / `Math.random` などは infrastructure と `shared/platform` だけ（ESLint。code.md）                                                                                           |
 | CODE-08 | 実装 | shared の `createLifetime()`（code.md）                                                                                                                                                                |
 | I18N-*  | 実装 | vue-i18n と `no-raw-text`（i18n.md）                                                                                                                                                                   |
+| UI-01   | 実装 | `QSkeleton`・`QBanner` などで状態を作り、分岐は presentation のテストで確かめる（ui.md）                                                                                                               |
+| UI-02   | 実装 | Quasar の部品のアクセシビリティを外さない、アイコンだけのボタンに翻訳キーの `aria-label`、`ui-review` スキル（ui.md）                                                                                  |
+| UI-03   | 実装 | プロジェクトの `DESIGN.md` → `quasar.variables.scss` と `framework.config.brand`、`vue/no-static-inline-styles`（ui.md）                                                                               |
+| UI-04   | 実装 | `ui-review` スキル（実装とは別の文脈で、3つの幅のスクリーンショット）（ui.md）                                                                                                                         |
 | TEST-*  | 実装 | Vitest projects（domain は node、それ以外は Quasar の app-extension の happy-dom）、MSW、PR で Playwright、外部サービスの接続先は E2E のビルドで外し、模擬していない通信はテストで落とす（testing.md） |
 | SES-01  | 実装 | `work-checkpoint` スキル（言語に依存しない）                                                                                                                                                           |
 | AGENT-* | 実装 | `stacks/claude-code/`（言語に依存しない）                                                                                                                                                              |
